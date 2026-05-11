@@ -1,0 +1,46 @@
+# calculadoras.facilgestion.cl — dependencias directas.
+#
+# Convención: versiones pineadas EXACTAS. pip-compile genera requirements.txt
+# con todas las transitivas pineadas también:
+#
+#   pip install pip-tools
+#   pip-compile --generate-hashes --output-file=requirements.txt requirements.in
+#
+# Revisión de versiones: 2026-05-11 contra pypi.org.
+
+# ── Framework ────────────────────────────────────────────────────────────────
+Django==5.2.14                # LTS hasta abr-2028 (security release 5-may-2026)
+
+# ── Servidor de aplicación ───────────────────────────────────────────────────
+gunicorn==23.0.0              # estable, mantenido
+
+# ── Configuración / entorno ──────────────────────────────────────────────────
+python-decouple==3.8          # mismo patrón que usa el ERP
+python-dotenv==1.0.1          # carga .env en dev
+
+# ── Cache / rate limit ───────────────────────────────────────────────────────
+django-redis==5.4.0           # backend de cache para sessions de cache-only y ratelimit
+redis==5.0.7                  # cliente Python
+
+# ── Seguridad / anti-abuso ───────────────────────────────────────────────────
+django-csp==4.0               # CSP por-vista (NO global, ver settings/base.py)
+django-ratelimit==4.1.0       # decoradores @ratelimit por endpoint
+# Honeypot: implementación propia en core/services/honeypot.py.
+# Decidimos no usar django-honeypot para minimizar deps y controlar el HTML.
+
+# ── HTTP cliente (verificación Turnstile contra Cloudflare) ──────────────────
+requests==2.32.3              # GET/POST a challenges.cloudflare.com
+
+# ── PDF ──────────────────────────────────────────────────────────────────────
+weasyprint==68.1              # HTML+CSS → PDF, branding consistente
+
+# ── Logging estructurado ─────────────────────────────────────────────────────
+python-json-logger==2.0.7     # JSON logs para Cloudflare/Loki/cualquier agregador
+
+# ── Dev / test (instalar con pip install -r requirements-dev.txt en local) ───
+# Mover a requirements-dev.in cuando empiece fase 8 (tests).
+# pytest==8.x
+# pytest-django==4.x
+# pytest-cov==5.x
+# coverage==7.x
+# pip-tools==7.x

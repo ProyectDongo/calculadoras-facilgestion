@@ -1,0 +1,35 @@
+{% load humanize %}{% spaceless %}<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ subject|default:"Tu cálculo" }} · {{ BRAND.name }}</title>
+</head>
+<body style="margin:0;padding:0;background:{{ BRAND.color_bg }};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;color:{{ BRAND.color_dark }};line-height:1.5;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:{{ BRAND.color_bg }};padding:32px 16px;">
+  <tr><td align="center">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(15,23,42,0.06);">
+      {# Header #}
+      <tr><td style="background:{{ BRAND.color_primary }};padding:24px 32px;color:#fff;">
+        <h1 style="margin:0;font-size:20px;font-weight:700;letter-spacing:-0.01em;">{{ BRAND.name }}</h1>
+        <p style="margin:4px 0 0;font-size:13px;opacity:0.9;">{{ BRAND.tagline }}</p>
+      </td></tr>
+      {# Body #}
+      <tr><td style="padding:32px;">{% block body %}{% endblock %}</td></tr>
+      {# Footer #}
+      <tr><td style="padding:20px 32px;border-top:1px solid #e2e8f0;background:#f8fafc;font-size:12px;color:{{ BRAND.color_light }};">
+        <p style="margin:0 0 6px;">
+          Recibes este correo porque solicitaste tu cálculo en
+          <a href="{{ BRAND.subdomain_url }}" style="color:{{ BRAND.color_primary }};text-decoration:none;">calculadoras.facilgestion.cl</a>.
+        </p>
+        <p style="margin:0;">
+          No almacenamos tu correo: este envío es la única vez que se usa.
+          Conoce FácilGestión en
+          <a href="{{ BRAND.url }}" style="color:{{ BRAND.color_primary }};text-decoration:none;">facilgestion.cl</a>.
+        </p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>{% endspaceless %}

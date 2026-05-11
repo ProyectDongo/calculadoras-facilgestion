@@ -1,0 +1,17 @@
+{% load humanize %}TU CÁLCULO DE IVA - FácilGestión
+================================
+
+Monto Neto:    ${{ r.neto|floatformat:0|intcomma }}
+IVA (19%):     ${{ r.iva|floatformat:0|intcomma }}
+Total c/IVA:   ${{ r.bruto|floatformat:0|intcomma }}
+
+Generado el {{ generado_en|date:"d/m/Y H:i" }}.
+
+Encuentras el detalle en el PDF adjunto.
+
+---
+Recibes este correo porque solicitaste tu cálculo en
+https://calculadoras.facilgestion.cl
+
+No almacenamos tu correo: este envío es la única vez que se usa.
+Conoce FácilGestión en https://facilgestion.cl

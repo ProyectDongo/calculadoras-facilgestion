@@ -1,0 +1,28 @@
+# Cloudflare Tunnel — config.yml de ejemplo.
+#
+# Este archivo va en el host (NO en el repo, NO en el contenedor) en:
+#   Linux: /etc/cloudflared/config.yml
+#   Windows: %ProgramData%\cloudflared\config.yml
+#
+# Copiar este archivo a `deploy/cloudflared.yml` (gitignorado), reemplazar
+# valores, y arrancar:
+#
+#   cloudflared tunnel --config /etc/cloudflared/config.yml run
+#
+# El tunnel ID se obtiene tras `cloudflared tunnel create calculadoras`.
+
+tunnel: <TUNNEL_UUID_AQUI>
+credentials-file: /etc/cloudflared/<TUNNEL_UUID_AQUI>.json
+
+ingress:
+  - hostname: calculadoras.facilgestion.cl
+    service: http://127.0.0.1:8001        # Puerto 8001 (el ERP usa 8000)
+    originRequest:
+      noTLSVerify: false
+      connectTimeout: 30s
+      tlsTimeout: 10s
+      tcpKeepAlive: 30s
+      keepAliveTimeout: 90s
+      httpHostHeader: calculadoras.facilgestion.cl
+      originServerName: calculadoras.facilgestion.cl
+  - service: http_status:404

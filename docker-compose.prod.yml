@@ -1,0 +1,81 @@
+# calculadoras.facilgestion.cl — producción.
+#
+# Diferencias clave vs dev:
+#   - read_only: true en web (tmpfs /tmp para WeasyPrint scratch)
+#   - Sin volumen del código fuente (imagen sellada)
+#   - Redis con password (REDIS_PASSWORD en .env)
+#   - Memory limits estrictos
+#   - logging json-driver, max-size/file
+#
+# Cloudflare Tunnel apunta a 127.0.0.1:8000 (corre como servicio externo).
+
+services:
+  web:
+    image: calculadoras-facilgestion:prod
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: calc_web
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+    read_only: true
+    tmpfs:
+      - /tmp:size=64M,uid=10001,gid=10001
+    volumes:
+      - static_volume:/app/staticfiles:ro
+    # Puerto 8001 (no 8000) para coexistir con el ERP de FácilGestión
+    # que ya escucha en 127.0.0.1:8000 del mismo VPS.
+    ports:
+      - "127.0.0.1:8001:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 384M
+        reservations:
+          memory: 128M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis:
+    image: redis:7-alpine
+    container_name: calc_redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD}
+      --save ""
+      --appendonly no
+      --maxmemory 64mb
+      --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+volumes:
+  static_volume:

@@ -1,0 +1,32 @@
+{% extends "calculadoras/pdf/base.html" %}
+{% load humanize %}
+
+{% block title %}Cálculo de IVA · {{ BRAND.name }}{% endblock %}
+
+{% block contenido %}
+<h1>Cálculo de IVA</h1>
+<p class="muted">
+  {% if r.modo == "neto_a_bruto" %}Conversión Neto → Bruto{% else %}Conversión Bruto → Neto{% endif %}
+  · Tasa IVA: 19%
+  {% if rut %} · RUT: {{ rut }}{% endif %}
+</p>
+
+<div class="highlight">
+  <span class="label">Total con IVA</span>
+  <span class="value">${{ r.bruto|floatformat:0|intcomma }} CLP</span>
+</div>
+
+<h3>Detalle</h3>
+<table class="kv">
+  <tr><th>Monto Neto</th><td>${{ r.neto|floatformat:0|intcomma }}</td></tr>
+  <tr><th>IVA (19%)</th><td>${{ r.iva|floatformat:0|intcomma }}</td></tr>
+  <tr><th>Total con IVA</th><td>${{ r.bruto|floatformat:0|intcomma }}</td></tr>
+</table>
+
+<h3 style="margin-top:18pt;">Sobre este cálculo</h3>
+<p class="muted">
+  El Impuesto al Valor Agregado (IVA) en Chile es de 19% según el DL 825.
+  Esta calculadora aplica la fórmula estándar y redondea al peso más cercano.
+  La información es referencial; verifica con tu contador o el SII antes de operar.
+</p>
+{% endblock %}

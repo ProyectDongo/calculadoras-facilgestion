@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}{{ nombre }} · Próximamente · {{ BRAND.name }}{% endblock %}
+
+{% block content %}
+<a href="{% url 'calculadoras:landing' %}" class="text-sm text-brand hover:text-brand-hover">← Todas las calculadoras</a>
+
+<div class="mt-8 text-center py-16">
+  <div class="text-6xl mb-4">🛠️</div>
+  <h1 class="text-3xl font-bold text-brand-dark mb-2">{{ nombre }}</h1>
+  <p class="text-brand-light max-w-md mx-auto">Esta calculadora estará disponible pronto. Por ahora puedes usar la calculadora de IVA.</p>
+  <a href="{% url 'calculadoras:calc_iva' %}" class="inline-block mt-6 bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg px-6 py-3 transition">
+    Ir a Calculadora de IVA →
+  </a>
+</div>
+{% endblock %}

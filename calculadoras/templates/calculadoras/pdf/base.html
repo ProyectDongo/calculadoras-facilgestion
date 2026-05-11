@@ -1,0 +1,106 @@
+{% load static %}{% load humanize %}<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>{% block title %}Cálculo · FácilGestión{% endblock %}</title>
+<style>
+  @page {
+    size: A4;
+    margin: 18mm 16mm 22mm 16mm;
+    @bottom-center {
+      content: element(footer);
+    }
+  }
+
+  :root, body {
+    font-family: "Helvetica", "Arial", sans-serif;
+    font-size: 11pt;
+    color: {{ BRAND.color_dark }};
+    line-height: 1.45;
+    margin: 0;
+  }
+
+  h1, h2, h3 { color: {{ BRAND.color_dark }}; margin: 0 0 6pt; letter-spacing: -0.01em; }
+  h1 { font-size: 22pt; font-weight: 700; }
+  h2 { font-size: 14pt; font-weight: 600; margin-top: 14pt; }
+  h3 { font-size: 11pt; font-weight: 600; color: {{ BRAND.color_light }}; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* Header del documento */
+  .doc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 10pt;
+    margin-bottom: 14pt;
+    border-bottom: 2pt solid {{ BRAND.color_primary }};
+  }
+  .doc-header .brand { display: flex; align-items: center; gap: 10pt; }
+  .doc-header img { height: 28pt; width: auto; }
+  .doc-header .brand-text { line-height: 1.2; }
+  .doc-header .brand-name { font-weight: 700; font-size: 13pt; color: {{ BRAND.color_dark }}; }
+  .doc-header .brand-sub  { font-size: 9pt; color: {{ BRAND.color_light }}; }
+  .doc-header .doc-meta {
+    text-align: right; font-size: 9pt; color: {{ BRAND.color_light }};
+  }
+
+  /* Tablas de resultado */
+  .kv { width: 100%; border-collapse: collapse; margin: 6pt 0; }
+  .kv tr { border-bottom: 1pt solid #e2e8f0; }
+  .kv tr:last-child { border-bottom: 0; }
+  .kv th, .kv td { padding: 6pt 4pt; text-align: left; vertical-align: top; }
+  .kv th { font-weight: 500; color: {{ BRAND.color_light }}; font-size: 10pt; }
+  .kv td { font-weight: 600; text-align: right; }
+
+  .highlight {
+    background: #eef4ff;
+    border-left: 3pt solid {{ BRAND.color_primary }};
+    padding: 10pt 12pt;
+    margin: 12pt 0;
+    border-radius: 2pt;
+  }
+  .highlight .label { display:block; font-size: 9pt; color: {{ BRAND.color_light }}; text-transform: uppercase; letter-spacing: 0.04em; }
+  .highlight .value { display:block; font-size: 22pt; font-weight: 700; color: {{ BRAND.color_primary }}; }
+
+  .muted { color: {{ BRAND.color_light }}; font-size: 9pt; }
+
+  /* Footer running */
+  footer {
+    position: running(footer);
+    text-align: center;
+    font-size: 8pt;
+    color: {{ BRAND.color_light }};
+    border-top: 0.5pt solid #e2e8f0;
+    padding-top: 4pt;
+  }
+  footer .brand-line { font-weight: 600; color: {{ BRAND.color_dark }}; }
+</style>
+</head>
+<body>
+
+<header class="doc-header">
+  <div class="brand">
+    <img src="{% static 'calculadoras/logo.png' %}" alt="{{ BRAND.name }}">
+    <div class="brand-text">
+      <div class="brand-name">{{ BRAND.name }}</div>
+      <div class="brand-sub">{{ BRAND.tagline }}</div>
+    </div>
+  </div>
+  <div class="doc-meta">
+    {% block doc_meta %}
+    <div><strong>{{ doc_titulo|default:"Cálculo" }}</strong></div>
+    <div>Generado: {{ generado_en|date:"d/m/Y H:i" }}</div>
+    {% endblock %}
+  </div>
+</header>
+
+<main>
+  {% block contenido %}{% endblock %}
+</main>
+
+<footer>
+  <div class="brand-line">Calculadora gratuita de {{ BRAND.name }} — {{ BRAND.tagline }}.</div>
+  <div>Conoce más en {{ BRAND.url|cut:"https://" }}</div>
+</footer>
+
+</body>
+</html>

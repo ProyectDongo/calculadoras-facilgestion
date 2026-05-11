@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Calculadoras gratuitas para PyMEs · {{ BRAND.name }}{% endblock %}
+
+{% block content %}
+<section class="text-center py-6 sm:py-10">
+  <h1 class="text-3xl sm:text-4xl font-bold text-brand-dark mb-3 tracking-tight">
+    Calculadoras gratuitas para tu PyME
+  </h1>
+  <p class="text-brand-light max-w-2xl mx-auto">
+    Tres herramientas anónimas, sin registro, con datos tributarios verificados contra el SII Chile.
+    Genera, descarga o envía a tu correo.
+  </p>
+</section>
+
+<section class="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mt-8">
+  {% for c in calculadoras %}
+  <a href="{% url 'calculadoras:'|add:c.url_name %}"
+     class="group bg-white rounded-2xl border border-slate-200 hover:border-brand hover:shadow-lg transition p-6 flex flex-col">
+    <div class="w-12 h-12 rounded-xl bg-brand/10 text-brand text-2xl font-bold flex items-center justify-center mb-4">
+      {{ c.icono }}
+    </div>
+    <h2 class="text-lg font-bold text-brand-dark mb-2">{{ c.nombre }}</h2>
+    <p class="text-sm text-brand-light flex-1">{{ c.descripcion }}</p>
+    <span class="text-brand font-medium text-sm mt-4 group-hover:translate-x-1 transition">
+      Abrir →
+    </span>
+  </a>
+  {% endfor %}
+</section>
+
+<section class="mt-12 bg-white border border-slate-200 rounded-2xl p-6 sm:p-8">
+  <h3 class="font-bold text-brand-dark mb-3">Diseñadas para no guardar tus datos</h3>
+  <div class="grid gap-4 sm:grid-cols-3 text-sm text-brand-light">
+    <div><strong class="text-brand-dark">Sin login.</strong> Usa las calculadoras sin crear cuenta.</div>
+    <div><strong class="text-brand-dark">Sin almacenamiento.</strong> Si pides PDF por correo, se envía y se descarta.</div>
+    <div><strong class="text-brand-dark">Constantes verificadas.</strong> IVA 19%, retención honorarios 15,25% (2026, Ley 21.133).</div>
+  </div>
+</section>
+{% endblock %}

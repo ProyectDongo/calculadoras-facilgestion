@@ -1,0 +1,29 @@
+/* calculadoras/static/calculadoras/css/app.css
+ * CSS custom encima de Tailwind. Mantenerlo mínimo.
+ */
+
+/* x-cloak: oculta elementos Alpine hasta que se inicialicen, evita FOUC */
+[x-cloak] { display: none !important; }
+
+/* Inputs number: ocultar spinners para look más limpio */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] { -moz-appearance: textfield; }
+
+/* Smooth scroll en landing */
+html { scroll-behavior: smooth; }
+
+/* Focus visible accesible (Tailwind ring solo cubre keyboard cuando combinas con focus-visible) */
+:focus-visible {
+  outline: 2px solid var(--brand-color, #2563eb);
+  outline-offset: 2px;
+}
+
+/* Print: oculta header/footer al imprimir desde el navegador
+ * (el PDF real se genera server-side con WeasyPrint) */
+@media print {
+  header, footer, .no-print { display: none !important; }
+}

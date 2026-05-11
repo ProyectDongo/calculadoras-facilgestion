@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% load static %}
+{% load honeypot %}
+
+{% block title %}Calculadora de IVA · {{ BRAND.name }}{% endblock %}
+
+{% block extra_head %}
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+{% endblock %}
+
+{% block content %}
+<a href="{% url 'calculadoras:landing' %}" class="text-sm text-brand hover:text-brand-hover">← Todas las calculadoras</a>
+
+<header class="mt-3 mb-6">
+  <h1 class="text-3xl font-bold text-brand-dark">Calculadora de IVA</h1>
+  <p class="text-brand-light mt-1">Tasa vigente: <strong>19%</strong> · Chile</p>
+</header>
+
+<div class="grid gap-6 lg:grid-cols-2"
+     x-data="ivaCalc()"
+     x-init="$watch('modo', () => recalcular()); $watch('monto', () => recalcular())">
+
+  {# ─── Form izquierda ───────────────────────────────────────────────── #}
+  <div class="bg-white border border-slate-200 rounded-2xl p-6">
+    <form
+      hx-post="{% url 'calculadoras:api_calcular_iva' %}"
+      hx-target="#resultado-iva"
+      hx-swap="innerHTML"
+      hx-trigger="submit, change from:input[name=modo], keyup changed delay:300ms from:input[name=monto]"
+      @htmx:after-request="capturarResultado($event)"
+    >
+      {% csrf_token %}
+
+      {# Toggle Neto→Bruto / Bruto→Neto #}
+      <div class="grid grid-cols-2 bg-slate-100 rounded-lg p-1 mb-5 text-sm font-medium">
+        <label class="cursor-pointer">
+          <input type="radio" name="modo" value="neto_a_bruto" class="sr-only peer" x-model="modo" checked>
+          <div class="text-center py-2 rounded-md peer-checked:bg-white peer-checked:shadow text-brand-light peer-checked:text-brand-dark transition">
+            Neto → Bruto
+          </div>
+        </label>
+        <label class="cursor-pointer">
+          <input type="radio" name="modo" value="bruto_a_neto" class="sr-only peer" x-model="modo">
+          <div class="text-center py-2 rounded-md peer-checked:bg-white peer-checked:shadow text-brand-light peer-checked:text-brand-dark transition">
+            Bruto → Neto
+          </div>
+        </label>
+      </div>
+
+      {# Monto #}
+      <label class="block">
+        <span class="text-sm font-medium text-brand-dark" x-text="modo==='neto_a_bruto' ? 'Monto NETO (CLP)' : 'Monto BRUTO con IVA (CLP)'"></span>
+        <div class="mt-1.5 relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-brand-light">$</span>
+          <input
+            type="number" name="monto" inputmode="numeric" min="0" max="9999999999" step="1"
+            placeholder="0"
+            x-model.number="monto"
+            class="w-full pl-7 pr-3 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-lg"
+            required
+          >
+        </div>
+      </label>
+
+      <p class="mt-3 text-xs text-brand-light">El resultado se actualiza automáticamente mientras escribes.</p>
+    </form>
+  </div>
+
+  {# ─── Resultado derecha ────────────────────────────────────────────── #}
+  <div class="bg-white border border-slate-200 rounded-2xl p-6 flex flex-col">
+    <div id="resultado-iva" class="flex-1">
+      <p class="text-brand-light text-sm">Ingresa un monto para ver el cálculo.</p>
+    </div>
+
+    {# Botones cuando ya hay resultado #}
+    <div class="mt-5 grid sm:grid-cols-2 gap-3" x-show="ultimoResultado" x-cloak>
+      <button type="button" @click="abrirModal('descargar')"
+              class="bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-3 transition">
+        Descargar PDF
+      </button>
+      <button type="button" @click="abrirModal('enviar')"
+              class="bg-white border-2 border-brand text-brand hover:bg-brand/5 font-semibold rounded-lg py-3 transition">
+        Enviar a mi correo
+      </button>
+    </div>
+  </div>
+
+  {# ─── Modal email + Turnstile ─────────────────────────────────────── #}
+  <div x-show="modalAbierto" x-cloak
+       class="fixed inset-0 z-40 bg-black/50 flex items-center justify-center p-4"
+       @click.self="modalAbierto=false">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+      <h3 class="text-lg font-bold text-brand-dark mb-1" x-text="accion==='enviar' ? 'Enviar a tu correo' : 'Descargar PDF'"></h3>
+      <p class="text-sm text-brand-light mb-5" x-text="accion==='enviar' ? 'Te lo enviaremos al correo y no lo almacenaremos.' : 'Opcional: completa para personalizar el PDF.'"></p>
+
+      <form id="form-accion" method="post"
+            :action="accion==='enviar' ? '{% url 'calculadoras:api_enviar' %}' : '{% url 'calculadoras:api_pdf' %}'"
+            @submit="enviar($event)">
+        {% csrf_token %}
+        {% honeypot_fields %}
+
+        <input type="hidden" name="calculadora" value="iva">
+        <input type="hidden" name="resultado_json" :value="JSON.stringify(ultimoResultado || {})">
+        <input type="hidden" name="accion" :value="accion">
+
+        <label class="block mb-3">
+          <span class="text-sm font-medium text-brand-dark">Email <span class="text-brand-light text-xs" x-show="accion!=='enviar'">(opcional)</span></span>
+          <input type="email" name="email" :required="accion==='enviar'"
+                 class="mt-1 w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        </label>
+
+        <label class="block mb-4">
+          <span class="text-sm font-medium text-brand-dark">RUT <span class="text-brand-light text-xs">(opcional)</span></span>
+          <input type="text" name="rut" placeholder="12.345.678-9"
+                 class="mt-1 w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        </label>
+
+        <div class="mb-4 flex justify-center">
+          {# Turnstile invisible — se renderiza pero queda vacío salvo challenge #}
+          <div class="cf-turnstile" data-sitekey="{{ TURNSTILE_SITE_KEY|default:'1x00000000000000000000AA' }}" data-size="flexible"></div>
+        </div>
+
+        <div class="flex gap-3">
+          <button type="button" @click="modalAbierto=false"
+                  class="flex-1 bg-slate-100 hover:bg-slate-200 text-brand-dark font-medium rounded-lg py-2.5 transition">
+            Cancelar
+          </button>
+          <button type="submit"
+                  class="flex-1 bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 transition"
+                  x-text="accion==='enviar' ? 'Enviar' : 'Descargar'"></button>
+        </div>
+
+        <p class="mt-3 text-xs text-brand-light text-center">
+          Tus datos no se almacenan. Ver <a href="{% url 'calculadoras:privacidad' %}" class="text-brand underline">política de privacidad</a>.
+        </p>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function ivaCalc() {
+  return {
+    modo: 'neto_a_bruto',
+    monto: null,
+    ultimoResultado: null,
+    modalAbierto: false,
+    accion: 'descargar',
+    recalcular() {
+      // HTMX dispara solo con cambios; este watcher es para Alpine state.
+      if (this.monto !== null && this.monto !== '') {
+        htmx.trigger(document.querySelector('form[hx-post]'), 'submit');
+      }
+    },
+    capturarResultado(ev) {
+      const xhr = ev.detail.xhr;
+      if (xhr.status === 200) {
+        const dataAttr = xhr.responseText.match(/data-resultado='([^']+)'/);
+        if (dataAttr) {
+          this.ultimoResultado = JSON.parse(dataAttr[1]);
+        }
+      }
+    },
+    abrirModal(accion) {
+      this.accion = accion;
+      this.modalAbierto = true;
+    },
+    async enviar(ev) {
+      ev.preventDefault();
+      const form = ev.target;
+      const formData = new FormData(form);
+      try {
+        const resp = await fetch(form.action, { method: 'POST', body: formData });
+        if (resp.headers.get('content-type')?.includes('application/pdf')) {
+          // Descarga directa
+          const blob = await resp.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          const disp = resp.headers.get('content-disposition') || '';
+          const m = disp.match(/filename="([^"]+)"/);
+          a.href = url; a.download = m ? m[1] : 'calculo.pdf';
+          a.click();
+          URL.revokeObjectURL(url);
+          this.modalAbierto = false;
+        } else {
+          const data = await resp.json();
+          if (data.ok) {
+            alert('✓ Enviado a tu correo.');
+            this.modalAbierto = false;
+          } else {
+            alert('No se pudo procesar tu solicitud. Recarga e intenta de nuevo.');
+          }
+        }
+      } catch {
+        alert('Error de red. Intenta nuevamente.');
+      }
+    },
+  }
+}
+</script>
+{% endblock %}

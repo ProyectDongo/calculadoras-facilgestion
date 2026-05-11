@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Política de privacidad · {{ BRAND.name }}{% endblock %}
+
+{% block content %}
+<article class="prose max-w-3xl mx-auto bg-white border border-slate-200 rounded-2xl p-6 sm:p-10">
+  <h1 class="text-3xl font-bold text-brand-dark mb-1">Política de privacidad</h1>
+  <p class="text-brand-light text-sm mb-8">calculadoras.facilgestion.cl · Ley 19.628 Chile · Última actualización: mayo 2026</p>
+
+  <h2 class="text-xl font-bold text-brand-dark mt-6 mb-2">1. Qué datos recopilamos</h2>
+  <p class="text-brand-light mb-3"><strong class="text-brand-dark">Ninguno de manera persistente.</strong> Las calculadoras funcionan sin pedirte datos:</p>
+  <ul class="list-disc list-inside text-brand-light space-y-1 mb-4">
+    <li>El cálculo lo hace tu navegador en conjunto con un cálculo de verificación en nuestro servidor.</li>
+    <li>El servidor no guarda los montos que ingresas.</li>
+  </ul>
+
+  <h2 class="text-xl font-bold text-brand-dark mt-6 mb-2">2. Qué pasa si pides PDF por correo</h2>
+  <p class="text-brand-light mb-4">Si nos das tu email para recibir el PDF, lo usamos <strong class="text-brand-dark">una sola vez</strong> para el envío. No lo guardamos en ninguna base de datos ni lo usamos para campañas de marketing.</p>
+
+  <h2 class="text-xl font-bold text-brand-dark mt-6 mb-2">3. Cookies</h2>
+  <p class="text-brand-light mb-4">Usamos una única cookie técnica (<code class="bg-slate-100 px-1 rounded">tc_accepted_v1</code>) que recuerda que aceptaste estos términos para no mostrarte el aviso cada vez. No es de tracking ni de marketing.</p>
+
+  <h2 class="text-xl font-bold text-brand-dark mt-6 mb-2">4. Anti-abuso</h2>
+  <p class="text-brand-light mb-4">Para evitar abuso por bots, usamos Cloudflare Turnstile (sin tracking) y un contador efímero por IP-hash (la IP nunca se almacena en claro, sólo un hash con sal). El contador se borra solo cada 5–15 minutos.</p>
+
+  <h2 class="text-xl font-bold text-brand-dark mt-6 mb-2">5. Tus derechos</h2>
+  <p class="text-brand-light mb-4">Como no guardamos tus datos, no hay datos que rectificar ni borrar. Si nos enviaste un email y luego te arrepentiste, puedes ignorar el mensaje — no quedó en ningún sistema nuestro.</p>
+
+  <h2 class="text-xl font-bold text-brand-dark mt-6 mb-2">6. Contacto</h2>
+  <p class="text-brand-light">Cualquier consulta sobre privacidad puedes escribirnos a <a href="mailto:contacto@facilgestion.cl" class="text-brand">contacto@facilgestion.cl</a>.</p>
+</article>
+{% endblock %}

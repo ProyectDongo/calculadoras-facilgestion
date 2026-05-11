@@ -1,0 +1,61 @@
+# calculadoras.facilgestion.cl — desarrollo local.
+#
+# Arquitectura:
+#   web    → gunicorn + Django (sin DB persistente; sessions = signed cookies)
+#   redis  → solo para rate limiting ephemeral (TTLs cortos)
+#
+# Cloudflare Tunnel se corre EXTERNO al compose. En dev se expone localhost:8000.
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: calculadoras-facilgestion:dev
+    container_name: calc_web
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+    ports:
+      - "127.0.0.1:8000:8000"
+    # En dev queremos hot-reload con el código del host
+    volumes:
+      - .:/app:rw
+      - static_volume:/app/staticfiles
+    # Override del CMD del Dockerfile para usar runserver con autoreload.
+    # NO corremos migrate: DATABASES.ENGINE = dummy (la app es stateless).
+    command: python manage.py runserver 0.0.0.0:8000
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/healthz/',timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  redis:
+    image: redis:7-alpine
+    container_name: calc_redis
+    restart: unless-stopped
+    # Sin password en dev (red interna docker). En prod sí.
+    command: >
+      redis-server
+      --save ""
+      --appendonly no
+      --maxmemory 64mb
+      --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+volumes:
+  static_volume:

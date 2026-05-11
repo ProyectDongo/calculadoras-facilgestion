@@ -1,0 +1,104 @@
+{% load static %}<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Calculadoras gratuitas para PyMEs chilenas: IVA, precio de venta y boleta de honorarios. Por FácilGestión.">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="{{ BRAND.color_primary }}">
+
+<title>{% block title %}{{ BRAND.name }} — Calculadoras gratuitas para PyMEs{% endblock %}</title>
+
+<link rel="icon" type="image/png" href="{% static 'calculadoras/logo.png' %}">
+
+{# Tailwind CDN (CSP permite unsafe-inline para styles — fase 9 endurecemos) #}
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          brand: {
+            DEFAULT: "{{ BRAND.color_primary }}",
+            hover:   "{{ BRAND.color_primary_hover }}",
+            dark:    "{{ BRAND.color_dark }}",
+            mid:     "{{ BRAND.color_mid }}",
+            light:   "{{ BRAND.color_light }}",
+            bg:      "{{ BRAND.color_bg }}",
+          },
+        },
+        fontFamily: {
+          sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+
+<link rel="stylesheet" href="{% static 'calculadoras/css/app.css' %}">
+
+{# HTMX + Alpine vendoreados (no CDN) #}
+<script src="{% static 'calculadoras/vendor/htmx.min.js' %}" defer></script>
+<script src="{% static 'calculadoras/vendor/alpine.min.js' %}" defer></script>
+
+{# Cloudflare Turnstile (carga sólo en páginas que lo usan) #}
+{% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen bg-brand-bg text-brand-dark antialiased font-sans flex flex-col">
+
+{# ── T&C modal — bloqueo al entrar si no hay cookie de aceptación ─────── #}
+<div
+  x-data="{ aceptado: document.cookie.includes('tc_accepted_v1=1') }"
+  x-show="!aceptado"
+  x-cloak
+  class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+  role="dialog" aria-modal="true" aria-labelledby="tc-title"
+>
+  <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-7">
+    <h2 id="tc-title" class="text-xl font-bold text-brand-dark mb-3">Antes de continuar</h2>
+    <div class="text-sm text-brand-light leading-relaxed space-y-2 mb-5">
+      <p>Estas calculadoras son <strong>gratuitas, anónimas y no almacenan tu información</strong>.</p>
+      <p>Si decides recibir el resultado por correo, tu email se usa <strong>solo para ese envío</strong> y no se guarda en ningún sistema.</p>
+      <p>Al continuar, aceptas los términos y la <a href="{% url 'calculadoras:privacidad' %}" class="text-brand underline">política de privacidad</a> bajo la Ley 19.628.</p>
+    </div>
+    <button
+      type="button"
+      @click="document.cookie='tc_accepted_v1=1;path=/;max-age=2592000;samesite=Lax'; aceptado=true"
+      class="w-full bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg px-4 py-3 transition"
+    >Acepto y continuar</button>
+  </div>
+</div>
+
+{# ── Header ────────────────────────────────────────────────────────────── #}
+<header class="bg-white border-b border-slate-200">
+  <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+    <a href="{% url 'calculadoras:landing' %}" class="flex items-center gap-2.5">
+      <img src="{% static 'calculadoras/logo.png' %}" alt="{{ BRAND.name }}" class="h-8 w-auto">
+      <span class="font-bold text-brand-dark">{{ BRAND.name }}</span>
+      <span class="hidden sm:inline text-xs text-brand-light">/ Calculadoras</span>
+    </a>
+    <a href="{{ BRAND.url }}" target="_blank" rel="noopener"
+       class="text-sm text-brand hover:text-brand-hover hidden sm:inline">
+      Conoce FácilGestión →
+    </a>
+  </div>
+</header>
+
+{# ── Contenido ─────────────────────────────────────────────────────────── #}
+<main class="flex-1 max-w-5xl mx-auto px-4 py-8 w-full">
+  {% block content %}{% endblock %}
+</main>
+
+{# ── Footer ────────────────────────────────────────────────────────────── #}
+<footer class="bg-white border-t border-slate-200 mt-12">
+  <div class="max-w-5xl mx-auto px-4 py-6 text-sm text-brand-light flex flex-col sm:flex-row gap-2 justify-between">
+    <div>© {% now "Y" %} {{ BRAND.name }} · {{ BRAND.tagline }}</div>
+    <div class="flex gap-4">
+      <a href="{% url 'calculadoras:privacidad' %}" class="hover:text-brand">Privacidad</a>
+      <a href="{{ BRAND.url }}" target="_blank" rel="noopener" class="hover:text-brand">facilgestion.cl</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

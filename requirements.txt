@@ -1,0 +1,24 @@
+# requirements.txt — pin de versiones para docker build.
+#
+# Este archivo es un MIRROR simple de requirements.in. NO incluye transitivas
+# ni hashes. Para generar el lockfile real:
+#
+#   pip install pip-tools
+#   pip-compile --generate-hashes --output-file=requirements.txt requirements.in
+#
+# Hasta que corras pip-compile, pip resuelve transitivas en runtime durante
+# el build de docker (más lento, no determinista entre re-builds).
+#
+# Revisión: 2026-05-11.
+
+Django==5.2.14
+gunicorn==23.0.0
+python-decouple==3.8
+python-dotenv==1.0.1
+django-redis==5.4.0
+redis==5.0.7
+django-csp==4.0
+django-ratelimit==4.1.0
+requests==2.32.3
+weasyprint==68.1
+python-json-logger==2.0.7
