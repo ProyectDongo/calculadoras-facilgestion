@@ -41,6 +41,7 @@ INSTALLED_APPS = [
 # Orden importa. CSPMiddleware debe ir DESPUÉS de SecurityMiddleware.
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",      # sirve /static/ sin nginx delante
     "csp.middleware.CSPMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",

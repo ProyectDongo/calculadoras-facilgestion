@@ -14,6 +14,11 @@ Django==5.2.14                # LTS hasta abr-2028 (security release 5-may-2026)
 # ── Servidor de aplicación ───────────────────────────────────────────────────
 gunicorn==23.0.0              # estable, mantenido
 
+# ── Static files serving ─────────────────────────────────────────────────────
+# Sirve /static/ sin nginx delante. En prod usa ManifestStaticFilesStorage
+# (hashing + cache eterno + compresión gzip/brotli).
+whitenoise==6.12.0
+
 # ── Configuración / entorno ──────────────────────────────────────────────────
 python-decouple==3.8          # mismo patrón que usa el ERP
 python-dotenv==1.0.1          # carga .env en dev

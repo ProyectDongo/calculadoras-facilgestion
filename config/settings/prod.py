@@ -27,3 +27,13 @@ SECURE_HSTS_PRELOAD = True
 # Cookies
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
+
+# Static files: WhiteNoise con hashing + compresión gzip/brotli + cache eterno.
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.InMemoryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
