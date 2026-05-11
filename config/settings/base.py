@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 # ─── Middleware ──────────────────────────────────────────────────────────────
 # Orden importa. CSPMiddleware debe ir DESPUÉS de SecurityMiddleware.
 MIDDLEWARE = [
+    "core.middleware.CloudflareRealIPMiddleware",      # reescribe REMOTE_ADDR (antes que ratelimit)
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",      # sirve /static/ sin nginx delante
     "csp.middleware.CSPMiddleware",

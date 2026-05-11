@@ -1,6 +1,7 @@
 """
 core/middleware.py — Middleware del proyecto.
 
+    CloudflareRealIPMiddleware     → reescribe REMOTE_ADDR a la IP real
     SignedCookieSessionMiddleware  → habilita sessions cookie-firmadas
     AntiFloodMiddleware            → bloqueo temporal por IP-hash via Redis
     SecurityHeadersMiddleware      → Permissions-Policy + CORP
@@ -16,6 +17,37 @@ from django.http import HttpResponse
 from core.services.ip_hash import request_ip_hash
 
 logger = logging.getLogger(__name__)
+
+
+# ── 0. IP real del cliente (REMOTE_ADDR) ─────────────────────────────────────
+
+class CloudflareRealIPMiddleware:
+    """
+    Reescribe REMOTE_ADDR a la IP real del cliente cuando el request viene por
+    Cloudflare Tunnel.
+
+    Necesario porque django-ratelimit con key='ip' lee REMOTE_ADDR directo, y
+    en este deploy REMOTE_ADDR es siempre 127.0.0.1 (cloudflared corre en el
+    host y reenvía al container). Sin este middleware, todo el tráfico se
+    cuenta como una sola IP y dispara los rate limits inmediatamente.
+
+    Confiamos en CF-Connecting-IP / X-Forwarded-For porque el container está
+    bind a 127.0.0.1 y solo es alcanzable vía tunnel; un atacante directo
+    contra el host tendría que primero comprometer la red local.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        cf_ip = request.META.get("HTTP_CF_CONNECTING_IP")
+        if cf_ip:
+            request.META["REMOTE_ADDR"] = cf_ip.strip()
+        else:
+            xff = request.META.get("HTTP_X_FORWARDED_FOR")
+            if xff:
+                request.META["REMOTE_ADDR"] = xff.split(",")[0].strip()
+        return self.get_response(request)
 
 
 # ── 1. Sessions cookie-firmadas ──────────────────────────────────────────────
