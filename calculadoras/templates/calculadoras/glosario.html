@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Glosario tributario chileno · {{ BRAND.name }}{% endblock %}
+
+{% block content %}
+<header class="text-center py-8 mb-2">
+  <h1 class="text-4xl font-bold text-brand-dark mb-2 tracking-tight">Glosario tributario</h1>
+  <p class="text-brand-light max-w-2xl mx-auto">Definiciones rápidas de los términos más usados por PyMEs chilenas. Cada concepto enlaza a la calculadora correspondiente cuando aplica.</p>
+</header>
+
+<section class="grid gap-4 sm:grid-cols-2 mt-8">
+
+  {# IVA #}
+  <article class="bg-white border border-slate-200 rounded-2xl p-6 hover:border-brand transition">
+    <h2 class="text-lg font-bold text-brand-dark mb-1">IVA</h2>
+    <p class="text-xs uppercase tracking-widest text-brand font-semibold mb-3">Impuesto al Valor Agregado · 19%</p>
+    <p class="text-sm text-brand-light leading-relaxed">Impuesto que grava la venta de bienes y servicios. En Chile es del <strong>19%</strong> sobre el valor neto. Vigente desde 1990 (DL 825).</p>
+    <a href="{% url 'calculadoras:calc_iva' %}" class="inline-block mt-3 text-sm text-brand hover:underline">Ir a calculadora →</a>
+  </article>
+
+  {# Bruto / Neto #}
+  <article class="bg-white border border-slate-200 rounded-2xl p-6">
+    <h2 class="text-lg font-bold text-brand-dark mb-1">Bruto vs Neto</h2>
+    <p class="text-xs uppercase tracking-widest text-brand-light font-semibold mb-3">Términos generales</p>
+    <p class="text-sm text-brand-light leading-relaxed"><strong>Neto:</strong> el valor antes de impuestos. <strong>Bruto:</strong> el valor total incluyendo IVA o retenciones. La conversión depende del contexto (IVA, honorarios, sueldo).</p>
+  </article>
+
+  {# Boleta de Honorarios #}
+  <article class="bg-white border border-slate-200 rounded-2xl p-6 hover:border-indigo-500 transition">
+    <h2 class="text-lg font-bold text-brand-dark mb-1">Boleta de Honorarios</h2>
+    <p class="text-xs uppercase tracking-widest text-indigo-600 font-semibold mb-3">Trabajador independiente · Retención 15,25%</p>
+    <p class="text-sm text-brand-light leading-relaxed">Documento tributario que emite quien presta servicios sin relación de dependencia. La empresa pagadora retiene un porcentaje (15,25% en 2026, Ley 21.133) y lo entera al SII.</p>
+    <a href="{% url 'calculadoras:calc_honorarios' %}" class="inline-block mt-3 text-sm text-brand hover:underline">Ir a calculadora →</a>
+  </article>
+
+  {# AFP #}
+  <article class="bg-white border border-slate-200 rounded-2xl p-6">
+    <h2 class="text-lg font-bold text-brand-dark mb-1">AFP</h2>
+    <p class="text-xs uppercase tracking-widest text-brand-light font-semibold mb-3">Administradora de Fondos de Pensiones</p>
+    <p class="text-sm text-brand-light leading-relaxed">Institución que gestiona el ahorro previsional. El trabajador cotiza un <strong>10% obligatorio</strong> sobre su renta imponible más una comisión variable (0,49% a 1,45% según AFP).</p>
+  </article>
+
+  {# Fonasa / Isapre #}
+  <article class="bg-white border border-slate-200 rounded-2xl p-6">
+    <h2 class="text-lg font-bold text-brand-dark mb-1">Fonasa / Isapre</h2>
+    <p class="text-xs uppercase tracking-widest text-brand-light font-semibold mb-3">Sistema de Salud</p>
+    <p class="text-sm text-brand-light leading-relaxed"><strong>Fonasa:</strong> sistema público; cotización fija de 7% sobre renta imponible. <strong>Isapre:</strong> sistema privado; el monto depende del plan contratado (expresado en UF mensual).</p>
+  </article>
+
+  {# Seguro Cesantía #}
+  <article class="bg-white border border-slate-200 rounded-2xl p-6">
+    <h2 class="text-lg font-bold text-brand-dark mb-1">Seguro de Cesantía</h2>
+    <p class="text-xs uppercase tracking-widest text-brand-light font-semibold mb-3">Trabajador · 0,6%</p>
+    <p class="text-sm text-brand-light leading-relaxed">Cobertura obligatoria que se acumula durante la relación laboral. El <strong>trabajador</strong> aporta 0,6% en contrato indefinido (0% en plazo fijo, lo cubre el empleador).</p>
+  </article>
+
+  {# IGC / Impuesto Único #}
+  <article class="bg-white border border-slate-200 rounded-2xl p-6 hover:border-rose-500 transition">
+    <h2 class="text-lg font-bold text-brand-dark mb-1">Impuesto Único (IGC)</h2>
+    <p class="text-xs uppercase tracking-widest text-rose-600 font-semibold mb-3">Segunda Categoría · Tramos progresivos</p>
+    <p class="text-sm text-brand-light leading-relaxed">Tributo que grava las rentas del trabajo dependiente. Se aplica por tramos progresivos en UTM, partiendo en 0% hasta 13,5 UTM y subiendo hasta 40% en los tramos superiores.</p>
+    <a href="{% url 'calculadoras:calc_sueldo' %}" class="inline-block mt-3 text-sm text-brand hover:underline">Ir a calculadora →</a>
+  </article>
+
+  {# UTM #}
+  <article class="bg-white border border-slate-200 rounded-2xl p-6">
+    <h2 class="text-lg font-bold text-brand-dark mb-1">UTM</h2>
+    <p class="text-xs uppercase tracking-widest text-brand-light font-semibold mb-3">Unidad Tributaria Mensual</p>
+    <p class="text-sm text-brand-light leading-relaxed">Unidad de medida reajustable usada para definir tramos del impuesto único y otras obligaciones tributarias. Cambia mensualmente según el IPC.</p>
+  </article>
+
+  {# UF #}
+  <article class="bg-white border border-slate-200 rounded-2xl p-6">
+    <h2 class="text-lg font-bold text-brand-dark mb-1">UF</h2>
+    <p class="text-xs uppercase tracking-widest text-brand-light font-semibold mb-3">Unidad de Fomento</p>
+    <p class="text-sm text-brand-light leading-relaxed">Unidad monetaria reajustable diariamente según la inflación. Se usa para arriendos, créditos hipotecarios, planes de Isapre y topes imponibles.</p>
+  </article>
+
+  {# F29 #}
+  <article class="bg-white border border-slate-200 rounded-2xl p-6">
+    <h2 class="text-lg font-bold text-brand-dark mb-1">F29</h2>
+    <p class="text-xs uppercase tracking-widest text-brand-light font-semibold mb-3">Formulario Mensual SII</p>
+    <p class="text-sm text-brand-light leading-relaxed">Declaración mensual al SII que reporta IVA débito (ventas), IVA crédito (compras) y PPM (Pago Provisional Mensual de la renta).</p>
+  </article>
+
+  {# Markup vs Margen #}
+  <article class="bg-white border border-slate-200 rounded-2xl p-6 hover:border-emerald-500 transition">
+    <h2 class="text-lg font-bold text-brand-dark mb-1">Markup vs Margen</h2>
+    <p class="text-xs uppercase tracking-widest text-emerald-600 font-semibold mb-3">Estrategia de precios</p>
+    <p class="text-sm text-brand-light leading-relaxed"><strong>Markup:</strong> utilidad como % del costo. <strong>Margen real:</strong> utilidad como % del precio de venta. Markup 30% ≈ margen 23%.</p>
+    <a href="{% url 'calculadoras:calc_precio_venta' %}" class="inline-block mt-3 text-sm text-brand hover:underline">Ir a calculadora →</a>
+  </article>
+
+  {# Renta imponible #}
+  <article class="bg-white border border-slate-200 rounded-2xl p-6">
+    <h2 class="text-lg font-bold text-brand-dark mb-1">Renta Imponible</h2>
+    <p class="text-xs uppercase tracking-widest text-brand-light font-semibold mb-3">Base de cotización</p>
+    <p class="text-sm text-brand-light leading-relaxed">Monto sobre el cual se calculan las cotizaciones previsionales (AFP, salud, cesantía). Tiene un <strong>tope</strong> en UF que se reajusta anualmente.</p>
+  </article>
+
+</section>
+
+<section class="mt-12 bg-gradient-to-br from-brand-dark to-brand-mid rounded-2xl p-8 text-white">
+  <h2 class="text-2xl font-bold mb-3">¿Necesitas estos cálculos integrados a tu contabilidad?</h2>
+  <p class="text-slate-300 mb-5 max-w-2xl">FácilGestión es un ERP modular que integra todos estos cálculos con tus facturas reales del SII. Sin Excel, sin errores.</p>
+  <a href="{{ BRAND.url }}" target="_blank" rel="noopener"
+     class="inline-flex items-center gap-2 bg-white hover:bg-slate-100 text-brand-dark font-semibold rounded-lg px-5 py-3 transition">
+    Conocer FácilGestión
+    <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd"/></svg>
+  </a>
+</section>
+{% endblock %}

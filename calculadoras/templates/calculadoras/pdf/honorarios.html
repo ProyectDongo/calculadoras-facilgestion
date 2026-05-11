@@ -1,0 +1,34 @@
+{% extends "calculadoras/pdf/base.html" %}
+{% load humanize %}
+
+{% block title %}Boleta de Honorarios · {{ BRAND.name }}{% endblock %}
+
+{% block contenido %}
+<h1>Cálculo de Boleta de Honorarios</h1>
+<p class="muted">
+  {% if r.modo == "bruto_a_liquido" %}Conversión Bruto → Líquido{% else %}Conversión Líquido → Bruto{% endif %}
+  · Retención: 15,25% (Ley 21.133)
+  {% if rut %} · RUT: {{ rut }}{% endif %}
+</p>
+
+<div class="highlight">
+  <span class="label">Líquido a recibir</span>
+  <span class="value">${{ r.liquido|floatformat:0|intcomma }} CLP</span>
+</div>
+
+<h3>Detalle</h3>
+<table class="kv">
+  <tr><th>Monto Bruto</th><td>${{ r.bruto|floatformat:0|intcomma }}</td></tr>
+  <tr><th>Retención (15,25%)</th><td>– ${{ r.retencion|floatformat:0|intcomma }}</td></tr>
+  <tr><th>Líquido</th><td>${{ r.liquido|floatformat:0|intcomma }}</td></tr>
+</table>
+
+<h3 style="margin-top:18pt;">Sobre la retención de honorarios</h3>
+<p class="muted">
+  La Ley 21.133 estableció un calendario de aumento de la tasa de retención para
+  emisores de boleta de honorarios: 13% (2023), 13,75% (2024), 14,50% (2025),
+  <strong>15,25% (2026)</strong>, 16% (2027) y 17% (2028 en adelante).
+  Esta calculadora aplica la tasa del año vigente. Verifica con tu contador o
+  el SII antes de operar.
+</p>
+{% endblock %}

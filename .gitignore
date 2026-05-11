@@ -32,6 +32,9 @@ media/
 Thumbs.db
 desktop.ini
 
+# WeasyPrint runtime cache (creado por el container)
+.cache/
+
 # Secrets
 .env
 .env.*

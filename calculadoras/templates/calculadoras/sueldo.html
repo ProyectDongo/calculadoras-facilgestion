@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Calculadora de Sueldo Líquido · {{ BRAND.name }}{% endblock %}
+
+{% block extra_head %}
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+{% endblock %}
+
+{% block content %}
+<a href="{% url 'calculadoras:landing' %}" class="text-sm text-brand hover:text-brand-hover inline-flex items-center gap-1">
+  <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd"/></svg>
+  Todas las calculadoras
+</a>
+
+<header class="mt-3 mb-6 flex items-start gap-4">
+  <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center shrink-0">
+    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="6" width="20" height="14" rx="2"/>
+      <path d="M14 14h4"/><path d="M18 11v6"/>
+      <path d="M2 10h20"/>
+    </svg>
+  </div>
+  <div>
+    <h1 class="text-3xl font-bold text-brand-dark">Sueldo Líquido</h1>
+    <p class="text-brand-light mt-1">AFP · Salud · Cesantía · Impuesto Único IGC 2026</p>
+  </div>
+</header>
+
+<div class="grid gap-6 lg:grid-cols-2" x-data="sueldoCalc()" @resultado-listo="capturarResultado($event.detail)">
+
+  {# ── Form ───────────────────────────────────────────────────────── #}
+  <div class="bg-white border border-slate-200 rounded-2xl p-6">
+    <form
+      hx-post="{% url 'calculadoras:api_calcular_sueldo' %}"
+      hx-target="#resultado-sueldo" hx-swap="innerHTML"
+      hx-trigger="change from:select, change from:input[type=radio], keyup changed delay:400ms from:input[type=number]"
+    >
+      {% csrf_token %}
+
+      <label class="block mb-4">
+        <span class="text-sm font-medium text-brand-dark">Sueldo Bruto Mensual (CLP)</span>
+        <div class="mt-1.5 relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-brand-light">$</span>
+          <input type="number" name="bruto" inputmode="numeric" min="0" max="9999999999" step="1"
+                 placeholder="0" x-model.number="bruto" required
+                 class="w-full pl-7 pr-3 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-lg">
+        </div>
+      </label>
+
+      <label class="block mb-4">
+        <span class="text-sm font-medium text-brand-dark">AFP</span>
+        <select name="afp_comision" x-model="afp_comision"
+                class="mt-1.5 w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-white">
+          {% for afp in afps %}
+          <option value="{{ afp.comision }}">{{ afp.nombre }} ({{ afp.comision|floatformat:"-2" }}% + 10% obligatorio)</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <div class="mb-4">
+        <span class="block text-sm font-medium text-brand-dark mb-2">Sistema de Salud</span>
+        <div class="grid grid-cols-2 bg-slate-100 rounded-lg p-1 text-sm font-medium">
+          <label class="cursor-pointer">
+            <input type="radio" name="salud_tipo" value="fonasa" class="sr-only peer" x-model="salud_tipo" checked>
+            <div class="text-center py-2 rounded-md peer-checked:bg-white peer-checked:shadow text-brand-light peer-checked:text-brand-dark transition">
+              Fonasa (7%)
+            </div>
+          </label>
+          <label class="cursor-pointer">
+            <input type="radio" name="salud_tipo" value="isapre" class="sr-only peer" x-model="salud_tipo">
+            <div class="text-center py-2 rounded-md peer-checked:bg-white peer-checked:shadow text-brand-light peer-checked:text-brand-dark transition">
+              Isapre
+            </div>
+          </label>
+        </div>
+        <div x-show="salud_tipo==='isapre'" x-cloak class="mt-3">
+          <label class="block">
+            <span class="text-xs text-brand-light">Plan Isapre (UF mensual)</span>
+            <input type="number" name="salud_isapre_uf" min="0" max="100" step="0.01"
+                   placeholder="3.5" x-model.number="salud_isapre_uf"
+                   class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-sm">
+          </label>
+        </div>
+      </div>
+
+      <div class="mb-2">
+        <span class="block text-sm font-medium text-brand-dark mb-2">Tipo de Contrato</span>
+        <div class="grid grid-cols-2 bg-slate-100 rounded-lg p-1 text-sm font-medium">
+          <label class="cursor-pointer">
+            <input type="radio" name="contrato" value="indefinido" class="sr-only peer" x-model="contrato" checked>
+            <div class="text-center py-2 rounded-md peer-checked:bg-white peer-checked:shadow text-brand-light peer-checked:text-brand-dark transition">
+              Indefinido
+            </div>
+          </label>
+          <label class="cursor-pointer">
+            <input type="radio" name="contrato" value="plazo_fijo" class="sr-only peer" x-model="contrato">
+            <div class="text-center py-2 rounded-md peer-checked:bg-white peer-checked:shadow text-brand-light peer-checked:text-brand-dark transition">
+              Plazo fijo
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-900">
+        Cálculo referencial 2026. No incluye asignaciones (colación, movilización) ni APV.
+        Para casos con tope imponible o gratificación legal, consulta a un contador.
+      </div>
+    </form>
+  </div>
+
+  {# ── Resultado ───────────────────────────────────────────────────── #}
+  <div class="bg-white border border-slate-200 rounded-2xl p-6 flex flex-col">
+    <div id="resultado-sueldo" class="flex-1">
+      <p class="text-brand-light text-sm">Ingresa tu sueldo bruto para ver el cálculo.</p>
+    </div>
+
+    {% include "calculadoras/_acciones_calc.html" with calc_key="sueldo" %}
+  </div>
+
+</div>
+
+{% include "calculadoras/_faq.html" with calc_key="sueldo" %}
+
+<script>
+function sueldoCalc() {
+  return Object.assign(accionesMixin(), {
+    bruto: null,
+    afp_comision: 0.0104,
+    salud_tipo: 'fonasa',
+    salud_isapre_uf: null,
+    contrato: 'indefinido',
+  });
+}
+</script>
+{% endblock %}

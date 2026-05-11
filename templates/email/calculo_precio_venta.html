@@ -1,0 +1,41 @@
+{% extends "email/base.html" %}
+{% load humanize %}
+
+{% block body %}
+<h2 style="margin:0 0 16px;font-size:18px;color:{{ BRAND.color_dark }};">Tu cálculo de precio de venta</h2>
+
+<p style="margin:0 0 18px;color:{{ BRAND.color_light }};font-size:14px;">
+  Adjunto encontrarás el PDF con el detalle. Resumen:
+</p>
+
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;margin-bottom:18px;">
+  <tr>
+    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;color:{{ BRAND.color_light }};font-size:13px;">Costo total</td>
+    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;">${{ r.costo_total|floatformat:0|intcomma }}</td>
+  </tr>
+  <tr>
+    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;color:{{ BRAND.color_light }};font-size:13px;">Utilidad ({{ r.porcentaje_markup|floatformat:"-2" }}%)</td>
+    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;color:#059669;">+ ${{ r.utilidad|floatformat:0|intcomma }}</td>
+  </tr>
+  <tr>
+    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;color:{{ BRAND.color_light }};font-size:13px;">Precio neto</td>
+    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;">${{ r.precio_neto|floatformat:0|intcomma }}</td>
+  </tr>
+  <tr>
+    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;color:{{ BRAND.color_light }};font-size:13px;">IVA (19%)</td>
+    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;">+ ${{ r.iva|floatformat:0|intcomma }}</td>
+  </tr>
+  <tr>
+    <td style="padding:14px 14px;background:#ecfdf5;border-radius:8px 0 0 8px;color:{{ BRAND.color_emerald }};font-weight:600;">Precio final con IVA</td>
+    <td style="padding:14px 14px;background:#ecfdf5;border-radius:0 8px 8px 0;text-align:right;font-weight:700;font-size:18px;color:{{ BRAND.color_emerald }};">${{ r.precio_con_iva|floatformat:0|intcomma }}</td>
+  </tr>
+</table>
+
+<p style="margin:14px 0 0;font-size:12px;color:{{ BRAND.color_light }};">
+  Margen real sobre venta: <strong>{{ r.margen_real_pct|floatformat:"-2" }}%</strong>.
+</p>
+
+<p style="margin:18px 0 0;font-size:13px;color:{{ BRAND.color_light }};">
+  Generado el {{ generado_en|date:"d/m/Y" }} a las {{ generado_en|date:"H:i" }}.
+</p>
+{% endblock %}

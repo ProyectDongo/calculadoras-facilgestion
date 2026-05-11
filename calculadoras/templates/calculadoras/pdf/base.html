@@ -1,4 +1,4 @@
-{% load static %}{% load humanize %}<!doctype html>
+{% load humanize %}<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -30,18 +30,39 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-bottom: 10pt;
-    margin-bottom: 14pt;
+    padding-bottom: 12pt;
+    margin-bottom: 16pt;
     border-bottom: 2pt solid {{ BRAND.color_primary }};
   }
-  .doc-header .brand { display: flex; align-items: center; gap: 10pt; }
-  .doc-header img { height: 28pt; width: auto; }
+  .doc-header .brand { display: flex; align-items: center; gap: 12pt; }
+  .doc-header img    { height: 42pt; width: auto; }
   .doc-header .brand-text { line-height: 1.2; }
-  .doc-header .brand-name { font-weight: 700; font-size: 13pt; color: {{ BRAND.color_dark }}; }
-  .doc-header .brand-sub  { font-size: 9pt; color: {{ BRAND.color_light }}; }
+  .doc-header .brand-name { font-weight: 700; font-size: 15pt; color: {{ BRAND.color_dark }}; letter-spacing: -0.01em; }
+  .doc-header .brand-sub  { font-size: 9pt; color: {{ BRAND.color_light }}; margin-top: 2pt; }
   .doc-header .doc-meta {
     text-align: right; font-size: 9pt; color: {{ BRAND.color_light }};
   }
+  .doc-header .doc-meta strong { color: {{ BRAND.color_primary }}; font-size: 10pt; }
+
+  /* Footer cierra-documento (siempre visible, dentro del flujo) */
+  .doc-footer {
+    margin-top: 28pt;
+    padding-top: 12pt;
+    border-top: 1pt solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 9pt;
+    color: {{ BRAND.color_light }};
+  }
+  .doc-footer .ft-brand { display: flex; align-items: center; gap: 8pt; }
+  .doc-footer .ft-brand img { height: 22pt; width: auto; }
+  .doc-footer .ft-brand .ft-text { line-height: 1.3; }
+  .doc-footer .ft-brand .ft-name { font-weight: 700; color: {{ BRAND.color_dark }}; font-size: 10pt; }
+  .doc-footer .ft-brand .ft-tag  { font-size: 8pt; color: {{ BRAND.color_light }}; }
+  .doc-footer .ft-url { text-align: right; }
+  .doc-footer .ft-url .ft-cta { color: {{ BRAND.color_primary }}; font-weight: 600; font-size: 10pt; }
+  .doc-footer .ft-url .ft-disclaimer { font-size: 8pt; color: {{ BRAND.color_light }}; }
 
   /* Tablas de resultado */
   .kv { width: 100%; border-collapse: collapse; margin: 6pt 0; }
@@ -79,7 +100,7 @@
 
 <header class="doc-header">
   <div class="brand">
-    <img src="{% static 'calculadoras/logo.png' %}" alt="{{ BRAND.name }}">
+    {% if logo_path %}<img src="{{ logo_path }}" alt="{{ BRAND.name }}">{% endif %}
     <div class="brand-text">
       <div class="brand-name">{{ BRAND.name }}</div>
       <div class="brand-sub">{{ BRAND.tagline }}</div>
@@ -97,9 +118,35 @@
   {% block contenido %}{% endblock %}
 </main>
 
+{# Banner CTA al ERP — destaca el lead-gen #}
+<div style="margin-top: 22pt; padding: 12pt 16pt; background: linear-gradient(135deg, {{ BRAND.color_dark }} 0%, {{ BRAND.color_mid }} 100%); color: white; border-radius: 6pt; display: flex; justify-content: space-between; align-items: center;">
+  <div style="font-size: 10pt; line-height: 1.4;">
+    <strong style="font-size: 11pt;">¿Haces estos cálculos a diario?</strong><br>
+    {{ BRAND.name }} los automatiza con tus facturas reales del SII.
+  </div>
+  <div style="font-size: 10pt; color: #93c5fd; font-weight: 700;">
+    {{ BRAND.url|cut:"https://" }}
+  </div>
+</div>
+
+{# Footer dentro del flujo del documento — visible siempre #}
+<div class="doc-footer">
+  <div class="ft-brand">
+    {% if logo_path %}<img src="{{ logo_path }}" alt="{{ BRAND.name }}">{% endif %}
+    <div class="ft-text">
+      <div class="ft-name">{{ BRAND.name }}</div>
+      <div class="ft-tag">{{ BRAND.tagline }}</div>
+    </div>
+  </div>
+  <div class="ft-url">
+    <div class="ft-cta">{{ BRAND.url|cut:"https://" }}</div>
+    <div class="ft-disclaimer">Calculadora gratuita · No es asesoría tributaria</div>
+  </div>
+</div>
+
+{# Footer running (alterno, en cada página si hay paginación) #}
 <footer>
-  <div class="brand-line">Calculadora gratuita de {{ BRAND.name }} — {{ BRAND.tagline }}.</div>
-  <div>Conoce más en {{ BRAND.url|cut:"https://" }}</div>
+  <div class="brand-line">Generado en calculadoras.facilgestion.cl · {{ BRAND.name }}</div>
 </footer>
 
 </body>

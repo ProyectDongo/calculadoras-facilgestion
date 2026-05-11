@@ -1,0 +1,18 @@
+{% load humanize %}
+<div data-resultado="{{ r_json }}"
+     x-data x-init="$dispatch('resultado-listo', JSON.parse($el.dataset.resultado))">
+  <div class="space-y-3">
+    <div class="flex justify-between items-baseline border-b border-slate-200 pb-2">
+      <span class="text-sm text-brand-light">Monto Bruto</span>
+      <span class="text-lg font-semibold text-brand-dark">${{ r.bruto|floatformat:0|intcomma }}</span>
+    </div>
+    <div class="flex justify-between items-baseline border-b border-slate-200 pb-2">
+      <span class="text-sm text-brand-light">Retención <span class="text-xs">(15,25%)</span></span>
+      <span class="text-lg font-semibold text-red-600">– ${{ r.retencion|floatformat:0|intcomma }}</span>
+    </div>
+    <div class="flex justify-between items-baseline bg-indigo-50 border border-indigo-200 -mx-2 px-3 py-3 rounded-lg">
+      <span class="text-sm font-medium text-indigo-700">Líquido a recibir</span>
+      <span class="text-2xl font-bold text-indigo-700">${{ r.liquido|floatformat:0|intcomma }}</span>
+    </div>
+  </div>
+</div>

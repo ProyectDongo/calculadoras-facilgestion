@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Calculadora de IVA · {{ BRAND.name }}{% endblock %}
+{% block title %}Calculadora de Boleta de Honorarios · {{ BRAND.name }}{% endblock %}
 
 {% block extra_head %}
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
@@ -14,49 +14,48 @@
 </a>
 
 <header class="mt-3 mb-6 flex items-start gap-4">
-  <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0">
+  <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center shrink-0">
     <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/>
-      <line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/>
-      <line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/>
-      <line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/>
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <path d="M9 13l2 2 4-4"/>
     </svg>
   </div>
   <div>
-    <h1 class="text-3xl font-bold text-brand-dark">Calculadora de IVA</h1>
-    <p class="text-brand-light mt-1">Tasa vigente: <strong>19%</strong> · DL 825 Chile</p>
+    <h1 class="text-3xl font-bold text-brand-dark">Boleta de Honorarios</h1>
+    <p class="text-brand-light mt-1">Retención <strong>15,25%</strong> · vigente 2026 · Ley 21.133</p>
   </div>
 </header>
 
-<div class="grid gap-6 lg:grid-cols-2" x-data="ivaCalc()" @resultado-listo="capturarResultado($event.detail)">
+<div class="grid gap-6 lg:grid-cols-2" x-data="honorariosCalc()" @resultado-listo="capturarResultado($event.detail)">
 
   {# ── Form ───────────────────────────────────────────────────────── #}
   <div class="bg-white border border-slate-200 rounded-2xl p-6">
     <form
-      hx-post="{% url 'calculadoras:api_calcular_iva' %}"
-      hx-target="#resultado-iva" hx-swap="innerHTML"
+      hx-post="{% url 'calculadoras:api_calcular_honorarios' %}"
+      hx-target="#resultado-honorarios" hx-swap="innerHTML"
       hx-trigger="change from:input[name=modo], keyup changed delay:300ms from:input[name=monto]"
     >
       {% csrf_token %}
 
       <div class="grid grid-cols-2 bg-slate-100 rounded-lg p-1 mb-5 text-sm font-medium">
         <label class="cursor-pointer">
-          <input type="radio" name="modo" value="neto_a_bruto" class="sr-only peer" x-model="modo" checked>
+          <input type="radio" name="modo" value="bruto_a_liquido" class="sr-only peer" x-model="modo" checked>
           <div class="text-center py-2 rounded-md peer-checked:bg-white peer-checked:shadow text-brand-light peer-checked:text-brand-dark transition">
-            Neto → Bruto
+            Bruto → Líquido
           </div>
         </label>
         <label class="cursor-pointer">
-          <input type="radio" name="modo" value="bruto_a_neto" class="sr-only peer" x-model="modo">
+          <input type="radio" name="modo" value="liquido_a_bruto" class="sr-only peer" x-model="modo">
           <div class="text-center py-2 rounded-md peer-checked:bg-white peer-checked:shadow text-brand-light peer-checked:text-brand-dark transition">
-            Bruto → Neto
+            Líquido → Bruto
           </div>
         </label>
       </div>
 
       <label class="block">
         <span class="text-sm font-medium text-brand-dark"
-              x-text="modo==='neto_a_bruto' ? 'Monto NETO (CLP)' : 'Monto BRUTO con IVA (CLP)'"></span>
+              x-text="modo==='bruto_a_liquido' ? 'Monto BRUTO (CLP)' : 'Monto LÍQUIDO recibido (CLP)'"></span>
         <div class="mt-1.5 relative">
           <span class="absolute left-3 top-1/2 -translate-y-1/2 text-brand-light">$</span>
           <input type="number" name="monto" inputmode="numeric" min="0" max="9999999999" step="1"
@@ -65,29 +64,31 @@
         </div>
       </label>
 
-      <p class="mt-3 text-xs text-brand-light">Se actualiza automáticamente mientras escribes.</p>
+      <div class="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-900">
+        <strong>Importante:</strong> la tasa sube anualmente. En 2027 será <strong>16%</strong> y en 2028 <strong>17%</strong>.
+      </div>
     </form>
   </div>
 
   {# ── Resultado ───────────────────────────────────────────────────── #}
   <div class="bg-white border border-slate-200 rounded-2xl p-6 flex flex-col">
-    <div id="resultado-iva" class="flex-1">
+    <div id="resultado-honorarios" class="flex-1">
       <p class="text-brand-light text-sm">Ingresa un monto para ver el cálculo.</p>
     </div>
 
-    {% include "calculadoras/_acciones_calc.html" with calc_key="iva" %}
+    {% include "calculadoras/_acciones_calc.html" with calc_key="honorarios" %}
   </div>
 
 </div>
 
 <script>
-function ivaCalc() {
+function honorariosCalc() {
   return Object.assign(accionesMixin(), {
-    modo: 'neto_a_bruto',
+    modo: 'bruto_a_liquido',
     monto: null,
   });
 }
 </script>
 
-{% include "calculadoras/_faq.html" with calc_key="iva" %}
+{% include "calculadoras/_faq.html" with calc_key="honorarios" %}
 {% endblock %}

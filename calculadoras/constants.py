@@ -5,17 +5,19 @@ Centralizados para que no haya magic strings dispersos por views/templates.
 """
 
 # Claves canónicas de cada calculadora (usadas en URLs, templates y email).
-CALC_IVA = "iva"
-CALC_PRECIO_VENTA = "precio_venta"
-CALC_HONORARIOS = "honorarios"
+CALC_IVA           = "iva"
+CALC_PRECIO_VENTA  = "precio_venta"
+CALC_HONORARIOS    = "honorarios"
+CALC_SUELDO        = "sueldo"
 
-CALCULADORAS_VALIDAS = (CALC_IVA, CALC_PRECIO_VENTA, CALC_HONORARIOS)
+CALCULADORAS_VALIDAS = (CALC_IVA, CALC_PRECIO_VENTA, CALC_HONORARIOS, CALC_SUELDO)
 
 # Asuntos de email — texto fijo, no template del usuario.
 ASUNTOS_EMAIL = {
     CALC_IVA:           "Tu cálculo de IVA · FácilGestión",
     CALC_PRECIO_VENTA:  "Tu cálculo de Precio de Venta · FácilGestión",
     CALC_HONORARIOS:    "Tu cálculo de Boleta de Honorarios · FácilGestión",
+    CALC_SUELDO:        "Tu cálculo de Sueldo Líquido · FácilGestión",
 }
 
 # Nombres descriptivos para mostrar en UI / PDF.
@@ -23,4 +25,5 @@ NOMBRES_DISPLAY = {
     CALC_IVA:           "Calculadora de IVA",
     CALC_PRECIO_VENTA:  "Calculadora de Precio de Venta",
     CALC_HONORARIOS:    "Calculadora de Boleta de Honorarios",
+    CALC_SUELDO:        "Calculadora de Sueldo Líquido",
 }

@@ -1,0 +1,36 @@
+{% extends "calculadoras/pdf/base.html" %}
+{% load humanize %}
+
+{% block title %}Precio de Venta · {{ BRAND.name }}{% endblock %}
+
+{% block contenido %}
+<h1>Cálculo de Precio de Venta</h1>
+<p class="muted">
+  Markup: {{ r.porcentaje_markup|floatformat:"-2" }}% sobre el costo · IVA 19%
+  {% if rut %} · RUT: {{ rut }}{% endif %}
+</p>
+
+<div class="highlight">
+  <span class="label">Precio final con IVA</span>
+  <span class="value">${{ r.precio_con_iva|floatformat:0|intcomma }} CLP</span>
+</div>
+
+<h3>Detalle</h3>
+<table class="kv">
+  <tr><th>Costo del producto</th><td>${{ r.costo|floatformat:0|intcomma }}</td></tr>
+  {% if r.flete > 0 %}<tr><th>Flete / transporte</th><td>${{ r.flete|floatformat:0|intcomma }}</td></tr>{% endif %}
+  <tr><th>Costo total</th><td>${{ r.costo_total|floatformat:0|intcomma }}</td></tr>
+  <tr><th>Utilidad ({{ r.porcentaje_markup|floatformat:"-2" }}% sobre costo)</th><td>${{ r.utilidad|floatformat:0|intcomma }}</td></tr>
+  <tr><th>Precio neto sugerido</th><td>${{ r.precio_neto|floatformat:0|intcomma }}</td></tr>
+  <tr><th>IVA (19%)</th><td>${{ r.iva|floatformat:0|intcomma }}</td></tr>
+  <tr><th>Precio final con IVA</th><td>${{ r.precio_con_iva|floatformat:0|intcomma }}</td></tr>
+  <tr><th>Margen real sobre venta</th><td>{{ r.margen_real_pct|floatformat:"-2" }} %</td></tr>
+</table>
+
+<h3 style="margin-top:18pt;">Markup vs margen</h3>
+<p class="muted">
+  <strong>Markup</strong> ({{ r.porcentaje_markup|floatformat:"-2" }}%) es la utilidad expresada como porcentaje del costo.
+  <strong>Margen real</strong> ({{ r.margen_real_pct|floatformat:"-2" }}%) es la utilidad como porcentaje del precio de venta neto.
+  Son dos números distintos y útiles para análisis distintos.
+</p>
+{% endblock %}

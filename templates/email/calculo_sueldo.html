@@ -1,0 +1,45 @@
+{% extends "email/base.html" %}
+{% load humanize %}
+
+{% block body %}
+<h2 style="margin:0 0 16px;font-size:18px;color:{{ BRAND.color_dark }};">Tu cálculo de sueldo líquido</h2>
+
+<p style="margin:0 0 18px;color:{{ BRAND.color_light }};font-size:14px;">
+  Adjunto encontrarás el PDF con el detalle. Resumen:
+</p>
+
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;margin-bottom:18px;">
+  <tr>
+    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;color:{{ BRAND.color_light }};font-size:13px;">Sueldo Bruto</td>
+    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;">${{ r.bruto|floatformat:0|intcomma }}</td>
+  </tr>
+  <tr>
+    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;color:{{ BRAND.color_light }};font-size:13px;">AFP</td>
+    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;color:#dc2626;">– ${{ r.afp_total|floatformat:0|intcomma }}</td>
+  </tr>
+  <tr>
+    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;color:{{ BRAND.color_light }};font-size:13px;">Salud</td>
+    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;color:#dc2626;">– ${{ r.salud|floatformat:0|intcomma }}</td>
+  </tr>
+  {% if r.cesantia > 0 %}
+  <tr>
+    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;color:{{ BRAND.color_light }};font-size:13px;">Seguro Cesantía</td>
+    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;color:#dc2626;">– ${{ r.cesantia|floatformat:0|intcomma }}</td>
+  </tr>
+  {% endif %}
+  {% if r.igc > 0 %}
+  <tr>
+    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;color:{{ BRAND.color_light }};font-size:13px;">Impuesto IGC</td>
+    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;color:#dc2626;">– ${{ r.igc|floatformat:0|intcomma }}</td>
+  </tr>
+  {% endif %}
+  <tr>
+    <td style="padding:14px 14px;background:#fef1f5;border-radius:8px 0 0 8px;color:#e11d48;font-weight:600;">Líquido</td>
+    <td style="padding:14px 14px;background:#fef1f5;border-radius:0 8px 8px 0;text-align:right;font-weight:700;font-size:18px;color:#e11d48;">${{ r.liquido|floatformat:0|intcomma }}</td>
+  </tr>
+</table>
+
+<p style="margin:20px 0 0;font-size:13px;color:{{ BRAND.color_light }};">
+  Generado el {{ generado_en|date:"d/m/Y" }} a las {{ generado_en|date:"H:i" }}.
+</p>
+{% endblock %}

@@ -1,9 +1,9 @@
 # calculadoras.facilgestion.cl
 
-Tres calculadoras públicas (Precio de venta, IVA, Boleta de honorarios) para PyMEs chilenas. Lead-gen del ERP FácilGestión. **Sin retención de datos**: la app es stateless, no persiste emails, RUTs ni payloads de cálculo.
+Cuatro calculadoras públicas para PyMEs chilenas (IVA, Precio de venta, Boleta de honorarios, Sueldo líquido) + cotizador multi-ítem exportable a PDF + glosario tributario. Lead-gen del ERP FácilGestión. **Sin retención de datos PII server-side**: la app es stateless, no persiste emails, RUTs ni payloads. Las listas viven en `localStorage` del navegador del usuario.
 
-> **Estado:** Fase 1 (setup) completada — 2026-05-11.
-> **Próxima fase:** 2 (core services: rut.py, turnstile.py, pdf.py, email_sender.py).
+> **Estado:** Fases 1, 2, 3, 4 (Sueldo + Cotización + Glosario + FAQ + Lead-gen banner) completadas — 2026-05-11.
+> **Pendiente:** Fase 5 (tests + coverage), Fase 6 (hardening final), Fase 7 (PWA + modo oscuro + calcs adicionales).
 
 ---
 
@@ -28,9 +28,28 @@ Tres calculadoras públicas (Precio de venta, IVA, Boleta de honorarios) para Py
 - **Cero PII server-side**: ni email, ni RUT, ni IP en claro. Si el usuario pide enviar PDF por correo, se envía y se descarta; nada queda persistido.
 - **T&C obligatorios al entrar**: modal con aceptación, queda en cookie firmada (`calc_session`).
 - **CSP por-vista, no global**: la política base es estricta; las vistas que necesitan `unsafe-inline` lo declaran con `@csp_update`.
-- **Anti-bot en 4 capas**: Cloudflare Turnstile + honeypot + tiempo mínimo de submit + rate limit por endpoint.
-- **PDFs con branding FácilGestión**: logo embebido, paleta `#2563eb` / `#0f172a` / `#475569`, fuentes del sistema.
-- **Multi-ítem (lista)**: localStorage del navegador, exportable a PDF de lista en cliente → servidor solo recibe el JSON final para renderizar.
+- **Anti-bot en 4 capas**: Cloudflare Turnstile + honeypot + tiempo mínimo de submit + rate limit por endpoint + middleware anti-flood global con Redis.
+- **PDFs con branding FácilGestión**: logo embebido desde filesystem, paleta `#2563eb` / `#0f172a` / `#475569`, banner CTA al ERP integrado en cada PDF.
+- **Multi-ítem (cotización)**: localStorage del navegador. Backend solo recibe el JSON al exportar PDF; re-totaliza server-side y descarta.
+- **Lead-gen contextual**: tras 3 cálculos en una sesión, banner discreto al ERP. Descartable con cooldown de 7 días.
+
+## Funcionalidad por página
+
+| Ruta | Qué hace |
+|---|---|
+| `/calculadoras/` | Landing con 4 cards + accesos a Cotización y Glosario |
+| `/calculadoras/iva/` | IVA 19% — Neto ↔ Bruto |
+| `/calculadoras/precio-venta/` | Costo + flete + utilidad → precio con/sin IVA + botón "Agregar a cotización" |
+| `/calculadoras/honorarios/` | Bruto ↔ Líquido (retención 15,25% Ley 21.133) |
+| `/calculadoras/sueldo/` | Bruto → Líquido con AFP (selector 7 AFPs) + Fonasa/Isapre + cesantía + IGC 2026 |
+| `/calculadoras/cotizacion/` | Lista multi-ítem desde `localStorage` → PDF profesional con emisor/cliente/items |
+| `/calculadoras/glosario/` | 12 términos tributarios chilenos con links a sus calcs |
+| `/calculadoras/privacidad/` | Política de privacidad (Ley 19.628) |
+| `/calculadoras/api/calcular/{calc}/` | Endpoint HTMX que devuelve partial con resultado |
+| `/calculadoras/api/pdf/` | Genera PDF de cálculo único |
+| `/calculadoras/api/enviar/` | Envía PDF por email (sin almacenar) |
+| `/calculadoras/api/cotizacion/pdf/` | Genera PDF de cotización multi-ítem |
+| `/healthz/` | Health check para Cloudflare/Docker |
 
 ## Comandos
 
@@ -105,13 +124,19 @@ Documentado en [SECURITY.md](SECURITY.md) (pendiente — Fase 10):
 
 ## Status de las fases
 
-- [x] **Fase 1** — Setup (este commit)
-- [ ] Fase 2 — Core services (rut, turnstile, pdf, email_sender)
-- [ ] Fase 3 — Calc IVA completa (andamiaje)
-- [ ] Fase 4 — Calc Precio Venta
-- [ ] Fase 5 — Calc Honorarios
-- [ ] Fase 6 — Lista multi-ítem (localStorage + PDF)
-- [ ] Fase 7 — Política de privacidad pública
-- [ ] Fase 8 — Tests + coverage ≥ 70%
-- [ ] Fase 9 — Hardening final (`manage.py check --deploy`)
-- [ ] Fase 10 — Documentación de deploy y Cloudflare
+- [x] **Fase 1** — Setup base (Docker, settings split, dummy DB, signed cookies)
+- [x] **Fase 2** — Core services (rut, turnstile, pdf, email_sender, honeypot, ip_hash, antiflood middleware)
+- [x] **Fase 3** — Calc IVA + Precio Venta + Honorarios + landing diferenciada
+- [x] **Fase 4** — Calc Sueldo Líquido + Lista multi-ítem + Cotización PDF + Glosario + FAQ + Banner ERP
+- [ ] **Fase 5** — Suite de tests con pytest (≥ 70% coverage en `core/` y `calculadoras/`)
+- [ ] **Fase 6** — Hardening final (CSP sin `unsafe-eval`/`unsafe-inline`, Tailwind build standalone, Alpine CSP-safe build, `manage.py check --deploy` limpio)
+- [ ] **Fase 7** — Mejoras adicionales: PWA instalable, modo oscuro, calc Finiquito, UF/USD converter, F29 simplificada, embed widget
+
+## Roadmap pendiente — calculadoras adicionales
+
+- Finiquito laboral (años de servicio + vacaciones + indemnización)
+- UF / USD / CLP converter con valor del día (cache Redis 15min, fuente `mindicador.cl`)
+- Punto de equilibrio (costos fijos / margen unitario)
+- F29 simplificada (IVA débito vs crédito + PPM)
+- Precio inverso ("Quiero $X de utilidad, ¿a cuánto vendo?")
+- Calendario tributario chileno (página estática SEO)

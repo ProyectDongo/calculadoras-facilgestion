@@ -1,9 +1,9 @@
-{% load humanize %}TU CÁLCULO DE IVA - FácilGestión
-================================
+{% load humanize %}TU CÁLCULO DE BOLETA DE HONORARIOS - FácilGestión
+==================================================
 
-Monto Neto:    ${{ r.neto|floatformat:0|intcomma }}
-IVA (19%):     ${{ r.iva|floatformat:0|intcomma }}
-Total c/IVA:   ${{ r.bruto|floatformat:0|intcomma }}
+Monto Bruto:    ${{ r.bruto|floatformat:0|intcomma }}
+Retención 15,25%: – ${{ r.retencion|floatformat:0|intcomma }}
+Líquido:        ${{ r.liquido|floatformat:0|intcomma }}
 
 Generado el {{ generado_en|date:"d/m/Y H:i" }}.
 

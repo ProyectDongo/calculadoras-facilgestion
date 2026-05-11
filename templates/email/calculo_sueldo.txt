@@ -1,0 +1,21 @@
+{% load humanize %}TU CÁLCULO DE SUELDO LÍQUIDO - FácilGestión
+===========================================
+
+Sueldo Bruto:        ${{ r.bruto|floatformat:0|intcomma }}
+AFP:                – ${{ r.afp_total|floatformat:0|intcomma }}
+Salud:              – ${{ r.salud|floatformat:0|intcomma }}
+{% if r.cesantia > 0 %}Seguro Cesantía:    – ${{ r.cesantia|floatformat:0|intcomma }}
+{% endif %}{% if r.igc > 0 %}Impuesto IGC:       – ${{ r.igc|floatformat:0|intcomma }}
+{% endif %}---
+Líquido:             ${{ r.liquido|floatformat:0|intcomma }}
+
+Generado el {{ generado_en|date:"d/m/Y H:i" }}.
+
+Encuentras el detalle en el PDF adjunto.
+
+---
+Recibes este correo porque solicitaste tu cálculo en
+https://calculadoras.facilgestion.cl
+
+No almacenamos tu correo: este envío es la única vez que se usa.
+Conoce FácilGestión en https://gestion.facilgestion.cl

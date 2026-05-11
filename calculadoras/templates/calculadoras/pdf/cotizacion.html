@@ -1,0 +1,182 @@
+{% load humanize %}<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Cotización · {{ BRAND.name }}</title>
+<style>
+  @page {
+    size: A4;
+    margin: 16mm 14mm 18mm 14mm;
+  }
+  body { font-family: "Helvetica", "Arial", sans-serif; font-size: 10pt; color: {{ BRAND.color_dark }}; line-height: 1.4; margin: 0; }
+
+  h1 { font-size: 24pt; font-weight: 700; margin: 0; letter-spacing: -0.02em; color: {{ BRAND.color_dark }}; }
+  h2 { font-size: 11pt; font-weight: 600; margin: 0 0 6pt; color: {{ BRAND.color_light }}; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* Header */
+  .header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding-bottom: 14pt; margin-bottom: 18pt;
+    border-bottom: 3pt solid {{ BRAND.color_primary }};
+  }
+  .header .brand { display: flex; align-items: center; gap: 12pt; }
+  .header img { height: 38pt; }
+  .header .brand-name { font-size: 14pt; font-weight: 700; color: {{ BRAND.color_dark }}; }
+  .header .brand-sub  { font-size: 9pt; color: {{ BRAND.color_light }}; }
+  .header .meta { text-align: right; font-size: 9pt; }
+  .header .meta .doc-type { background: {{ BRAND.color_primary }}; color: white; padding: 4pt 12pt; border-radius: 4pt; font-weight: 700; letter-spacing: 0.1em; font-size: 10pt; display: inline-block; }
+  .header .meta .doc-date { color: {{ BRAND.color_light }}; margin-top: 6pt; }
+
+  /* Bloques emisor / cliente */
+  .partes { display: flex; gap: 16pt; margin-bottom: 18pt; }
+  .partes .parte { flex: 1; background: #f8fafc; border-left: 2pt solid {{ BRAND.color_primary }}; padding: 10pt 12pt; border-radius: 2pt; }
+  .partes .parte .label { font-size: 8pt; color: {{ BRAND.color_light }}; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4pt; font-weight: 600; }
+  .partes .parte .nombre { font-size: 11pt; font-weight: 700; color: {{ BRAND.color_dark }}; margin-bottom: 3pt; }
+  .partes .parte .detalle { font-size: 9pt; color: {{ BRAND.color_light }}; line-height: 1.5; }
+
+  /* Tabla productos */
+  table.productos { width: 100%; border-collapse: collapse; margin-bottom: 12pt; }
+  table.productos thead th {
+    background: {{ BRAND.color_dark }}; color: white;
+    padding: 8pt 10pt; text-align: left; font-size: 9pt; font-weight: 600;
+  }
+  table.productos thead th.right { text-align: right; }
+  table.productos thead th.center { text-align: center; }
+  table.productos tbody td { padding: 8pt 10pt; border-bottom: 0.5pt solid #e2e8f0; }
+  table.productos tbody td.right { text-align: right; }
+  table.productos tbody td.center { text-align: center; }
+  table.productos tbody tr:nth-child(even) td { background: #f8fafc; }
+
+  /* Totales */
+  .totales { width: 45%; margin-left: auto; margin-top: 10pt; }
+  .totales table { width: 100%; border-collapse: collapse; }
+  .totales td { padding: 5pt 8pt; font-size: 10pt; }
+  .totales td.label { color: {{ BRAND.color_light }}; }
+  .totales td.value { text-align: right; font-weight: 600; }
+  .totales tr.total td { background: {{ BRAND.color_primary }}; color: white; padding: 10pt; font-size: 13pt; font-weight: 700; border-radius: 4pt; }
+
+  /* Observaciones */
+  .observaciones { margin-top: 18pt; padding: 10pt 12pt; background: #fffbeb; border-left: 2pt solid #f59e0b; font-size: 9pt; color: {{ BRAND.color_dark }}; }
+  .observaciones .label { font-size: 8pt; text-transform: uppercase; letter-spacing: 0.06em; color: #b45309; font-weight: 600; margin-bottom: 4pt; }
+
+  /* Footer */
+  .footer {
+    margin-top: 20pt; padding-top: 12pt; border-top: 1pt solid #e2e8f0;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 8pt; color: {{ BRAND.color_light }};
+  }
+  .footer .ft-cta { color: {{ BRAND.color_primary }}; font-weight: 700; font-size: 9pt; }
+
+  /* Banner CTA al ERP — destacado */
+  .cta-erp {
+    margin-top: 16pt; padding: 12pt 16pt;
+    background: linear-gradient(135deg, {{ BRAND.color_dark }} 0%, {{ BRAND.color_mid }} 100%);
+    color: white; border-radius: 6pt;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .cta-erp .text { font-size: 10pt; }
+  .cta-erp .text strong { font-size: 11pt; }
+  .cta-erp .url { font-size: 10pt; color: #93c5fd; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="brand">
+    {% if logo_path %}<img src="{{ logo_path }}" alt="{{ BRAND.name }}">{% endif %}
+    <div>
+      <div class="brand-name">{{ BRAND.name }}</div>
+      <div class="brand-sub">{{ BRAND.tagline }}</div>
+    </div>
+  </div>
+  <div class="meta">
+    <div class="doc-type">COTIZACIÓN</div>
+    <div class="doc-date">
+      Fecha: {{ generado_en|date:"d/m/Y" }}<br>
+      Válida por {{ validez_dias }} días
+    </div>
+  </div>
+</header>
+
+<div class="partes">
+  <div class="parte">
+    <div class="label">Emisor</div>
+    <div class="nombre">{{ emisor.empresa|default:"—" }}</div>
+    <div class="detalle">
+      {% if emisor.rut %}RUT: {{ emisor.rut }}<br>{% endif %}
+      {% if emisor.email %}{{ emisor.email }}<br>{% endif %}
+      {% if emisor.telefono %}{{ emisor.telefono }}{% endif %}
+    </div>
+  </div>
+  <div class="parte">
+    <div class="label">Cliente</div>
+    <div class="nombre">{{ cliente.nombre|default:"—" }}</div>
+    <div class="detalle">
+      {% if cliente.rut %}RUT: {{ cliente.rut }}{% endif %}
+    </div>
+  </div>
+</div>
+
+<h2>Detalle de productos</h2>
+<table class="productos">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Descripción</th>
+      <th class="center">Cant.</th>
+      <th class="right">P. unitario</th>
+      <th class="right">Subtotal</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for it in items %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ it.descripcion }}</td>
+      <td class="center">{{ it.cantidad }}</td>
+      <td class="right">${{ it.precio_unitario|intcomma }}</td>
+      <td class="right">${{ it.subtotal|intcomma }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="totales">
+  <table>
+    <tr>
+      <td class="label">Subtotal neto</td>
+      <td class="value">${{ subtotal_neto|intcomma }}</td>
+    </tr>
+    <tr>
+      <td class="label">IVA (19%)</td>
+      <td class="value">${{ iva|intcomma }}</td>
+    </tr>
+    <tr class="total">
+      <td>TOTAL</td>
+      <td style="text-align:right;">${{ total|intcomma }}</td>
+    </tr>
+  </table>
+</div>
+
+{% if observaciones %}
+<div class="observaciones">
+  <div class="label">Observaciones</div>
+  {{ observaciones }}
+</div>
+{% endif %}
+
+<div class="cta-erp">
+  <div class="text">
+    <strong>¿Cotizas seguido?</strong><br>
+    FácilGestión automatiza tus cotizaciones, facturas y libros contables.
+  </div>
+  <div class="url">{{ BRAND.url|cut:"https://" }}</div>
+</div>
+
+<div class="footer">
+  <div>Cotización generada en calculadoras.facilgestion.cl · {{ generado_en|date:"d/m/Y H:i" }}</div>
+  <div class="ft-cta">{{ BRAND.name }}</div>
+</div>
+
+</body>
+</html>

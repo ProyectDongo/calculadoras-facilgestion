@@ -1,0 +1,21 @@
+{% load humanize %}TU CÁLCULO DE PRECIO DE VENTA - FácilGestión
+============================================
+
+Costo total:        ${{ r.costo_total|floatformat:0|intcomma }}
+Utilidad ({{ r.porcentaje_markup|floatformat:"-2" }}%):  + ${{ r.utilidad|floatformat:0|intcomma }}
+Precio neto:        ${{ r.precio_neto|floatformat:0|intcomma }}
+IVA (19%):          + ${{ r.iva|floatformat:0|intcomma }}
+Precio final c/IVA: ${{ r.precio_con_iva|floatformat:0|intcomma }}
+
+Margen real sobre venta: {{ r.margen_real_pct|floatformat:"-2" }}%
+
+Generado el {{ generado_en|date:"d/m/Y H:i" }}.
+
+Encuentras el detalle en el PDF adjunto.
+
+---
+Recibes este correo porque solicitaste tu cálculo en
+https://calculadoras.facilgestion.cl
+
+No almacenamos tu correo: este envío es la única vez que se usa.
+Conoce FácilGestión en https://gestion.facilgestion.cl

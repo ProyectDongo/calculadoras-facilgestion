@@ -1,0 +1,43 @@
+{% extends "calculadoras/pdf/base.html" %}
+{% load humanize %}
+
+{% block title %}Sueldo Líquido · {{ BRAND.name }}{% endblock %}
+
+{% block contenido %}
+<h1>Cálculo de Sueldo Líquido</h1>
+<p class="muted">
+  Trabajador dependiente · Contrato {% if r.cesantia > 0 %}indefinido{% else %}a plazo fijo{% endif %}
+  · Salud {% if r.salud_tipo == "isapre" %}Isapre{% else %}Fonasa{% endif %}
+  {% if rut %} · RUT: {{ rut }}{% endif %}
+</p>
+
+<div class="highlight">
+  <span class="label">Líquido a recibir</span>
+  <span class="value">${{ r.liquido|floatformat:0|intcomma }} CLP</span>
+</div>
+
+<h3>Detalle de descuentos</h3>
+<table class="kv">
+  <tr><th>Sueldo Bruto</th><td>${{ r.bruto|floatformat:0|intcomma }}</td></tr>
+  {% if r.bruto != r.renta_imponible %}
+  <tr><th>Renta imponible (con tope)</th><td>${{ r.renta_imponible|floatformat:0|intcomma }}</td></tr>
+  {% endif %}
+  <tr><th>AFP — 10% obligatorio</th><td>– ${{ r.afp_obligatoria|floatformat:0|intcomma }}</td></tr>
+  <tr><th>AFP — comisión</th><td>– ${{ r.afp_comision|floatformat:0|intcomma }}</td></tr>
+  <tr><th>Salud {% if r.salud_tipo == "isapre" %}(Isapre){% else %}(Fonasa 7%){% endif %}</th><td>– ${{ r.salud|floatformat:0|intcomma }}</td></tr>
+  {% if r.cesantia > 0 %}<tr><th>Seguro Cesantía (0,6%)</th><td>– ${{ r.cesantia|floatformat:0|intcomma }}</td></tr>{% endif %}
+  <tr><th>Base imponible IGC</th><td>${{ r.base_igc|floatformat:0|intcomma }}</td></tr>
+  {% if r.igc > 0 %}<tr><th>Impuesto Único IGC</th><td>– ${{ r.igc|floatformat:0|intcomma }}</td></tr>{% endif %}
+  <tr><th>Total descuentos</th><td>– ${{ r.total_descuentos|floatformat:0|intcomma }}</td></tr>
+  <tr><th>Líquido</th><td>${{ r.liquido|floatformat:0|intcomma }}</td></tr>
+</table>
+
+<h3 style="margin-top:18pt;">Notas tributarias</h3>
+<p class="muted">
+  Cálculo referencial basado en las tasas y tramos del SII Chile vigentes a la fecha
+  de emisión. <strong>No incluye</strong> asignaciones (colación, movilización),
+  bonos, gratificación legal ni aportes voluntarios (APV). El monto Isapre, cuando aplica,
+  se calcula con un valor referencial de UF; el cálculo real lo realiza la Isapre con la UF
+  del mes de pago. Esta calculadora es informativa y no reemplaza la liquidación oficial.
+</p>
+{% endblock %}

@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+{% load static %}
+{% load honeypot %}
+
+{% block title %}Mi cotización · {{ BRAND.name }}{% endblock %}
+
+{% block extra_head %}
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+{% endblock %}
+
+{% block content %}
+<a href="{% url 'calculadoras:landing' %}" class="text-sm text-brand hover:text-brand-hover inline-flex items-center gap-1">
+  <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd"/></svg>
+  Volver a calculadoras
+</a>
+
+<header class="mt-3 mb-6 flex items-start gap-4">
+  <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
+    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+      <rect x="9" y="3" width="6" height="4" rx="1"/>
+      <line x1="9" y1="12" x2="15" y2="12"/>
+      <line x1="9" y1="16" x2="15" y2="16"/>
+    </svg>
+  </div>
+  <div>
+    <h1 class="text-3xl font-bold text-brand-dark">Mi cotización</h1>
+    <p class="text-brand-light mt-1">Lista de productos para exportar como PDF profesional</p>
+  </div>
+</header>
+
+<div x-data="cotizacionPage()" x-init="cargar()">
+
+  {# Estado vacío #}
+  <div x-show="items.length === 0" x-cloak class="bg-white border border-slate-200 rounded-2xl p-10 text-center">
+    <div class="text-5xl mb-3">📋</div>
+    <h2 class="text-xl font-bold text-brand-dark mb-2">Tu cotización está vacía</h2>
+    <p class="text-brand-light max-w-md mx-auto mb-5">Calcula precios de venta y usa "Agregar a cotización" para construir tu lista. Todo vive en tu navegador.</p>
+    <a href="{% url 'calculadoras:calc_precio_venta' %}"
+       class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg px-5 py-2.5 transition">
+      Ir a Precio de Venta →
+    </a>
+  </div>
+
+  {# Lista con items #}
+  <div x-show="items.length > 0" x-cloak class="grid gap-6 lg:grid-cols-3">
+
+    {# Tabla #}
+    <div class="lg:col-span-2 bg-white border border-slate-200 rounded-2xl overflow-hidden">
+      <div class="px-5 py-3 border-b border-slate-200 flex items-center justify-between">
+        <h2 class="font-semibold text-brand-dark">Productos <span class="text-brand-light text-sm font-normal" x-text="`(${items.length})`"></span></h2>
+        <button @click="limpiar()" class="text-xs text-red-600 hover:text-red-700 hover:underline">Vaciar lista</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 text-xs text-brand-light uppercase tracking-wide">
+            <tr>
+              <th class="px-4 py-2 text-left">Producto</th>
+              <th class="px-4 py-2 text-center w-20">Cant.</th>
+              <th class="px-4 py-2 text-right w-32">Precio c/u</th>
+              <th class="px-4 py-2 text-right w-32">Subtotal</th>
+              <th class="w-10"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="it in items" :key="it._id">
+              <tr class="border-t border-slate-200">
+                <td class="px-4 py-3 text-brand-dark" x-text="it.descripcion"></td>
+                <td class="px-4 py-3 text-center">
+                  <input type="number" min="1" :value="it.cantidad"
+                         @change="updateQty(it._id, $event.target.value)"
+                         class="w-16 text-center px-2 py-1 border border-slate-300 rounded">
+                </td>
+                <td class="px-4 py-3 text-right text-brand-dark" x-text="'$' + fmt(it.precio_unitario)"></td>
+                <td class="px-4 py-3 text-right font-semibold text-brand-dark" x-text="'$' + fmt(it.cantidad * it.precio_unitario)"></td>
+                <td class="px-4 py-3 text-right">
+                  <button @click="remove(it._id)" class="text-slate-400 hover:text-red-600 transition">
+                    <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                  </button>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+          <tfoot class="bg-slate-50 text-sm">
+            <tr class="border-t-2 border-slate-200">
+              <td colspan="3" class="px-4 py-2 text-right text-brand-light">Subtotal neto</td>
+              <td colspan="2" class="px-4 py-2 text-right font-semibold text-brand-dark" x-text="'$' + fmt(subtotal())"></td>
+            </tr>
+            <tr>
+              <td colspan="3" class="px-4 py-2 text-right text-brand-light">IVA (19%)</td>
+              <td colspan="2" class="px-4 py-2 text-right font-semibold text-brand-dark" x-text="'+ $' + fmt(iva())"></td>
+            </tr>
+            <tr class="bg-emerald-50 border-t border-emerald-200">
+              <td colspan="3" class="px-4 py-3 text-right text-emerald-700 font-semibold">TOTAL</td>
+              <td colspan="2" class="px-4 py-3 text-right text-xl font-bold text-emerald-700" x-text="'$' + fmt(total())"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    {# Panel emisor + acciones #}
+    <div class="space-y-4">
+      <div class="bg-white border border-slate-200 rounded-2xl p-5">
+        <h3 class="font-semibold text-brand-dark mb-3 text-sm">Datos del emisor <span class="text-brand-light text-xs">(opcional, aparecen en el PDF)</span></h3>
+        <div class="space-y-3">
+          <input type="text" maxlength="200" placeholder="Nombre o empresa"
+                 x-model="emisor.empresa" @change="guardarEmisor()"
+                 class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          <input type="text" maxlength="20" placeholder="RUT"
+                 x-model="emisor.rut" @change="guardarEmisor()"
+                 class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          <input type="email" maxlength="200" placeholder="Email"
+                 x-model="emisor.email" @change="guardarEmisor()"
+                 class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          <input type="text" maxlength="50" placeholder="Teléfono"
+                 x-model="emisor.telefono" @change="guardarEmisor()"
+                 class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        </div>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-2xl p-5">
+        <h3 class="font-semibold text-brand-dark mb-3 text-sm">Cliente <span class="text-brand-light text-xs">(opcional)</span></h3>
+        <div class="space-y-3">
+          <input type="text" maxlength="200" placeholder="Nombre del cliente"
+                 x-model="cliente.nombre"
+                 class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          <input type="text" maxlength="20" placeholder="RUT del cliente"
+                 x-model="cliente.rut"
+                 class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        </div>
+      </div>
+
+      <button @click="abrirModal('descargar')"
+              class="w-full bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-3 transition flex items-center justify-center gap-2 shadow">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Descargar cotización (PDF)
+      </button>
+    </div>
+  </div>
+
+  {# Modal para descargar (verifica Turnstile) #}
+  <div x-show="modalAbierto" x-cloak
+       class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+       @click.self="modalAbierto=false"
+       @keydown.escape.window="modalAbierto=false">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+      <h3 class="text-lg font-bold text-brand-dark mb-1">Descargar cotización</h3>
+      <p class="text-sm text-brand-light mb-5">Verificamos que no eres un bot. Tus datos no se almacenan.</p>
+
+      <form method="post" action="{% url 'calculadoras:api_cotizacion_pdf' %}" @submit="enviar($event)">
+        {% csrf_token %}
+        {% honeypot_fields %}
+        <input type="hidden" name="calculadora" value="cotizacion">
+        <input type="hidden" name="resultado_json" :value="JSON.stringify(payload())">
+        <input type="hidden" name="accion" value="descargar">
+
+        <div class="mb-4 flex justify-center">
+          <div class="cf-turnstile" data-sitekey="{{ TURNSTILE_SITE_KEY|default:'1x00000000000000000000AA' }}" data-size="flexible"></div>
+        </div>
+
+        <div class="flex gap-3">
+          <button type="button" @click="modalAbierto=false"
+                  class="flex-1 bg-slate-100 hover:bg-slate-200 text-brand-dark font-medium rounded-lg py-2.5 transition">
+            Cancelar
+          </button>
+          <button type="submit"
+                  class="flex-1 bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 transition">
+            Descargar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function cotizacionPage() {
+  return Object.assign(accionesMixin(), {
+    items: [],
+    emisor: { empresa: '', rut: '', email: '', telefono: '' },
+    cliente: { nombre: '', rut: '' },
+
+    cargar() {
+      this.items = window.listaStore.list();
+      const em = window.listaStore.emisor();
+      if (em && em.empresa !== undefined) this.emisor = Object.assign(this.emisor, em);
+      this.ultimoResultado = { ready: true }; // habilita modal
+      window.addEventListener('lista-cambio', () => { this.items = window.listaStore.list(); });
+    },
+    fmt(n) {
+      return (n || 0).toLocaleString('es-CL');
+    },
+    subtotal() {
+      return this.items.reduce((s, it) => s + (it.cantidad * it.precio_unitario), 0);
+    },
+    iva() { return Math.round(this.subtotal() * 0.19); },
+    total() { return this.subtotal() + this.iva(); },
+    remove(id) { window.listaStore.remove(id); this.items = window.listaStore.list(); },
+    updateQty(id, c) { window.listaStore.updateQty(id, c); this.items = window.listaStore.list(); },
+    limpiar() {
+      if (confirm('¿Vaciar toda la lista de productos?')) {
+        window.listaStore.clear();
+        this.items = [];
+      }
+    },
+    guardarEmisor() { window.listaStore.setEmisor(this.emisor); },
+    payload() {
+      return {
+        emisor: this.emisor,
+        cliente: this.cliente,
+        items: this.items.map(it => ({
+          descripcion: it.descripcion,
+          cantidad: it.cantidad,
+          precio_unitario: it.precio_unitario,
+        })),
+        validez_dias: 30,
+      };
+    },
+  });
+}
+</script>
+{% endblock %}

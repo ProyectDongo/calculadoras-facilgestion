@@ -22,6 +22,8 @@ def brand(_request):
             "color_success": tributario.BRAND_COLOR_SUCCESS,
             "color_danger": tributario.BRAND_COLOR_DANGER,
             "color_warning": tributario.BRAND_COLOR_WARNING,
+            "color_indigo": tributario.BRAND_COLOR_INDIGO,
+            "color_emerald": tributario.BRAND_COLOR_EMERALD,
         }
     }
 

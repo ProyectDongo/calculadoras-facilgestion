@@ -21,13 +21,7 @@ from core.services import rut as rut_svc
 # ─── IVA ─────────────────────────────────────────────────────────────────────
 
 class IVACalcForm(forms.Form):
-    """
-    Cálculo de IVA en cualquiera de los 2 modos.
-
-    Validación:
-        - modo en {neto_a_bruto, bruto_a_neto}
-        - monto positivo
-    """
+    """Cálculo de IVA en cualquiera de los 2 modos."""
     MODO_CHOICES = [
         ("neto_a_bruto", "Neto → Bruto"),
         ("bruto_a_neto", "Bruto → Neto"),
@@ -36,15 +30,93 @@ class IVACalcForm(forms.Form):
     modo = forms.ChoiceField(choices=MODO_CHOICES)
     monto = forms.DecimalField(
         min_value=Decimal("0"),
-        max_value=Decimal("9999999999"),     # 10 dígitos — suficiente
+        max_value=Decimal("9999999999"),
         max_digits=10,
         decimal_places=0,
     )
 
     def clean_monto(self):
-        # En CLP no manejamos decimales; el form ya valida pero por las dudas
-        # quantizamos a entero.
         return Decimal(int(self.cleaned_data["monto"]))
+
+
+class HonorariosCalcForm(forms.Form):
+    """Cálculo de honorarios en cualquiera de los 2 modos."""
+    MODO_CHOICES = [
+        ("bruto_a_liquido", "Bruto → Líquido"),
+        ("liquido_a_bruto", "Líquido → Bruto"),
+    ]
+
+    modo = forms.ChoiceField(choices=MODO_CHOICES)
+    monto = forms.DecimalField(
+        min_value=Decimal("0"),
+        max_value=Decimal("9999999999"),
+        max_digits=10,
+        decimal_places=0,
+    )
+
+    def clean_monto(self):
+        return Decimal(int(self.cleaned_data["monto"]))
+
+
+class SueldoCalcForm(forms.Form):
+    """Cálculo de sueldo líquido."""
+    bruto = forms.DecimalField(
+        min_value=Decimal("0"), max_value=Decimal("9999999999"),
+        max_digits=10, decimal_places=0,
+    )
+    afp_comision = forms.DecimalField(
+        required=False, min_value=Decimal("0"), max_value=Decimal("0.05"),
+        max_digits=6, decimal_places=4,
+    )
+    salud_tipo = forms.ChoiceField(
+        choices=[("fonasa", "Fonasa"), ("isapre", "Isapre")],
+        required=False,
+    )
+    salud_isapre_uf = forms.DecimalField(
+        required=False, min_value=Decimal("0"), max_value=Decimal("100"),
+        max_digits=6, decimal_places=2,
+    )
+    contrato = forms.ChoiceField(
+        choices=[("indefinido", "Indefinido"), ("plazo_fijo", "Plazo fijo")],
+        required=False,
+    )
+
+    def clean_bruto(self):
+        return Decimal(int(self.cleaned_data["bruto"]))
+
+    def clean_afp_comision(self):
+        v = self.cleaned_data.get("afp_comision")
+        return v if v is not None else Decimal("0.0104")
+
+    def clean_salud_tipo(self):
+        return self.cleaned_data.get("salud_tipo") or "fonasa"
+
+    def clean_salud_isapre_uf(self):
+        v = self.cleaned_data.get("salud_isapre_uf")
+        return v if v is not None else Decimal("0")
+
+    def clean_contrato(self):
+        return self.cleaned_data.get("contrato") or "indefinido"
+
+
+class PrecioVentaCalcForm(forms.Form):
+    """Cálculo de precio de venta."""
+    costo = forms.DecimalField(
+        min_value=Decimal("0"), max_value=Decimal("9999999999"),
+        max_digits=10, decimal_places=0,
+    )
+    flete = forms.DecimalField(
+        required=False, min_value=Decimal("0"), max_value=Decimal("9999999999"),
+        max_digits=10, decimal_places=0,
+    )
+    porcentaje_utilidad = forms.DecimalField(
+        min_value=Decimal("0"), max_value=Decimal("1000"),
+        max_digits=6, decimal_places=2,
+    )
+
+    def clean_flete(self):
+        v = self.cleaned_data.get("flete")
+        return Decimal(int(v)) if v else Decimal("0")
 
 
 class EnviarOdescargarForm(AntiBotFormMixin, forms.Form):

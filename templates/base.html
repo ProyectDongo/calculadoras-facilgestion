@@ -39,7 +39,22 @@
 
 {# HTMX + Alpine vendoreados (no CDN) #}
 <script src="{% static 'calculadoras/vendor/htmx.min.js' %}" defer></script>
+<script src="{% static 'calculadoras/js/lista.js' %}" defer></script>
+<script src="{% static 'calculadoras/js/engagement.js' %}" defer></script>
+<script src="{% static 'calculadoras/js/acciones.js' %}" defer></script>
 <script src="{% static 'calculadoras/vendor/alpine.min.js' %}" defer></script>
+
+<script>
+// Engagement tick — escucha eventos de cálculo exitoso
+document.addEventListener('htmx:afterRequest', function(ev) {
+  if (ev.detail && ev.detail.xhr && ev.detail.xhr.status === 200) {
+    const url = ev.detail.requestConfig && ev.detail.requestConfig.path || '';
+    if (url.includes('/api/calcular/') && window.engagement) {
+      window.engagement.tick();
+    }
+  }
+});
+</script>
 
 {# Cloudflare Turnstile (carga sólo en páginas que lo usan) #}
 {% block extra_head %}{% endblock %}
@@ -69,34 +84,82 @@
   </div>
 </div>
 
-{# ── Header ────────────────────────────────────────────────────────────── #}
-<header class="bg-white border-b border-slate-200">
-  <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-    <a href="{% url 'calculadoras:landing' %}" class="flex items-center gap-2.5">
-      <img src="{% static 'calculadoras/logo.png' %}" alt="{{ BRAND.name }}" class="h-8 w-auto">
-      <span class="font-bold text-brand-dark">{{ BRAND.name }}</span>
-      <span class="hidden sm:inline text-xs text-brand-light">/ Calculadoras</span>
+{# ── Header — navy oscuro como gestion.facilgestion.cl ──────────────────── #}
+<header class="bg-brand-dark border-b border-slate-800/50">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+    <a href="{% url 'calculadoras:landing' %}" class="flex items-center gap-4 group">
+      {# Wrapper blanco — el logo original tiene texto negro, sobre navy se pierde #}
+      <div class="bg-white rounded-xl px-4 py-2.5 shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all">
+        <img src="{% static 'calculadoras/logo.png' %}" alt="{{ BRAND.name }}"
+             class="h-10 sm:h-12 w-auto">
+      </div>
+      <div class="hidden sm:flex flex-col leading-tight border-l border-slate-700 pl-4">
+        <span class="text-[11px] uppercase tracking-widest text-slate-400 font-semibold">Suite</span>
+        <span class="text-base font-semibold text-white">Calculadoras gratuitas</span>
+      </div>
     </a>
-    <a href="{{ BRAND.url }}" target="_blank" rel="noopener"
-       class="text-sm text-brand hover:text-brand-hover hidden sm:inline">
-      Conoce FácilGestión →
-    </a>
+    <div class="flex items-center gap-2 sm:gap-3"
+         x-data="{ count: 0 }"
+         x-init="count = (window.listaStore ? window.listaStore.count() : 0); window.addEventListener('lista-cambio', e => count = e.detail.count)">
+
+      {# Botón Mi cotización con contador #}
+      <a href="{% url 'calculadoras:cotizacion' %}"
+         class="relative inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+          <rect x="9" y="3" width="6" height="4" rx="1"/>
+          <line x1="9" y1="12" x2="15" y2="12"/>
+          <line x1="9" y1="16" x2="15" y2="16"/>
+        </svg>
+        <span class="hidden sm:inline">Mi cotización</span>
+        <span x-show="count > 0" x-cloak x-text="count"
+              class="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center"></span>
+      </a>
+
+      <a href="{{ BRAND.url }}" target="_blank" rel="noopener"
+         class="hidden sm:inline-flex items-center gap-1.5 text-sm text-slate-300 hover:text-white transition">
+        Ir a FácilGestión
+        <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd"/></svg>
+      </a>
+    </div>
   </div>
 </header>
 
 {# ── Contenido ─────────────────────────────────────────────────────────── #}
-<main class="flex-1 max-w-5xl mx-auto px-4 py-8 w-full">
+<main class="flex-1 max-w-6xl mx-auto px-4 sm:px-6 py-8 w-full">
   {% block content %}{% endblock %}
 </main>
 
-{# ── Footer ────────────────────────────────────────────────────────────── #}
-<footer class="bg-white border-t border-slate-200 mt-12">
-  <div class="max-w-5xl mx-auto px-4 py-6 text-sm text-brand-light flex flex-col sm:flex-row gap-2 justify-between">
-    <div>© {% now "Y" %} {{ BRAND.name }} · {{ BRAND.tagline }}</div>
-    <div class="flex gap-4">
-      <a href="{% url 'calculadoras:privacidad' %}" class="hover:text-brand">Privacidad</a>
-      <a href="{{ BRAND.url }}" target="_blank" rel="noopener" class="hover:text-brand">facilgestion.cl</a>
+{# ── Footer — navy oscuro como el header, refuerza continuidad ───────── #}
+<footer class="bg-brand-dark text-slate-400 mt-16">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8 grid gap-6 sm:grid-cols-3 text-sm">
+    <div>
+      <div class="inline-block bg-white rounded-lg px-3 py-2 mb-3 shadow-sm">
+        <img src="{% static 'calculadoras/logo.png' %}" alt="{{ BRAND.name }}" class="h-9 w-auto">
+      </div>
+      <p class="text-slate-400 text-xs leading-relaxed">{{ BRAND.tagline }}.</p>
     </div>
+    <div>
+      <div class="text-white font-semibold text-sm mb-2">Calculadoras</div>
+      <ul class="space-y-1.5 text-xs">
+        <li><a href="{% url 'calculadoras:calc_iva' %}" class="hover:text-white transition">IVA</a></li>
+        <li><a href="{% url 'calculadoras:calc_precio_venta' %}" class="hover:text-white transition">Precio de venta</a></li>
+        <li><a href="{% url 'calculadoras:calc_honorarios' %}" class="hover:text-white transition">Boleta de honorarios</a></li>
+        <li><a href="{% url 'calculadoras:calc_sueldo' %}" class="hover:text-white transition">Sueldo líquido</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="text-white font-semibold text-sm mb-2">Recursos</div>
+      <ul class="space-y-1.5 text-xs">
+        <li><a href="{% url 'calculadoras:cotizacion' %}" class="hover:text-white transition">Mi cotización</a></li>
+        <li><a href="{% url 'calculadoras:glosario' %}" class="hover:text-white transition">Glosario tributario</a></li>
+        <li><a href="{% url 'calculadoras:privacidad' %}" class="hover:text-white transition">Política de privacidad</a></li>
+        <li><a href="{{ BRAND.url }}" target="_blank" rel="noopener" class="hover:text-white transition">Ir a {{ BRAND.name }} →</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-slate-800 max-w-6xl mx-auto px-4 sm:px-6 py-4 text-xs text-slate-500 text-center">
+    © {% now "Y" %} {{ BRAND.name }} · Hecho en Chile · Cumple Ley 19.628
   </div>
 </footer>
 

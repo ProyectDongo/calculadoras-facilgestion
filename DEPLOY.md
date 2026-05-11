@@ -75,8 +75,15 @@ Verifica que gunicorn arranca sin errores. El container expone `127.0.0.1:8001:8
 ## 4. Smoke test local en el VPS
 
 ```bash
-curl -s http://127.0.0.1:8001/healthz/                # debe responder "ok"
-curl -sI http://127.0.0.1:8001/calculadoras/ | head   # 200 OK
+# Healthcheck
+curl -s http://127.0.0.1:8001/healthz/                       # debe responder "ok"
+
+# Las 8 páginas públicas
+for p in / iva/ precio-venta/ honorarios/ sueldo/ cotizacion/ glosario/ privacidad/; do
+  printf "%-15s " "$p"
+  curl -s -o /dev/null -w "%{http_code}\n" "http://127.0.0.1:8001/calculadoras$p"
+done
+# Deben responder todas 200.
 ```
 
 ## 5. Cloudflare Tunnel
@@ -172,21 +179,33 @@ En https://dash.cloudflare.com → tu zona `facilgestion.cl`:
 curl -sI https://calculadoras.facilgestion.cl/healthz/
 # Debe responder 200 OK, cabeceras de Cloudflare presentes.
 
-curl -s https://calculadoras.facilgestion.cl/calculadoras/iva/ | grep -i "calculadora de iva"
+curl -s https://calculadoras.facilgestion.cl/calculadoras/sueldo/ | grep -i "sueldo"
 # Debe encontrar el título.
 ```
 
-Abre en un navegador:
+Abre en un navegador y valida cada calc:
 
 ```
 https://calculadoras.facilgestion.cl/calculadoras/iva/
+https://calculadoras.facilgestion.cl/calculadoras/precio-venta/
+https://calculadoras.facilgestion.cl/calculadoras/honorarios/
+https://calculadoras.facilgestion.cl/calculadoras/sueldo/
+https://calculadoras.facilgestion.cl/calculadoras/cotizacion/
+https://calculadoras.facilgestion.cl/calculadoras/glosario/
 ```
 
-Validar:
-- Modal de T&C aparece al primer load.
-- Calc reacciona al escribir un monto.
-- Sin errores en la consola del navegador (warnings de preload de Turnstile son cosméticos).
-- "Descargar PDF" baja un PDF con el branding correcto.
+Checklist de validación:
+- [ ] Modal de T&C aparece al primer load (cookie `tc_accepted_v1` persistente)
+- [ ] Las 4 calcs reaccionan al escribir un monto (HTMX en vivo)
+- [ ] Sin errores rojos en la consola del navegador
+- [ ] Turnstile aparece al abrir modal de descargar/enviar
+- [ ] "Descargar PDF" baja un PDF con logo + CTA al ERP
+- [ ] "Enviar por correo" funciona si configuraste SMTP password real
+- [ ] En `/precio-venta/`: botón "Agregar a cotización" suma al contador del header
+- [ ] En `/cotizacion/`: la tabla se llena, exporta PDF cotización con branding completo
+- [ ] Glosario muestra 12 términos
+- [ ] Tras 3 cálculos en una sesión, aparece banner ERP bottom-right
+- [ ] Footer muestra Cotización, Glosario y links externos
 
 ## 8. Mantenimiento
 

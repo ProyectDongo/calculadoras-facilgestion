@@ -7,21 +7,23 @@
 
 ## Resumen ejecutivo
 
-| Mecanismo | Estado fase 1 |
+| Mecanismo | Estado |
 |---|---|
-| Sin Postgres / sin persistencia de PII | ✅ Implementado (DATABASES dummy, signed_cookies) |
-| HSTS + SSL redirect | ✅ En `prod.py` |
+| Sin Postgres / sin persistencia de PII | ✅ DATABASES dummy + sessions signed_cookies |
+| HSTS + SSL redirect | ✅ En `prod.py` (1 año, preload, subdomains) |
 | Cookies SECURE / HttpOnly / SameSite=Lax | ✅ Sesión + CSRF |
-| CSP estricta (django-csp 4.x) | ✅ Base por-vista en `base.py` |
+| CSP estricta (django-csp 4.x dict API) | ✅ Política base + permite Tailwind CDN + Turnstile |
 | X-Frame-Options DENY | ✅ |
-| Permissions-Policy | ✅ Middleware |
-| Cross-Origin-Opener-Policy / Resource-Policy | ✅ |
-| Cloudflare Turnstile | 🟡 site_key/secret en env, verificación service pendiente (Fase 2) |
-| Rate limit por endpoint | 🟡 django-ratelimit instalado, decoradores pendientes (Fase 3) |
-| Anti-flood middleware global | 🟡 Stub, lógica pendiente (Fase 2) |
-| Honeypot + tiempo mínimo submit | 🔴 Pendiente (Fase 3) |
-| NoPIIFilter para logs | ✅ Implementado |
-| `manage.py check --deploy` sin warnings | 🔴 Pendiente (Fase 9) |
+| Permissions-Policy | ✅ Middleware (sin geo/mic/cam/payment) |
+| Cross-Origin-Opener-Policy / Resource-Policy | ✅ same-origin |
+| Cloudflare Turnstile | ✅ Verificación server-side fail-closed, 3s timeout |
+| Rate limit por endpoint | ✅ django-ratelimit: 60/min calcular, 10/min PDF, 5/min enviar |
+| Anti-flood middleware global | ✅ Redis-backed, 3 contadores con bloqueo 15min, fail-OPEN |
+| Honeypot + tiempo mínimo submit | ✅ Campo `website` oculto + TimestampSigner 1.5s-30min |
+| NoPIIFilter para logs | ✅ Redacta emails y RUTs con regex |
+| Validación defensiva en cotización PDF | ✅ Max 50 items, longitudes capped, re-totaliza server-side |
+| `manage.py check --deploy` sin warnings | 🟡 Pendiente fase 6 (al endurecer CSP) |
+| Tests con coverage ≥ 70% | 🟡 Tests unitarios existen (IVA/honorarios/precio_venta/sueldo), pendiente integración |
 
 ---
 
@@ -73,6 +75,31 @@ El contenedor `web` expone HTTP puro en `127.0.0.1:8000`. Cloudflare valida cert
 - `security_opt: no-new-privileges` — no escalada vía setuid.
 - Usuario `app` UID 10001, no-root, sin shell (`/usr/sbin/nologin`).
 - `SUID` bits removidos del filesystem en build.
+- Puerto 8001 (no 8000) para coexistir con ERP en mismo VPS.
+
+### 6. Lista multi-ítem y cotización — sin PII server-side
+
+- La "lista de productos" vive 100% en `localStorage` del navegador. Cero base
+  de datos, cero archivos del lado servidor.
+- El backend SOLO recibe el JSON de la lista cuando el usuario hace click en
+  "Descargar PDF". Inmediatamente después de generar el PDF, el JSON se
+  descarta (no se loguea, no se cachea).
+- `core/views.py:_sanitizar_cotizacion()` valida defensivamente:
+    - Máximo 50 items por cotización.
+    - `descripcion` cap a 200 caracteres.
+    - `cantidad` y `precio_unitario` enteros positivos (cast forzado).
+    - Strings sanitizados con `[:N].strip()` antes de meter en template.
+- Re-totaliza server-side (`subtotal_neto = sum(items)`) — no confía en
+  los totales que el cliente envía.
+- El template del PDF auto-escapa (Django default) cualquier texto que venga
+  del usuario; XSS via descripción de producto = no posible.
+
+### 7. Engagement counter — solo localStorage
+
+- `engagement.js` cuenta cálculos hechos en `localStorage` del navegador.
+- Tras 3 cálculos muestra un toast al ERP.
+- Sin tracking server-side. Sin cookies. Sin analytics externos.
+- El usuario puede descartar; cooldown 7 días almacenado localmente.
 
 ---
 
