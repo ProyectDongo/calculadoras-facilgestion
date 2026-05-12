@@ -33,7 +33,7 @@
     <form
       hx-post="{% url 'calculadoras:api_calcular_precio_venta' %}"
       hx-target="#resultado-precio-venta" hx-swap="innerHTML"
-      hx-trigger="keyup changed delay:400ms from:input"
+      hx-trigger="change from:input[type=radio], keyup changed delay:400ms from:input[type=number]"
     >
       {% csrf_token %}
 
