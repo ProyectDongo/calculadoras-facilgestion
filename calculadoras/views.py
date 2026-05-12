@@ -328,10 +328,18 @@ def api_calcular_sueldo(request):
     payload["movilizacion"]       = int(form.cleaned_data["movilizacion"])
     payload["gratificacion_legal"] = bool(form.cleaned_data.get("gratificacion_legal", False))
 
-    from config.tributario import INGRESO_MINIMO_MENSUAL
+    from config.tributario import (
+        GRATIFICACION_LEGAL_TOPE_IMM_ANUAL,
+        INGRESO_MINIMO_MENSUAL,
+    )
+    from decimal import Decimal
+    tope_gratif_mensual = (
+        GRATIFICACION_LEGAL_TOPE_IMM_ANUAL * INGRESO_MINIMO_MENSUAL / Decimal("12")
+    )
     return render(request, "calculadoras/_resultado_sueldo.html", {
         "r": r, "r_json": json.dumps(payload),
         "IMM": INGRESO_MINIMO_MENSUAL,
+        "GRATIF_TOPE_MENSUAL": tope_gratif_mensual.quantize(Decimal("1")),
     })
 
 

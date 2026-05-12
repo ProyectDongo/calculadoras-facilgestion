@@ -22,9 +22,17 @@
       <span class="text-sm font-medium text-brand-dark">${{ r.sueldo_base|floatformat:0|intcomma }}</span>
     </div>
     <div class="flex justify-between items-baseline pb-1.5 text-xs">
-      <span class="text-emerald-700">+ Gratificación legal <span class="text-[10px]">(Art. 50)</span></span>
+      <span class="text-emerald-700">
+        + Gratificación legal <span class="text-[10px]">(Art. 50)</span>
+        {% if r.gratificacion_legal >= GRATIF_TOPE_MENSUAL %}
+        <span class="ml-1 inline-block text-[10px] font-bold uppercase bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">tope</span>
+        {% endif %}
+      </span>
       <span class="text-emerald-700 font-medium">+ ${{ r.gratificacion_legal|floatformat:0|intcomma }}</span>
     </div>
+    {% if r.gratificacion_legal >= GRATIF_TOPE_MENSUAL %}
+    <p class="text-[10px] text-amber-700 italic -mt-1 mb-1">Gratificación tope alcanzado: 4,75 × IMM / 12 = ${{ GRATIF_TOPE_MENSUAL|floatformat:0|intcomma }}. Por más que suba el sueldo, este monto no crece.</p>
+    {% endif %}
     <div class="flex justify-between items-baseline pb-1.5 pt-1 border-t border-slate-200">
       <span class="font-semibold text-brand-dark">Sueldo Bruto imponible</span>
       <span class="font-semibold text-brand-dark">${{ r.bruto|floatformat:0|intcomma }}</span>
