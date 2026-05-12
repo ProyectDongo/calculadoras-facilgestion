@@ -14,6 +14,7 @@ API doc: https://mindicador.cl/api  (gratis, sin auth, sin rate limit oficial)
 """
 from __future__ import annotations
 
+import datetime
 import logging
 from decimal import Decimal, InvalidOperation
 from typing import Optional
@@ -28,6 +29,15 @@ logger = logging.getLogger(__name__)
 _API_BASE = "https://mindicador.cl/api"
 _CACHE_TTL_SECONDS = 24 * 60 * 60   # 24h
 _HTTP_TIMEOUT_SECONDS = 3
+
+
+def _ultimo_dia_mes_anterior(hoy: datetime.date | None = None) -> datetime.date:
+    """Último día calendario del mes pasado. Para liquidaciones del mes M,
+    las cotizaciones se calculan con la UF de esta fecha."""
+    if hoy is None:
+        hoy = datetime.date.today()
+    primer_dia_mes_actual = hoy.replace(day=1)
+    return primer_dia_mes_actual - datetime.timedelta(days=1)
 
 
 def _cache_key(indicador: str) -> str:
@@ -78,6 +88,48 @@ def _get_cached_or_fetch(indicador: str, fallback: Decimal) -> Decimal:
 def get_uf() -> Decimal:
     """UF del día (en pesos). Fallback a config/tributario.UF_VALOR_FALLBACK."""
     return _get_cached_or_fetch("uf", UF_VALOR_FALLBACK)
+
+
+def get_uf_liquidacion() -> Decimal:
+    """
+    UF para liquidaciones de sueldo: la del ÚLTIMO día del mes anterior.
+
+    Esta es la UF que el SII/AFP/Isapres exigen para calcular las
+    cotizaciones del mes en curso. Por ejemplo, para una liquidación de
+    mayo 2026 se usa la UF del 30/abril/2026.
+
+    Fallback: si la API falla, devuelve get_uf() (la actual). Esto
+    introduce un pequeño error pero permite operar.
+    """
+    fecha = _ultimo_dia_mes_anterior()
+    fecha_str = fecha.strftime("%d-%m-%Y")   # mindicador usa dd-mm-yyyy
+    cache_key = f"mindicador:uf_liquidacion:{fecha.isoformat()}"
+
+    try:
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return Decimal(str(cached))
+    except Exception:
+        pass
+
+    url = f"{_API_BASE}/uf/{fecha_str}"
+    try:
+        resp = requests.get(url, timeout=_HTTP_TIMEOUT_SECONDS)
+        resp.raise_for_status()
+        data = resp.json()
+        serie = data.get("serie") or []
+        if serie:
+            valor = Decimal(str(serie[0].get("valor")))
+            try:
+                cache.set(cache_key, str(valor), _CACHE_TTL_SECONDS)
+            except Exception:
+                pass
+            return valor
+    except (requests.RequestException, ValueError, InvalidOperation, KeyError, IndexError) as exc:
+        logger.warning("mindicador: fallo UF de %s: %s", fecha_str, exc.__class__.__name__)
+
+    # Fallback: UF actual
+    return get_uf()
 
 
 def get_utm() -> Decimal:

@@ -68,6 +68,45 @@
         </div>
       </label>
 
+      {# ── Asignaciones no imponibles + gratificación (justo después del sueldo) #}
+      <div class="mb-5 bg-slate-50/60 border border-slate-200 rounded-lg p-3">
+        <p class="text-[10px] font-semibold text-brand-dark uppercase tracking-wide mb-2">Asignaciones <span class="font-normal text-brand-light normal-case">(no imponibles)</span></p>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="block">
+            <span class="text-xs text-brand-light">Colación (CLP)</span>
+            <div class="mt-1 relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-brand-light text-sm">$</span>
+              <input type="text" name="colacion" inputmode="numeric"
+                     :value="fmtCL(colacion)"
+                     @input="colacion = parseCL($event.target.value)"
+                     placeholder="0"
+                     class="w-full pl-7 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-sm">
+            </div>
+          </label>
+          <label class="block">
+            <span class="text-xs text-brand-light">Movilización (CLP)</span>
+            <div class="mt-1 relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-brand-light text-sm">$</span>
+              <input type="text" name="movilizacion" inputmode="numeric"
+                     :value="fmtCL(movilizacion)"
+                     @input="movilizacion = parseCL($event.target.value)"
+                     placeholder="0"
+                     class="w-full pl-7 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-sm">
+            </div>
+          </label>
+        </div>
+
+        <label class="flex items-start gap-2.5 cursor-pointer mt-3 pt-3 border-t border-slate-200">
+          <input type="checkbox" name="gratificacion_legal" value="1"
+                 x-model="gratificacion_legal"
+                 class="mt-0.5 w-4 h-4 rounded border-slate-300 text-brand focus:ring-brand/30 cursor-pointer">
+          <span class="text-xs text-brand-dark leading-relaxed">
+            <strong>Incluir gratificación legal mensual</strong>
+            <span class="block text-brand-light mt-0.5">25% del sueldo con tope de 4,75 IMM/año (Art. 50 CT).</span>
+          </span>
+        </label>
+      </div>
+
       <label class="block mb-4">
         <span class="text-sm font-medium text-brand-dark">AFP</span>
         <select name="afp_comision" x-model="afp_comision"
@@ -123,49 +162,6 @@
             </div>
           </label>
         </div>
-      </div>
-
-      {# ── Asignaciones no imponibles (no descuentan, no pagan IGC) ────── #}
-      <div class="mt-5 pt-4 border-t border-slate-100">
-        <p class="text-xs font-semibold text-brand-dark uppercase tracking-wide mb-3">Asignaciones <span class="font-normal text-brand-light normal-case">(no imponibles)</span></p>
-        <div class="grid grid-cols-2 gap-3">
-          <label class="block">
-            <span class="text-xs text-brand-light">Colación (CLP)</span>
-            <div class="mt-1 relative">
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-brand-light text-sm">$</span>
-              <input type="text" name="colacion" inputmode="numeric"
-                     :value="fmtCL(colacion)"
-                     @input="colacion = parseCL($event.target.value)"
-                     placeholder="0"
-                     class="w-full pl-7 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-sm">
-            </div>
-          </label>
-          <label class="block">
-            <span class="text-xs text-brand-light">Movilización (CLP)</span>
-            <div class="mt-1 relative">
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-brand-light text-sm">$</span>
-              <input type="text" name="movilizacion" inputmode="numeric"
-                     :value="fmtCL(movilizacion)"
-                     @input="movilizacion = parseCL($event.target.value)"
-                     placeholder="0"
-                     class="w-full pl-7 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-sm">
-            </div>
-          </label>
-        </div>
-        <p class="text-[10px] text-brand-light mt-1.5">SII recomienda que la suma de colación + movilización no supere ~30% del sueldo o el valor real de mercado, para no perder el carácter no imponible.</p>
-      </div>
-
-      {# ── Gratificación legal mensual (Art. 50 Código del Trabajo) ─── #}
-      <div class="mt-4">
-        <label class="flex items-start gap-2.5 cursor-pointer group">
-          <input type="checkbox" name="gratificacion_legal" value="1"
-                 x-model="gratificacion_legal"
-                 class="mt-0.5 w-4 h-4 rounded border-slate-300 text-brand focus:ring-brand/30 cursor-pointer">
-          <span class="text-xs text-brand-dark leading-relaxed">
-            <strong>Incluir gratificación legal mensual</strong>
-            <span class="block text-brand-light mt-0.5">25% del sueldo con tope de 4,75 IMM al año (Art. 50 Código del Trabajo). Aplica si tu contrato la incluye mensualmente.</span>
-          </span>
-        </label>
       </div>
 
       {# ── Botón recalcular (fallback si JS / HTMX no dispara) ─────── #}

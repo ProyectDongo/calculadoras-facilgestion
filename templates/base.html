@@ -98,24 +98,7 @@ document.addEventListener('htmx:afterRequest', function(ev) {
         <span class="text-base font-bold text-white">Calculadoras para PyMEs · Chile 2026</span>
       </div>
     </a>
-    <div class="flex items-center gap-2 sm:gap-3"
-         x-data="{ count: 0 }"
-         x-init="count = (window.listaStore ? window.listaStore.count() : 0); window.addEventListener('lista-cambio', e => count = e.detail.count)">
-
-      {# Botón Mi cotización con contador #}
-      <a href="{% url 'calculadoras:cotizacion' %}"
-         class="relative inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
-          <rect x="9" y="3" width="6" height="4" rx="1"/>
-          <line x1="9" y1="12" x2="15" y2="12"/>
-          <line x1="9" y1="16" x2="15" y2="16"/>
-        </svg>
-        <span class="hidden sm:inline">Mi cotización</span>
-        <span x-show="count > 0" x-cloak x-text="count"
-              class="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center"></span>
-      </a>
-
+    <div class="flex items-center gap-2 sm:gap-3">
       <a href="{{ BRAND.url }}" target="_blank" rel="noopener"
          class="hidden sm:inline-flex items-center gap-1.5 text-sm text-slate-300 hover:text-white transition">
         Ir a FácilGestión

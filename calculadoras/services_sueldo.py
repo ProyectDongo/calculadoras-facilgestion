@@ -28,6 +28,7 @@ from config.tributario import (
     GRATIFICACION_LEGAL_TOPE_IMM_ANUAL,
     IGC_TRAMOS_2026,
     INGRESO_MINIMO_MENSUAL,
+    ISAPRE_ADICIONAL_TOPE_IGC,
     MUTUAL_TASA_BASE,
     SALUD_FONASA,
     SEGURO_CESANTIA_EMPLEADOR_INDEFINIDO,
@@ -38,7 +39,7 @@ from config.tributario import (
     TOPE_CESANTIA_UF,
     TOPE_IMPONIBLE_UF,
 )
-from core.services.mindicador import get_uf, get_utm
+from core.services.mindicador import get_uf_liquidacion, get_utm
 
 _CLP_QUANTIZER: Final = Decimal("1")
 
@@ -186,8 +187,11 @@ def calcular(
     else:
         sueldo_base = monto_d
 
-    # Indicadores en tiempo real (cache 24h, fallback si API cae)
-    uf_clp = get_uf()
+    # Indicadores:
+    # - UF: la del ÚLTIMO DÍA del mes anterior (regla SII/AFP/Isapre para
+    #   liquidaciones). NO la UF de hoy.
+    # - UTM: la del mes en curso (sí, la actual).
+    uf_clp = get_uf_liquidacion()
     utm_clp = get_utm()
 
     # Gratificación legal mensual (Art. 50): IMPONIBLE, se suma al sueldo base.
@@ -235,7 +239,17 @@ def calcular(
     cesantia = base_cesantia * cesantia_pct_d
 
     # 5. Base imponible IGC
-    base_igc = bruto_d - afp_total - salud - cesantia
+    # Si es Isapre, sólo se rebaja del IGC el 7% obligatorio + adicional
+    # hasta el tope mensual. El "adicional Isapre" sobre el 7% que excede
+    # ese tope, NO descuenta IGC (paga impuesto como renta ordinaria).
+    if salud_tipo == "isapre":
+        salud_obligatoria = renta_imponible * SALUD_FONASA   # 7% mínimo
+        adicional_isapre = max(Decimal("0"), salud - salud_obligatoria)
+        adicional_rebaja_igc = min(adicional_isapre, ISAPRE_ADICIONAL_TOPE_IGC)
+        salud_para_igc = salud_obligatoria + adicional_rebaja_igc
+    else:
+        salud_para_igc = salud   # Fonasa: descuenta todo
+    base_igc = bruto_d - afp_total - salud_para_igc - cesantia
     base_igc = max(Decimal("0"), base_igc)
 
     # 6. IGC

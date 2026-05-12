@@ -79,6 +79,13 @@ IGC_TRAMOS_2026 = (
 AFP_COTIZACION_OBLIGATORIA = Decimal("0.10")   # 10% sobre renta imponible
 AFP_COMISION_PROMEDIO = Decimal("0.0104")      # Promedio simple, 2026
 SALUD_FONASA = Decimal("0.07")                 # 7% obligatorio Fonasa
+
+# Tope mensual del descuento adicional Isapre (sobre el 7%) que se
+# permite rebajar de la base IGC. Fuente: liquidaciones reales abr/may
+# 2026 (previred). El monto que pagues a Isapre sobre el 7% sí se
+# descuenta del líquido, PERO solo hasta este tope se rebaja del IGC.
+# Por encima, paga impuesto como si fuera renta ordinaria.
+ISAPRE_ADICIONAL_TOPE_IGC = Decimal("62822")
 SEGURO_CESANTIA_INDEFINIDO = Decimal("0.006")  # 0.6% indefinido (trab.)
 SEGURO_CESANTIA_PLAZO_FIJO = Decimal("0.0")    # plazo fijo: lo paga el empleador
 
