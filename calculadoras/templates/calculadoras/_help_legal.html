@@ -1,0 +1,230 @@
+{% comment %}
+Card detallada "Cómo se calcula" — explica fórmula + referencia legal por calc.
+Variable: calc_key. Aparece arriba del FAQ.
+{% endcomment %}
+{% load humanize %}
+
+<section class="mt-12 max-w-3xl">
+
+{# ─────────────────────────────────────────────── IVA ─────────── #}
+{% if calc_key == 'iva' %}
+<div class="bg-gradient-to-br from-blue-50/40 to-white border border-blue-200/60 rounded-2xl p-6">
+  <h2 class="text-xl font-bold text-brand-dark mb-4 flex items-center gap-2">
+    <svg class="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    Cómo se calcula el IVA
+  </h2>
+
+  <div class="space-y-3 text-sm text-brand-dark leading-relaxed">
+    <p><strong class="text-brand">Tasa fija: 19%</strong> sobre el valor neto. No ha cambiado desde 1990 (DL 825).</p>
+
+    <div class="grid sm:grid-cols-2 gap-3 my-4">
+      <div class="bg-white border border-slate-200 rounded-lg p-3">
+        <p class="text-xs font-semibold text-brand-light uppercase tracking-wide">Neto → Bruto</p>
+        <p class="font-mono text-sm text-brand-dark mt-1">bruto = neto × 1.19</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-lg p-3">
+        <p class="text-xs font-semibold text-brand-light uppercase tracking-wide">Bruto → Neto</p>
+        <p class="font-mono text-sm text-brand-dark mt-1">neto = bruto / 1.19</p>
+      </div>
+    </div>
+
+    <p class="text-brand-light">
+      <strong class="text-brand-dark">Cuándo NO aplica IVA:</strong> educación, ciertos servicios de salud, exportaciones, y prestaciones personales (ciertos giros profesionales).
+    </p>
+  </div>
+
+  <p class="text-xs text-brand-light mt-5 pt-3 border-t border-slate-200">
+    Fuente: <a href="https://www.sii.cl/normativa_legislacion/ley_iva.pdf" target="_blank" rel="noopener" class="text-brand underline">Ley sobre Impuesto a las Ventas y Servicios (DL 825)</a> · SII Chile
+  </p>
+</div>
+
+{# ─────────────────────────────────────────── HONORARIOS ──────── #}
+{% elif calc_key == 'honorarios' %}
+<div class="bg-gradient-to-br from-indigo-50/40 to-white border border-indigo-200/60 rounded-2xl p-6">
+  <h2 class="text-xl font-bold text-brand-dark mb-4 flex items-center gap-2">
+    <svg class="w-5 h-5 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    Cómo se calcula la retención
+  </h2>
+
+  <div class="space-y-3 text-sm text-brand-dark leading-relaxed">
+    <p>La <strong>Ley 21.133 (2019)</strong> escalonó la retención de honorarios desde 10,75% en 2020 hasta 17% en 2028. La tasa <strong>se aplica al bruto</strong>, no al líquido.</p>
+
+    <div class="grid sm:grid-cols-2 gap-3 my-4">
+      <div class="bg-white border border-slate-200 rounded-lg p-3">
+        <p class="text-xs font-semibold text-brand-light uppercase tracking-wide">Bruto → Líquido</p>
+        <p class="font-mono text-sm text-brand-dark mt-1">líquido = bruto × (1 − 0.1525)</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-lg p-3">
+        <p class="text-xs font-semibold text-brand-light uppercase tracking-wide">Líquido → Bruto</p>
+        <p class="font-mono text-sm text-brand-dark mt-1">bruto = líquido / (1 − 0.1525)</p>
+      </div>
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-lg overflow-hidden mt-4">
+      <div class="bg-slate-50 px-4 py-2 text-xs font-semibold text-brand-dark uppercase tracking-wide">Cronograma escalonado (Ley 21.133)</div>
+      <table class="w-full text-sm">
+        <tbody class="divide-y divide-slate-100">
+          <tr><td class="px-4 py-2 text-brand-light">2024</td><td class="px-4 py-2 text-brand-dark">13,75 %</td></tr>
+          <tr><td class="px-4 py-2 text-brand-light">2025</td><td class="px-4 py-2 text-brand-dark">14,50 %</td></tr>
+          <tr class="bg-indigo-50/50"><td class="px-4 py-2 font-semibold text-indigo-700">2026 (vigente)</td><td class="px-4 py-2 font-semibold text-indigo-700">15,25 %</td></tr>
+          <tr><td class="px-4 py-2 text-brand-light">2027</td><td class="px-4 py-2 text-brand-dark">16,00 %</td></tr>
+          <tr><td class="px-4 py-2 text-brand-light">2028+</td><td class="px-4 py-2 text-brand-dark">17,00 % (tasa final)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="text-brand-light mt-3">
+      <strong class="text-brand-dark">Quién paga:</strong> si la boleta va a empresa, ella retiene y declara. Si va a persona natural, declaras tú en Operación Renta de abril.
+    </p>
+  </div>
+
+  <p class="text-xs text-brand-light mt-5 pt-3 border-t border-slate-200">
+    Fuentes: <a href="https://www.bcn.cl/leychile/navegar?idNorma=1127995" target="_blank" rel="noopener" class="text-brand underline">Ley 21.133</a> · <a href="https://www.sii.cl/destacados/honorarios/" target="_blank" rel="noopener" class="text-brand underline">SII — Boletas de Honorarios</a> · Última verificación 2026-05-12
+  </p>
+</div>
+
+{# ─────────────────────────────────────────── PRECIO VENTA ─────── #}
+{% elif calc_key == 'precio_venta' %}
+<div class="bg-gradient-to-br from-emerald-50/40 to-white border border-emerald-200/60 rounded-2xl p-6">
+  <h2 class="text-xl font-bold text-brand-dark mb-4 flex items-center gap-2">
+    <svg class="w-5 h-5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    Cómo se calcula el precio de venta
+  </h2>
+
+  <div class="space-y-3 text-sm text-brand-dark leading-relaxed">
+    <p>El precio neto se construye sumando markup al costo total; el IVA se aplica al final; la comisión de tarjeta se calcula <em>aparte</em> para no canibalizar la utilidad.</p>
+
+    <div class="bg-white border border-slate-200 rounded-lg p-4 my-4 font-mono text-sm text-brand-dark space-y-1.5">
+      <div>costo_total &nbsp; = costo + flete</div>
+      <div>utilidad &nbsp;&nbsp;&nbsp;&nbsp; = costo_total × markup%</div>
+      <div>precio_neto &nbsp; = costo_total + utilidad</div>
+      <div>precio_iva &nbsp;&nbsp; = precio_neto × 1.19</div>
+      <div class="text-emerald-700">precio_tarjeta = precio_iva / (1 − comisión%)</div>
+    </div>
+
+    <div class="bg-amber-50/60 border border-amber-200 rounded-lg p-3 my-3">
+      <p class="text-xs text-amber-900">
+        <strong>Markup vs Margen real:</strong> el markup es % sobre el <em>costo</em>; el margen es % sobre la <em>venta</em>. Markup 30 % ≈ margen 23 %.
+      </p>
+    </div>
+
+    {# ──── Tabla referencial de comisiones de tarjeta ──── #}
+    <div class="bg-white border border-slate-200 rounded-lg overflow-hidden mt-5">
+      <div class="bg-slate-50 px-4 py-2 text-xs font-semibold text-brand-dark uppercase tracking-wide flex items-center justify-between">
+        <span>Comisiones referenciales tarjeta (Chile 2026)</span>
+        <span class="text-[10px] font-normal normal-case text-brand-light italic">consulta tu contrato real</span>
+      </div>
+      <table class="w-full text-xs sm:text-sm">
+        <thead class="bg-slate-50/50 text-brand-light text-[11px] uppercase">
+          <tr>
+            <th class="px-3 py-2 text-left">Operador</th>
+            <th class="px-3 py-2 text-right">Crédito 1 cuota</th>
+            <th class="px-3 py-2 text-right">Débito</th>
+            <th class="px-3 py-2 text-right">Liberación</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {% for key, nombre, credito, debito, plazo, url in COMISIONES_TARJETA %}
+          <tr class="hover:bg-slate-50/50">
+            <td class="px-3 py-2 font-medium text-brand-dark">
+              {% if url %}<a href="{{ url }}" target="_blank" rel="noopener" class="hover:underline">{{ nombre }}</a>{% else %}{{ nombre }}{% endif %}
+            </td>
+            <td class="px-3 py-2 text-right font-mono text-brand-dark">{{ credito|floatformat:"-2" }} %</td>
+            <td class="px-3 py-2 text-right font-mono text-brand-dark">{{ debito|floatformat:"-2" }} %</td>
+            <td class="px-3 py-2 text-right text-brand-light">{% if plazo == 0 %}inmediata{% else %}{{ plazo }} días{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p class="px-4 py-2 text-[11px] text-brand-light bg-slate-50/60 leading-relaxed">
+        Tasas <strong>excluyen IVA</strong> y son referenciales públicas. Tu plan real depende de volumen mensual, rubro y plazo de liberación negociado.
+      </p>
+    </div>
+  </div>
+
+  <p class="text-xs text-brand-light mt-5 pt-3 border-t border-slate-200">
+    Última verificación de tasas: 2026-05-12 · IVA 19 % (DL 825)
+  </p>
+</div>
+
+{# ─────────────────────────────────────────────── SUELDO ────────── #}
+{% elif calc_key == 'sueldo' %}
+<div class="bg-gradient-to-br from-rose-50/40 to-white border border-rose-200/60 rounded-2xl p-6">
+  <h2 class="text-xl font-bold text-brand-dark mb-4 flex items-center gap-2">
+    <svg class="w-5 h-5 text-rose-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    Cómo se calcula el sueldo líquido
+  </h2>
+
+  <div class="space-y-3 text-sm text-brand-dark leading-relaxed">
+    <p>Cinco descuentos sobre la renta imponible (bruto con tope de <strong>{{ TOPE_IMPONIBLE_UF|floatformat:"-1" }} UF</strong>): AFP, salud, cesantía e Impuesto Único (IGC) progresivo.</p>
+
+    <div class="bg-white border border-slate-200 rounded-lg p-4 my-4 font-mono text-sm text-brand-dark space-y-1.5">
+      <div>renta_imp = min(bruto, {{ TOPE_IMPONIBLE_UF }} UF)</div>
+      <div>afp &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = renta_imp × (10% + comisión_afp)</div>
+      <div>salud &nbsp;&nbsp;&nbsp; = renta_imp × 7%  (Fonasa)</div>
+      <div>cesantía &nbsp; = renta_imp × 0.6%  (indefinido)</div>
+      <div>base_igc &nbsp; = bruto − afp − salud − cesantía</div>
+      <div>igc &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = tramo_progresivo(base_igc / UTM)</div>
+      <div class="text-rose-700">líquido = bruto − afp − salud − cesantía − igc</div>
+    </div>
+
+    {# ──── Tabla comisiones AFP 2026 ──── #}
+    <div class="bg-white border border-slate-200 rounded-lg overflow-hidden mt-5">
+      <div class="bg-slate-50 px-4 py-2 text-xs font-semibold text-brand-dark uppercase tracking-wide">Comisiones AFP 2026 (% adicional al 10 % obligatorio)</div>
+      <table class="w-full text-xs sm:text-sm">
+        <tbody class="divide-y divide-slate-100">
+          {% for afp in afps %}
+          <tr class="hover:bg-slate-50/50">
+            <td class="px-3 py-2 text-brand-dark">AFP {{ afp.nombre }}</td>
+            <td class="px-3 py-2 text-right font-mono text-brand-dark">{{ afp.comision_pct }} %</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p class="px-4 py-2 text-[11px] text-brand-light bg-slate-50/60">
+        Fuente: <a href="https://www.spensiones.cl" target="_blank" rel="noopener" class="text-brand underline">Superintendencia de Pensiones</a>. Las comisiones varían trimestralmente.
+      </p>
+    </div>
+
+    {# ──── Tramos IGC ──── #}
+    <div class="bg-white border border-slate-200 rounded-lg overflow-hidden mt-4">
+      <div class="bg-slate-50 px-4 py-2 text-xs font-semibold text-brand-dark uppercase tracking-wide">Impuesto Único (IGC) — tramos mensuales 2026</div>
+      <table class="w-full text-xs">
+        <thead class="bg-slate-50/50 text-brand-light text-[10px] uppercase">
+          <tr>
+            <th class="px-3 py-2 text-left">Desde (UTM)</th>
+            <th class="px-3 py-2 text-left">Hasta (UTM)</th>
+            <th class="px-3 py-2 text-right">Tasa</th>
+            <th class="px-3 py-2 text-right">Rebaja (UTM)</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 font-mono">
+          <tr><td class="px-3 py-2">0</td><td class="px-3 py-2">13,5</td><td class="px-3 py-2 text-right text-emerald-700">Exento</td><td class="px-3 py-2 text-right">—</td></tr>
+          <tr><td class="px-3 py-2">13,5</td><td class="px-3 py-2">30</td><td class="px-3 py-2 text-right">4 %</td><td class="px-3 py-2 text-right">0,54</td></tr>
+          <tr><td class="px-3 py-2">30</td><td class="px-3 py-2">50</td><td class="px-3 py-2 text-right">8 %</td><td class="px-3 py-2 text-right">1,74</td></tr>
+          <tr><td class="px-3 py-2">50</td><td class="px-3 py-2">70</td><td class="px-3 py-2 text-right">13,5 %</td><td class="px-3 py-2 text-right">4,49</td></tr>
+          <tr><td class="px-3 py-2">70</td><td class="px-3 py-2">90</td><td class="px-3 py-2 text-right">23 %</td><td class="px-3 py-2 text-right">11,14</td></tr>
+          <tr><td class="px-3 py-2">90</td><td class="px-3 py-2">120</td><td class="px-3 py-2 text-right">30,4 %</td><td class="px-3 py-2 text-right">17,80</td></tr>
+          <tr><td class="px-3 py-2">120</td><td class="px-3 py-2">310</td><td class="px-3 py-2 text-right">35 %</td><td class="px-3 py-2 text-right">23,32</td></tr>
+          <tr><td class="px-3 py-2">310</td><td class="px-3 py-2">+</td><td class="px-3 py-2 text-right">40 %</td><td class="px-3 py-2 text-right">38,82</td></tr>
+        </tbody>
+      </table>
+      <p class="px-4 py-2 text-[11px] text-brand-light bg-slate-50/60">
+        UTM actual referencial: <strong>${{ UTM_VALOR|floatformat:0|intcomma }}</strong>. Fórmula: <code>impuesto = base_UTM × tasa − rebaja</code>, todo en UTM y luego × UTM en pesos.
+      </p>
+    </div>
+
+    <div class="bg-amber-50/60 border border-amber-200 rounded-lg p-3 mt-4">
+      <p class="text-xs text-amber-900">
+        <strong>Referencial.</strong> No incluye colación, movilización, asignaciones de zona, bonos, gratificación legal, APV, ni descuentos voluntarios.
+      </p>
+    </div>
+  </div>
+
+  <p class="text-xs text-brand-light mt-5 pt-3 border-t border-slate-200">
+    Fuentes: <a href="https://www.sii.cl" target="_blank" rel="noopener" class="text-brand underline">SII</a> · <a href="https://www.spensiones.cl" target="_blank" rel="noopener" class="text-brand underline">SP</a> · <a href="https://www.supersalud.gob.cl" target="_blank" rel="noopener" class="text-brand underline">Supersalud</a> · UF/UTM vía mindicador.cl
+  </p>
+</div>
+
+{% endif %}
+</section>

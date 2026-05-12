@@ -28,9 +28,8 @@ from config.tributario import (
     SEGURO_CESANTIA_INDEFINIDO,
     SEGURO_CESANTIA_PLAZO_FIJO,
     TOPE_IMPONIBLE_UF,
-    UF_VALOR_REFERENCIAL,
-    UTM_VALOR_ACTUAL,
 )
+from core.services.mindicador import get_uf, get_utm
 
 _CLP_QUANTIZER: Final = Decimal("1")
 
@@ -68,7 +67,7 @@ def _q(d: Decimal) -> Decimal:
     return d.quantize(_CLP_QUANTIZER, rounding=ROUND_HALF_UP)
 
 
-def _calcular_igc(base_imponible_clp: Decimal) -> Decimal:
+def _calcular_igc(base_imponible_clp: Decimal, utm_valor: Decimal) -> Decimal:
     """
     Calcula el Impuesto Único de Segunda Categoría (mensual).
 
@@ -81,12 +80,12 @@ def _calcular_igc(base_imponible_clp: Decimal) -> Decimal:
     if base_imponible_clp <= 0:
         return Decimal("0")
 
-    base_utm = base_imponible_clp / UTM_VALOR_ACTUAL
+    base_utm = base_imponible_clp / utm_valor
 
     for lim_inf, lim_sup, tasa, rebaja_utm in IGC_TRAMOS_2026:
         if base_utm >= lim_inf and (lim_sup is None or base_utm < lim_sup):
             impuesto_utm = (base_utm * tasa) - rebaja_utm
-            impuesto_clp = impuesto_utm * UTM_VALOR_ACTUAL
+            impuesto_clp = impuesto_utm * utm_valor
             return _q(max(Decimal("0"), impuesto_clp))
 
     return Decimal("0")
@@ -116,8 +115,12 @@ def calcular(
     if comision_d < 0 or comision_d > Decimal("0.05"):
         raise ValueError("Comisión AFP fuera de rango razonable.")
 
+    # Valores de indicadores en tiempo real (con fallback hardcoded si la API cae)
+    uf_clp = get_uf()
+    utm_clp = get_utm()
+
     # 1. Renta imponible con tope
-    tope_clp = TOPE_IMPONIBLE_UF * UF_VALOR_REFERENCIAL
+    tope_clp = TOPE_IMPONIBLE_UF * uf_clp
     renta_imponible = min(bruto_d, tope_clp)
 
     # 2. AFP
@@ -132,7 +135,7 @@ def calcular(
         salud_uf = _to_decimal(salud_isapre_uf)
         if salud_uf < 0:
             raise ValueError("Monto Isapre no puede ser negativo.")
-        salud = salud_uf * UF_VALOR_REFERENCIAL
+        salud = salud_uf * uf_clp
     else:
         raise ValueError(f"salud_tipo inválido: {salud_tipo!r}")
 
@@ -149,7 +152,7 @@ def calcular(
     base_igc = max(Decimal("0"), base_igc)
 
     # 6. IGC
-    igc = _calcular_igc(base_igc)
+    igc = _calcular_igc(base_igc, utm_clp)
 
     # 7. Líquido
     total_descuentos = afp_total + salud + cesantia + igc

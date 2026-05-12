@@ -29,3 +29,11 @@ if not config("EMAIL_HOST_PASSWORD", default=""):
 
 # Permitir hosts locales
 ALLOWED_HOSTS = ["*"]
+
+# CSRF en dev: permite calculadoras.facilgestion.cl y túneles temporales (ngrok)
+CSRF_TRUSTED_ORIGINS = [
+    "https://calculadoras.facilgestion.cl",
+    "https://*.ngrok-free.app",
+    "https://*.ngrok.io",
+    "https://*.ngrok.app",
+]

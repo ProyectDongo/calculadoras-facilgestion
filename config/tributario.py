@@ -1,12 +1,20 @@
 """
 config/tributario.py — Constantes tributarias chilenas.
 
-⚠ REVISIÓN ANUAL OBLIGATORIA. Cada cambio aquí debe llevar:
+⚠ REVISIÓN PERIÓDICA OBLIGATORIA. Cada cambio aquí debe llevar:
    - Fecha de verificación
-   - Fuente (link a SII o ley)
+   - Fuente (link a SII / Superintendencia / Ley)
    - Nota del próximo cambio conocido
 
-Última verificación: 2026-05-11 contra SII Chile y Ley 21.133.
+Última verificación: 2026-05-12 contra:
+   - SII Chile (https://www.sii.cl)
+   - Superintendencia de Pensiones (https://www.spensiones.cl)
+   - Ley 21.133 (Retención honorarios)
+   - mindicador.cl (UF/UTM en tiempo real)
+
+Para valores que cambian frecuentemente (UF diaria, UTM mensual), preferir
+core.services.mindicador.{get_uf, get_utm} en vez de los hardcoded de acá.
+Los hardcoded son fallback para cuando la API esté caída.
 """
 from decimal import Decimal
 
@@ -38,10 +46,9 @@ RETENCION_HONORARIOS_PROXIMO_CAMBIO = "2027-01-01"  # → 0.16
 # Único de Segunda Categoría, el SII usa la UTM del mes en que se devengó.
 # Fuente mensual: https://www.sii.cl/valores_y_fechas/utm/utm2026.htm
 #
-# TODO mensual: si nos importa precisión, leer la UTM via API mindicador.cl
-# y cachear en Redis. Por ahora hardcoded — exactitud razonable para el caso
-# de uso "calculadora rápida".
-UTM_VALOR_ACTUAL = Decimal("70000")   # Aprox mayo 2026, actualizar mensualmente
+# Fallback hardcoded. Para valor real-time → core.services.mindicador.get_utm().
+UTM_VALOR_FALLBACK = Decimal("70588")  # mayo 2026 (mindicador.cl verificado 2026-05-12)
+UTM_VALOR_ACTUAL = UTM_VALOR_FALLBACK  # alias backward-compat
 
 
 # ── Tramos del Impuesto Único de Segunda Categoría (IGC mensual 2026) ────────
@@ -73,8 +80,12 @@ SEGURO_CESANTIA_PLAZO_FIJO = Decimal("0.0")    # plazo fijo: lo paga el empleado
 
 # Tope imponible mensual (UF). Sobre este monto no se cotiza.
 # Cambia anualmente. Fuente: Superintendencia de Pensiones.
-TOPE_IMPONIBLE_UF = Decimal("85.7")   # 2026 aprox.
-UF_VALOR_REFERENCIAL = Decimal("39200")  # Aproximado mayo 2026. TODO API mindicador.cl
+# 2026: 85.7 UF (anuncio de la SP en oct/nov del año anterior).
+TOPE_IMPONIBLE_UF = Decimal("85.7")
+
+# UF fallback. Para valor real-time → core.services.mindicador.get_uf().
+UF_VALOR_FALLBACK = Decimal("40290")        # 2026-05-12 (mindicador.cl)
+UF_VALOR_REFERENCIAL = UF_VALOR_FALLBACK    # alias backward-compat
 
 # Choices de AFPs comunes con sus comisiones (% sobre renta imponible).
 # Fuente: Superintendencia de Pensiones — variables, revisar trimestralmente.
@@ -86,6 +97,26 @@ AFP_COMISIONES_2026 = (
     ("planvital", "PlanVital", Decimal("0.0116")),
     ("provida",   "ProVida",   Decimal("0.0145")),
     ("uno",       "Uno",       Decimal("0.0049")),
+)
+
+
+# ── Comisiones de tarjeta — REFERENCIALES ────────────────────────────────────
+# Datos PÚBLICOS y REFERENCIALES de operadores chilenos a mayo 2026. Cada
+# comercio negocia su propio plan: tarjeta crédito vs débito, volumen mensual,
+# rubro, y plazo de liberación de fondos. **Siempre revisar el contrato real.**
+#
+# Convención del array: (key, nombre_display, tasa_credito_1cuota, tasa_debito,
+#                        plazo_liberacion_dias, "URL_referencia_pricing")
+# Tasas como Decimal, en porcentaje (1.49 → "1.49"), excluyen IVA.
+#
+# Fuente: pricing publicado en cada operador. Verificar trimestralmente.
+COMISIONES_TARJETA_2026 = (
+    ("transbank",     "Transbank",      Decimal("2.95"), Decimal("1.49"), 1,  "https://www.transbank.cl/precios"),
+    ("getnet",        "Getnet (Santander)", Decimal("2.79"), Decimal("1.29"), 1,  "https://www.getnet.cl"),
+    ("klap",          "Klap (Multicaja)",   Decimal("1.95"), Decimal("1.05"), 1,  "https://www.klap.cl"),
+    ("mercadopago_i", "Mercado Pago (inmediato)", Decimal("4.49"), Decimal("1.99"), 0,  "https://www.mercadopago.cl/ayuda/costo-vender_321"),
+    ("mercadopago_14","Mercado Pago (14 días)",   Decimal("3.49"), Decimal("1.79"), 14, "https://www.mercadopago.cl/ayuda/costo-vender_321"),
+    ("onepay",        "Onepay (transferencia)",   Decimal("0.99"), Decimal("0.99"), 0,  "https://www.onepay.cl"),
 )
 
 

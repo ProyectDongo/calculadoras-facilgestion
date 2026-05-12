@@ -125,20 +125,34 @@ def honorarios(request):
 
 @require_GET
 def precio_venta(request):
+    from config.tributario import COMISIONES_TARJETA_2026
     return render(request, "calculadoras/precio_venta.html", {
         "calc_key": CALC_PRECIO_VENTA,
         "nombre": NOMBRES_DISPLAY[CALC_PRECIO_VENTA],
+        "COMISIONES_TARJETA": COMISIONES_TARJETA_2026,
     })
 
 
 @require_GET
 def sueldo(request):
-    from config.tributario import AFP_COMISIONES_2026
-    afps = [{"key": k, "nombre": n, "comision": str(c)} for k, n, c in AFP_COMISIONES_2026]
+    from config.tributario import AFP_COMISIONES_2026, TOPE_IMPONIBLE_UF
+    from core.services.mindicador import get_utm
+    # Tabla AFP con comisión expresada como porcentaje display (ej "1.44")
+    afps = [
+        {
+            "key": k,
+            "nombre": n,
+            "comision": str(c),
+            "comision_pct": (f"{c * 100:.2f}".rstrip("0").rstrip(".") or "0"),
+        }
+        for k, n, c in AFP_COMISIONES_2026
+    ]
     return render(request, "calculadoras/sueldo.html", {
         "calc_key": CALC_SUELDO,
         "nombre": NOMBRES_DISPLAY[CALC_SUELDO],
         "afps": afps,
+        "TOPE_IMPONIBLE_UF": TOPE_IMPONIBLE_UF,
+        "UTM_VALOR": get_utm(),
     })
 
 
