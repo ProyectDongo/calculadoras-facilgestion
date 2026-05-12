@@ -189,15 +189,18 @@ def _payload_honorarios(r) -> str:
 
 def _payload_precio_venta(r) -> str:
     return json.dumps({
-        "costo":               int(r.costo),
-        "flete":               int(r.flete),
-        "porcentaje_utilidad": float(r.porcentaje_markup),
-        "costo_total":         int(r.costo_total),
-        "utilidad":            int(r.utilidad),
-        "precio_neto":         int(r.precio_neto),
-        "iva":                 int(r.iva),
-        "precio_con_iva":      int(r.precio_con_iva),
-        "margen_real_pct":     float(r.margen_real_pct),
+        "costo":                int(r.costo),
+        "flete":                int(r.flete),
+        "porcentaje_utilidad":  float(r.porcentaje_markup),
+        "comision_tarjeta":     float(r.comision_tarjeta_pct),
+        "costo_total":          int(r.costo_total),
+        "utilidad":             int(r.utilidad),
+        "precio_neto":          int(r.precio_neto),
+        "iva":                  int(r.iva),
+        "precio_con_iva":       int(r.precio_con_iva),
+        "precio_tarjeta":       int(r.precio_tarjeta),
+        "recargo_tarjeta":      int(r.recargo_tarjeta),
+        "margen_real_pct":      float(r.margen_real_pct),
     })
 
 
@@ -261,6 +264,7 @@ def api_calcular_precio_venta(request):
         costo=form.cleaned_data["costo"],
         flete=form.cleaned_data["flete"],
         porcentaje_utilidad=form.cleaned_data["porcentaje_utilidad"],
+        comision_tarjeta=form.cleaned_data["comision_tarjeta"],
     )
     registrar_calculo(request)
     return render(request, "calculadoras/_resultado_precio_venta.html", {
@@ -324,6 +328,7 @@ def _recalcular(calc: str, payload: dict):
             costo=payload.get("costo"),
             flete=payload.get("flete", 0),
             porcentaje_utilidad=payload.get("porcentaje_utilidad"),
+            comision_tarjeta=payload.get("comision_tarjeta", 0),
         )
 
     if calc == CALC_SUELDO:

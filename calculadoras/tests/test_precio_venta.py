@@ -58,3 +58,39 @@ def test_pct_negativo_lanza():
 def test_string_input_acepta():
     r = calcular(costo="50000", flete="0", porcentaje_utilidad="20")
     assert r.precio_neto == Decimal("60000")
+
+
+def test_sin_comision_tarjeta_precio_tarjeta_es_cero():
+    r = calcular(costo=10_000, porcentaje_utilidad=30)
+    assert r.comision_tarjeta_pct == Decimal("0")
+    assert r.precio_tarjeta == Decimal("0")
+    assert r.recargo_tarjeta == Decimal("0")
+
+
+def test_comision_tarjeta_no_afecta_utilidad():
+    """La comisión de tarjeta no modifica precio_neto ni utilidad."""
+    r_sin = calcular(costo=10_000, porcentaje_utilidad=30)
+    r_con = calcular(costo=10_000, porcentaje_utilidad=30, comision_tarjeta=2)
+    assert r_sin.precio_neto == r_con.precio_neto
+    assert r_sin.utilidad == r_con.utilidad
+    assert r_sin.precio_con_iva == r_con.precio_con_iva
+
+
+def test_comision_tarjeta_calculo_correcto():
+    """
+    precio_con_iva / (1 - 0.02) = precio_tarjeta.
+    Caso: costo=10.000, markup=30% → precio_con_iva=14.637 (sin flete).
+    Con flete=0 y markup=30: precio_neto=13.000, iva=2.470, precio_con_iva=15.470
+    (corrección: costo=10000, markup=30% → utilidad=3000, neto=13000, iva=2470, bruto=15470)
+    comision=2% → precio_tarjeta = 15470 / 0.98 = 15785 (redondeado).
+    """
+    r = calcular(costo=10_000, porcentaje_utilidad=30, comision_tarjeta=2)
+    assert r.precio_con_iva == Decimal("15470")
+    expected_tarjeta = (Decimal("15470") / Decimal("0.98")).quantize(Decimal("1"))
+    assert r.precio_tarjeta == expected_tarjeta
+    assert r.recargo_tarjeta == r.precio_tarjeta - r.precio_con_iva
+
+
+def test_comision_negativa_lanza():
+    with pytest.raises(ValueError):
+        calcular(costo=10_000, porcentaje_utilidad=30, comision_tarjeta=-1)

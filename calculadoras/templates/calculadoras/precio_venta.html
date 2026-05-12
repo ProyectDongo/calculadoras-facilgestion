@@ -68,6 +68,17 @@
         <p class="text-xs text-brand-light mt-1.5">Markup sobre el costo. Ejemplo: 30% sobre $12.000 = $3.600 de utilidad.</p>
       </label>
 
+      <label class="block mb-4">
+        <span class="text-sm font-medium text-brand-dark">Comisión tarjeta bancaria <span class="text-brand-light text-xs">(opcional)</span></span>
+        <div class="mt-1.5 relative">
+          <input type="number" name="comision_tarjeta" inputmode="decimal" min="0" max="99" step="0.01"
+                 placeholder="0" x-model.number="comision_tarjeta"
+                 class="w-full pl-3 pr-9 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-lg">
+          <span class="absolute right-3 top-1/2 -translate-y-1/2 text-brand-light">%</span>
+        </div>
+        <p class="text-xs text-brand-light mt-1.5">Ej: Transbank 1.49 %. Se calcula fuera de la utilidad para evitar referencia circular.</p>
+      </label>
+
       <label class="block">
         <span class="text-sm font-medium text-brand-dark">Descripción del producto <span class="text-brand-light text-xs">(opcional, para tu cotización)</span></span>
         <input type="text" maxlength="200" placeholder="Ej: Polera algodón premium · Talla M"
@@ -114,16 +125,21 @@ function precioVentaCalc() {
     costo: null,
     flete: null,
     porcentaje_utilidad: 30,
+    comision_tarjeta: null,
     descripcion: '',
     agregando: false,
     agregado: false,
     agregarACotizacion() {
       if (!this.ultimoResultado) return;
       this.agregando = true;
+      // Si hay comisión de tarjeta, el precio sugerido para cotización es el precio con tarjeta
+      const precio = this.ultimoResultado.precio_tarjeta > 0
+        ? this.ultimoResultado.precio_tarjeta
+        : this.ultimoResultado.precio_con_iva;
       window.listaStore.add({
         descripcion: this.descripcion || 'Producto sin descripción',
         cantidad: 1,
-        precio_unitario: this.ultimoResultado.precio_con_iva,
+        precio_unitario: precio,
         fuente: 'precio_venta',
       });
       this.agregado = true;
