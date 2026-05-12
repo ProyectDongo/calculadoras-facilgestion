@@ -34,7 +34,7 @@
     <form
       hx-post="{% url 'calculadoras:api_calcular_sueldo' %}"
       hx-target="#resultado-sueldo" hx-swap="innerHTML"
-      hx-trigger="change from:select, change from:input[type=radio], keyup changed delay:400ms from:input"
+      hx-trigger="change from:select, change from:input[type=radio], change from:input[type=checkbox], keyup changed delay:400ms from:input[type=text]"
     >
       {% csrf_token %}
 

@@ -69,6 +69,11 @@ class ResultadoSueldo:
     gratificacion_legal: Decimal    # 0 si no aplica
     liquido_total: Decimal          # liquido + colacion + movilizacion + gratificacion
 
+    # Monto original que ingresó el usuario (= bruto si modo bruto_a_liquido,
+    # = líquido objetivo si modo liquido_a_bruto). Útil para mostrar el valor
+    # tal como lo pidió, sin la pérdida de precisión de la búsqueda binaria.
+    monto_input: Decimal
+
     # Costo total empleador (trabajador NO ve, es para info del empresario)
     aporte_afp_empleador: Decimal   # 0.1% sobre renta imponible
     aporte_sis: Decimal             # 1,62% sobre renta imponible
@@ -276,6 +281,7 @@ def calcular(
         aporte_mutual=_q(aporte_mutual),
         aporte_cesantia_empleador=_q(aporte_cesantia_emp),
         costo_total_empleador=_q(costo_total_emp),
+        monto_input=_q(monto_d),
     )
 
 
