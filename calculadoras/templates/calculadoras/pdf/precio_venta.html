@@ -7,15 +7,23 @@
 <h1>Cálculo de Precio de Venta</h1>
 <p class="muted">
   Markup: {{ r.porcentaje_markup|floatformat:"-2" }}% sobre el costo · IVA 19%
+  {% if r.comision_tarjeta_pct > 0 %} · Comisión tarjeta: {{ r.comision_tarjeta_pct|floatformat:"-2" }}%{% endif %}
   {% if rut %} · RUT: {{ rut }}{% endif %}
 </p>
 
 <div class="highlight">
-  <span class="label">Precio final con IVA</span>
+  <span class="label">Precio con IVA (efectivo / transferencia)</span>
   <span class="value">${{ r.precio_con_iva|floatformat:0|intcomma }} CLP</span>
 </div>
 
-<h3>Detalle</h3>
+{% if r.comision_tarjeta_pct > 0 %}
+<div class="highlight" style="background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8;">
+  <span class="label">Precio con tarjeta (mantiene utilidad intacta)</span>
+  <span class="value">${{ r.precio_tarjeta|floatformat:0|intcomma }} CLP</span>
+</div>
+{% endif %}
+
+<h3>Detalle del cálculo</h3>
 <table class="kv">
   <tr><th>Costo del producto</th><td>${{ r.costo|floatformat:0|intcomma }}</td></tr>
   {% if r.flete > 0 %}<tr><th>Flete / transporte</th><td>${{ r.flete|floatformat:0|intcomma }}</td></tr>{% endif %}
@@ -23,7 +31,11 @@
   <tr><th>Utilidad ({{ r.porcentaje_markup|floatformat:"-2" }}% sobre costo)</th><td>${{ r.utilidad|floatformat:0|intcomma }}</td></tr>
   <tr><th>Precio neto sugerido</th><td>${{ r.precio_neto|floatformat:0|intcomma }}</td></tr>
   <tr><th>IVA (19%)</th><td>${{ r.iva|floatformat:0|intcomma }}</td></tr>
-  <tr><th>Precio final con IVA</th><td>${{ r.precio_con_iva|floatformat:0|intcomma }}</td></tr>
+  <tr><th>Precio con IVA (efectivo / transferencia)</th><td>${{ r.precio_con_iva|floatformat:0|intcomma }}</td></tr>
+  {% if r.comision_tarjeta_pct > 0 %}
+  <tr><th>Recargo tarjeta ({{ r.comision_tarjeta_pct|floatformat:"-2" }}%)</th><td>${{ r.recargo_tarjeta|floatformat:0|intcomma }}</td></tr>
+  <tr><th>Precio con tarjeta</th><td>${{ r.precio_tarjeta|floatformat:0|intcomma }}</td></tr>
+  {% endif %}
   <tr><th>Margen real sobre venta</th><td>{{ r.margen_real_pct|floatformat:"-2" }} %</td></tr>
 </table>
 
@@ -31,6 +43,6 @@
 <p class="muted">
   <strong>Markup</strong> ({{ r.porcentaje_markup|floatformat:"-2" }}%) es la utilidad expresada como porcentaje del costo.
   <strong>Margen real</strong> ({{ r.margen_real_pct|floatformat:"-2" }}%) es la utilidad como porcentaje del precio de venta neto.
-  Son dos números distintos y útiles para análisis distintos.
+  {% if r.comision_tarjeta_pct > 0 %}La comisión de tarjeta se calcula fuera del markup para que la utilidad no quede reducida por el cobro de la tarjeta.{% endif %}
 </p>
 {% endblock %}

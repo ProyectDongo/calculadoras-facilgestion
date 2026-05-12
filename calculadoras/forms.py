@@ -113,10 +113,18 @@ class PrecioVentaCalcForm(forms.Form):
         min_value=Decimal("0"), max_value=Decimal("1000"),
         max_digits=6, decimal_places=2,
     )
+    comision_tarjeta = forms.DecimalField(
+        required=False, min_value=Decimal("0"), max_value=Decimal("99"),
+        max_digits=5, decimal_places=2,
+    )
 
     def clean_flete(self):
         v = self.cleaned_data.get("flete")
         return Decimal(int(v)) if v else Decimal("0")
+
+    def clean_comision_tarjeta(self):
+        v = self.cleaned_data.get("comision_tarjeta")
+        return v if v is not None else Decimal("0")
 
 
 class EnviarOdescargarForm(AntiBotFormMixin, forms.Form):
