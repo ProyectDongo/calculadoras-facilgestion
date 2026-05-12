@@ -1,8 +1,7 @@
 {% load honeypot %}
 {% comment %}
-Partial reutilizable. El padre debe tener un x-data con accionesMixin().
-
-Variables Django: calc_key ("iva" | "honorarios" | "precio_venta")
+Partial reutilizable. Padre debe tener x-data con accionesMixin().
+Variables Django: calc_key
 {% endcomment %}
 
 {# ─── Botones (visibles tras primer resultado) ─────────────────────────── #}
@@ -26,15 +25,15 @@ Variables Django: calc_key ("iva" | "honorarios" | "precio_venta")
   </button>
 </div>
 
-{# ─── Modal de captura ─────────────────────────────────────────────────── #}
+{# ─── Modal de captura de lead ─────────────────────────────────────────── #}
 <div x-show="modalAbierto" x-cloak
-     class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+     class="fixed inset-0 z-40 bg-slate-900/70 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4"
      @click.self="modalAbierto=false"
      @keydown.escape.window="modalAbierto=false">
-  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 max-h-[92vh] overflow-y-auto">
+  <div class="bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
 
-    {# Header del modal con ícono distinto según acción #}
-    <div class="flex items-start gap-3 mb-5">
+    {# ── Header ────────────────────────────────────────────────────── #}
+    <div class="px-6 pt-6 pb-4 border-b border-slate-100 flex items-start gap-3 shrink-0">
       <div class="w-10 h-10 rounded-xl bg-brand/10 text-brand flex items-center justify-center shrink-0">
         <template x-if="accion==='enviar'">
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
@@ -43,17 +42,22 @@ Variables Django: calc_key ("iva" | "honorarios" | "precio_venta")
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         </template>
       </div>
-      <div class="flex-1">
-        <h3 class="text-lg font-bold text-brand-dark leading-tight"
-            x-text="accion==='enviar' ? 'Enviar a tu correo' : 'Descargar PDF'"></h3>
-        <p class="text-xs text-brand-light mt-0.5"
-           x-text="accion==='enviar' ? 'No almacenamos tu email.' : 'Verificamos que no eres un bot.'"></p>
+      <div class="flex-1 min-w-0">
+        <h3 class="text-base sm:text-lg font-bold text-brand-dark leading-tight"
+            x-text="accion==='enviar' ? 'Enviar PDF a tu correo' : 'Descargar PDF'"></h3>
+        <p class="text-xs text-brand-light mt-0.5">Completa tus datos para continuar.</p>
       </div>
+      <button type="button" @click="modalAbierto=false" aria-label="Cerrar"
+              class="text-slate-400 hover:text-brand-dark transition p-1">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
 
+    {# ── Form ──────────────────────────────────────────────────────── #}
     <form method="post"
           :action="accion==='enviar' ? '{% url 'calculadoras:api_enviar' %}' : '{% url 'calculadoras:api_pdf' %}'"
-          @submit="enviar($event)">
+          @submit="enviar($event)"
+          class="overflow-y-auto px-6 py-5 flex-1">
       {% csrf_token %}
       {% honeypot_fields %}
 
@@ -61,49 +65,109 @@ Variables Django: calc_key ("iva" | "honorarios" | "precio_venta")
       <input type="hidden" name="resultado_json" :value="JSON.stringify(ultimoResultado || {})">
       <input type="hidden" name="accion" :value="accion">
 
-      {# Email — visible SÓLO si la acción es "enviar". Obligatorio en ese caso. #}
-      <div x-show="accion==='enviar'" x-cloak>
-        <label class="block mb-3">
-          <span class="text-sm font-medium text-brand-dark">Tu correo electrónico <span class="text-red-500">*</span></span>
-          <input type="email" name="email" :required="accion==='enviar'" placeholder="tu@correo.cl"
-                 class="mt-1 w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+      <div class="space-y-3.5">
+
+        {# Email — siempre obligatorio #}
+        <label class="block">
+          <span class="text-xs font-semibold text-brand-dark">Correo electrónico <span class="text-red-500">*</span></span>
+          <input type="email" name="email" required placeholder="tu@correo.cl"
+                 class="mt-1 w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-sm">
         </label>
+
+        {# Empresa — obligatoria #}
+        <label class="block">
+          <span class="text-xs font-semibold text-brand-dark">Empresa / Razón social <span class="text-red-500">*</span></span>
+          <input type="text" name="empresa" required maxlength="200" placeholder="Mi Empresa SpA"
+                 class="mt-1 w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-sm">
+        </label>
+
+        <div class="grid sm:grid-cols-2 gap-3">
+          <label class="block">
+            <span class="text-xs font-semibold text-brand-dark">Nombre fantasía <span class="text-brand-light text-[10px] font-normal">(opcional)</span></span>
+            <input type="text" name="nombre_fantasia" maxlength="200" placeholder="Mi Marca"
+                   class="mt-1 w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-sm">
+          </label>
+
+          <label class="block">
+            <span class="text-xs font-semibold text-brand-dark">Tu nombre <span class="text-brand-light text-[10px] font-normal">(opcional)</span></span>
+            <input type="text" name="nombre_contacto" maxlength="120" placeholder="Juan Pérez"
+                   class="mt-1 w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-sm">
+          </label>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-3">
+          <label class="block">
+            <span class="text-xs font-semibold text-brand-dark">Rubro <span class="text-brand-light text-[10px] font-normal">(opcional)</span></span>
+            <select name="rubro"
+                    class="mt-1 w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-sm bg-white">
+              <option value="">— Selecciona —</option>
+              <option value="comercio">Comercio / Retail</option>
+              <option value="servicios">Servicios profesionales</option>
+              <option value="construccion">Construcción</option>
+              <option value="gastronomia">Gastronomía / HoReCa</option>
+              <option value="industria">Industria / Manufactura</option>
+              <option value="transporte">Transporte y logística</option>
+              <option value="tecnologia">Tecnología / Software</option>
+              <option value="salud">Salud</option>
+              <option value="educacion">Educación</option>
+              <option value="agricultura">Agro / Pesca / Minería</option>
+              <option value="inmobiliaria">Inmobiliaria</option>
+              <option value="independiente">Profesional independiente</option>
+              <option value="otro">Otro</option>
+            </select>
+          </label>
+
+          <label class="block">
+            <span class="text-xs font-semibold text-brand-dark">RUT <span class="text-brand-light text-[10px] font-normal">(opcional, va en PDF)</span></span>
+            <input type="text" name="rut" maxlength="12" placeholder="12.345.678-9"
+                   class="mt-1 w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-sm">
+          </label>
+        </div>
+
+        {# ── Turnstile ───────────────────────────────────────────── #}
+        <div class="pt-1">
+          <span class="text-[10px] text-brand-light block mb-1.5 uppercase tracking-wider font-semibold">Verificación</span>
+          <div class="cf-turnstile"
+               data-sitekey="{{ TURNSTILE_SITE_KEY|default:'1x00000000000000000000AA' }}"
+               data-size="flexible"
+               data-theme="light"></div>
+        </div>
+
+        {# ── Consentimiento legal ───────────────────────────────── #}
+        <div class="space-y-2.5 pt-3 border-t border-slate-100">
+          <label class="flex items-start gap-2.5 cursor-pointer group">
+            <input type="checkbox" name="acepto_politica" required
+                   class="mt-0.5 w-4 h-4 rounded border-slate-300 text-brand focus:ring-brand/30 cursor-pointer">
+            <span class="text-xs text-brand-dark leading-relaxed">
+              <strong>Acepto la <a href="{% url 'calculadoras:privacidad' %}" target="_blank" rel="noopener" class="text-brand underline">política de privacidad</a></strong>
+              y autorizo el tratamiento de mis datos personales según la Ley 19.628 de Chile. <span class="text-red-500">*</span>
+            </span>
+          </label>
+
+          <label class="flex items-start gap-2.5 cursor-pointer group">
+            <input type="checkbox" name="acepto_marketing"
+                   class="mt-0.5 w-4 h-4 rounded border-slate-300 text-brand focus:ring-brand/30 cursor-pointer">
+            <span class="text-xs text-brand-light leading-relaxed">
+              Autorizo a {{ BRAND.name }} a enviarme comunicaciones sobre el ERP, novedades y promociones. Puedo retirar mi consentimiento en cualquier momento.
+            </span>
+          </label>
+        </div>
       </div>
 
-      {# RUT — opcional, siempre visible #}
-      <label class="block mb-4">
-        <span class="text-sm font-medium text-brand-dark">RUT <span class="text-brand-light text-xs">(opcional, aparece en el PDF)</span></span>
-        <input type="text" name="rut" placeholder="12.345.678-9"
-               class="mt-1 w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
-      </label>
-
-      {# Turnstile — siempre visible. Renderizado manual al abrir el modal. #}
-      <div class="mb-2">
-        <span class="text-xs text-brand-light block mb-1.5">Verificación de seguridad</span>
-        <div class="cf-turnstile"
-             data-sitekey="{{ TURNSTILE_SITE_KEY|default:'1x00000000000000000000AA' }}"
-             data-size="flexible"
-             data-theme="light"></div>
-      </div>
-
+      {# ── Botones ─────────────────────────────────────────────── #}
       <div class="flex gap-3 mt-5">
         <button type="button" @click="modalAbierto=false"
-                class="flex-1 bg-slate-100 hover:bg-slate-200 text-brand-dark font-medium rounded-lg py-2.5 transition">
+                class="flex-1 bg-slate-100 hover:bg-slate-200 text-brand-dark font-medium rounded-lg py-2.5 transition text-sm">
           Cancelar
         </button>
         <button type="submit"
-                class="flex-1 bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 transition flex items-center justify-center gap-2">
+                class="flex-1 bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 transition flex items-center justify-center gap-2 text-sm">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <template x-if="accion==='enviar'"><polyline points="22 2 11 13"/></template>
           </svg>
-          <span x-text="accion==='enviar' ? 'Enviar' : 'Descargar PDF'"></span>
+          <span x-text="accion==='enviar' ? 'Enviar a mi correo' : 'Descargar PDF'"></span>
         </button>
       </div>
-
-      <p class="mt-3 text-[11px] text-brand-light text-center leading-relaxed">
-        No almacenamos tus datos. Si nos das tu correo, se usa una sola vez.
-        <a href="{% url 'calculadoras:privacidad' %}" class="text-brand underline">Política de privacidad</a>.
-      </p>
     </form>
   </div>
 </div>

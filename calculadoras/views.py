@@ -34,6 +34,7 @@ from calculadoras.services_sueldo import calcular as calc_sueldo
 from core.middleware import registrar_calculo
 from core.services.email_sender import enviar_calculo
 from core.services.pdf import render_pdf
+from leads.services import crear_lead_desde_form as _crear_lead
 
 logger = logging.getLogger(__name__)
 
@@ -404,10 +405,10 @@ def _generar_pdf(calc: str, payload: dict, *, rut: str = "") -> tuple[bytes, str
 @ratelimit(key="ip", rate="10/m", method="POST", block=True)
 @ratelimit(key="ip", rate="30/h", method="POST", block=True)
 def api_pdf(request):
-    """POST → descarga del PDF de la calc indicada."""
+    """POST → captura lead + descarga del PDF de la calc indicada."""
     form = EnviarOdescargarForm(request.POST, request=request)
     if not form.is_valid():
-        return JsonResponse({"error": "validation_failed"}, status=400)
+        return JsonResponse({"error": "validation_failed", "errors": form.errors.as_json()}, status=400)
 
     calc = form.cleaned_data["calculadora"]
     if calc not in CALCULADORAS_VALIDAS:
@@ -417,6 +418,14 @@ def api_pdf(request):
         payload = json.loads(form.cleaned_data["resultado_json"])
     except json.JSONDecodeError:
         return JsonResponse({"error": "payload_invalido"}, status=400)
+
+    # Persistir lead PRIMERO. Por compliance, sin consentimiento guardado no
+    # entregamos el PDF (fail-closed). Si la DB cae, devolvemos 503.
+    try:
+        _crear_lead(form, request)
+    except Exception as exc:
+        logger.exception("api_pdf: fallo guardar lead. err=%s", exc.__class__.__name__)
+        return JsonResponse({"error": "internal"}, status=503)
 
     try:
         pdf_bytes, filename = _generar_pdf(calc, payload, rut=form.cleaned_data["rut"])
@@ -434,23 +443,29 @@ def api_pdf(request):
 @ratelimit(key="ip", rate="5/m", method="POST", block=True)
 @ratelimit(key="post:email", rate="15/h", method="POST", block=True)
 def api_enviar(request):
-    """POST → genera PDF + envía por email (sin almacenar nada)."""
+    """POST → captura lead + genera PDF + envía por email."""
     form = EnviarOdescargarForm(request.POST, request=request)
     if not form.is_valid():
-        return JsonResponse({"error": "validation_failed"}, status=400)
+        return JsonResponse({"error": "validation_failed", "errors": form.errors.as_json()}, status=400)
 
     calc = form.cleaned_data["calculadora"]
     if calc not in CALCULADORAS_VALIDAS:
         return JsonResponse({"error": "calc_invalida"}, status=400)
 
     email = form.cleaned_data["email"]
-    if not email:
-        return JsonResponse({"error": "email_requerido"}, status=400)
 
     try:
         payload = json.loads(form.cleaned_data["resultado_json"])
     except json.JSONDecodeError:
         return JsonResponse({"error": "payload_invalido"}, status=400)
+
+    # Persistir lead PRIMERO (compliance Ley 19.628). Sin consentimiento guardado
+    # no enviamos email.
+    try:
+        lead = _crear_lead(form, request)
+    except Exception as exc:
+        logger.exception("api_enviar: fallo guardar lead. err=%s", exc.__class__.__name__)
+        return JsonResponse({"error": "internal"}, status=503)
 
     try:
         pdf_bytes, filename = _generar_pdf(calc, payload, rut=form.cleaned_data["rut"])
@@ -472,6 +487,13 @@ def api_enviar(request):
         pdf_bytes=pdf_bytes,
         pdf_filename=filename,
     )
+
+    # Actualizar lead con resultado del envío.
+    lead.email_enviado = bool(ok)
+    if not ok:
+        lead.email_error = "smtp_error"
+    lead.save(update_fields=["email_enviado", "email_error"])
+
     if not ok:
         return JsonResponse({"error": "email_send_failed"}, status=502)
     return JsonResponse({"ok": True})

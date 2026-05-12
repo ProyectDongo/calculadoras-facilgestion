@@ -137,33 +137,55 @@ class PrecioVentaCalcForm(forms.Form):
 
 class EnviarOdescargarForm(AntiBotFormMixin, forms.Form):
     """
-    Form común para "Descargar PDF" y "Enviar a mi correo".
+    Form para "Descargar PDF" y "Enviar a mi correo".
 
-    Estos endpoints sí requieren Turnstile (lo crítico es el envío de email).
+    Ahora capturamos lead obligatorio (email + empresa + acepto_politica).
+    Sin estos campos no se entrega el PDF. Cumple Ley 19.628 (consentimiento
+    explícito para tratamiento de datos personales).
+
+    Sigue requiriendo Turnstile (anti-bot).
     """
-    # Resultado serializado del cálculo, viene del frontend (Alpine).
-    # NO confiamos en estos datos — los re-validamos en la view recalculando.
+    # ── Datos del cálculo ────────────────────────────────────────────────
+    # Resultado serializado del cálculo (Alpine). NO confiamos: re-calculamos.
     resultado_json = forms.CharField(max_length=4_000)
+    calculadora    = forms.CharField(max_length=20)
+    accion         = forms.ChoiceField(choices=[("descargar", "Descargar"), ("enviar", "Enviar")])
 
-    # Tipo de calc (iva | precio_venta | honorarios)
-    calculadora = forms.CharField(max_length=20)
+    # ── Datos del lead (todos obligatorios excepto fantasía/rubro/nombre) ──
+    email           = forms.EmailField(required=True)
+    nombre_contacto = forms.CharField(max_length=120, required=False)
+    empresa         = forms.CharField(max_length=200, required=True)
+    nombre_fantasia = forms.CharField(max_length=200, required=False)
+    rubro           = forms.CharField(max_length=20, required=False)
+    rut             = forms.CharField(max_length=12, required=False)
 
-    # Email obligatorio sólo en "enviar". Para "descargar" puede venir vacío.
-    email = forms.EmailField(required=False)
-
-    # RUT opcional en cualquiera de los 2 casos.
-    rut = forms.CharField(required=False, max_length=12)
-
-    # Modo: "descargar" | "enviar"
-    accion = forms.ChoiceField(choices=[("descargar", "Descargar"), ("enviar", "Enviar")])
+    # ── Consentimiento ───────────────────────────────────────────────────
+    acepto_politica  = forms.BooleanField(required=True, error_messages={
+        "required": "Debes aceptar la política de privacidad para continuar.",
+    })
+    acepto_marketing = forms.BooleanField(required=False)
 
     def clean_email(self):
-        email = self.cleaned_data.get("email", "").strip()
+        email = (self.cleaned_data.get("email") or "").strip().lower()
         if not email:
-            return ""
-        # Django ya validó formato; validate_email es defensivo.
+            raise forms.ValidationError("Email es obligatorio.")
         validate_email(email)
         return email
+
+    def clean_empresa(self):
+        v = (self.cleaned_data.get("empresa") or "").strip()
+        if not v:
+            raise forms.ValidationError("Empresa es obligatoria.")
+        return v
+
+    def clean_nombre_contacto(self):
+        return (self.cleaned_data.get("nombre_contacto") or "").strip()
+
+    def clean_nombre_fantasia(self):
+        return (self.cleaned_data.get("nombre_fantasia") or "").strip()
+
+    def clean_rubro(self):
+        return (self.cleaned_data.get("rubro") or "").strip()
 
     def clean_rut(self):
         valor = (self.cleaned_data.get("rut") or "").strip()
@@ -172,11 +194,3 @@ class EnviarOdescargarForm(AntiBotFormMixin, forms.Form):
         if not rut_svc.validar(valor):
             raise forms.ValidationError("RUT inválido.")
         return rut_svc.normalizar(valor)
-
-    def clean(self):
-        cleaned = super().clean()
-        if cleaned.get("accion") == "enviar" and not cleaned.get("email"):
-            raise forms.ValidationError(
-                "Email es obligatorio para enviar el PDF por correo.",
-            )
-        return cleaned

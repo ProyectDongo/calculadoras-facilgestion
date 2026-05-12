@@ -30,10 +30,12 @@ ALLOWED_HOSTS = config(
 # Sin contrib.sessions tampoco — usamos signed_cookies pero el módulo no es
 # necesario, sólo el middleware que ya está como tal.
 INSTALLED_APPS = [
+    "django.contrib.contenttypes",      # requerido para migraciones de leads
     "django.contrib.staticfiles",
     "django.contrib.humanize",          # formato CLP en templates
     "core.apps.CoreConfig",
     "calculadoras.apps.CalculadorasConfig",
+    "leads.apps.LeadsConfig",
 ]
 
 
@@ -78,11 +80,20 @@ TEMPLATES = [
 
 
 # ─── DB ──────────────────────────────────────────────────────────────────────
-# La app NO almacena datos. Configuramos un dummy para que Django no chille.
-# `django.db.backends.dummy` lanza error si alguien intenta usarlo → desired.
+# Postgres dedicado para guardar leads (email/empresa/rubro en claro, RUT
+# cifrado con AES vía core.services.crypto). NO se comparte con el ERP.
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.dummy",
+        "ENGINE":   "django.db.backends.postgresql",
+        "NAME":     config("POSTGRES_DB",       default="calculadoras"),
+        "USER":     config("POSTGRES_USER",     default="calculadoras"),
+        "PASSWORD": config("POSTGRES_PASSWORD", default=""),
+        "HOST":     config("POSTGRES_HOST",     default="db"),
+        "PORT":     config("POSTGRES_PORT",     default="5432"),
+        "CONN_MAX_AGE": 60,
+        "OPTIONS": {
+            "connect_timeout": 5,
+        },
     }
 }
 
@@ -163,6 +174,12 @@ EMAIL_TIMEOUT = 10
 # ─── Cloudflare Turnstile ────────────────────────────────────────────────────
 TURNSTILE_SITE_KEY = config("TURNSTILE_SITE_KEY", default="")
 TURNSTILE_SECRET_KEY = config("TURNSTILE_SECRET_KEY", default="")
+
+
+# ─── Cifrado de RUTs en reposo (Fernet) ──────────────────────────────────────
+# Generá con: python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'
+# Si la key se compromete, hay que migrar a MultiFernet con rotación (no implementado aún).
+RUT_ENCRYPTION_KEY = config("RUT_ENCRYPTION_KEY", default="")
 
 
 # ─── Security headers base (refinados en prod.py) ────────────────────────────

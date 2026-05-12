@@ -27,6 +27,11 @@ python-dotenv==1.0.1          # carga .env en dev
 django-redis==5.4.0           # backend de cache para sessions de cache-only y ratelimit
 redis==5.0.7                  # cliente Python
 
+# ── DB y cifrado ─────────────────────────────────────────────────────────────
+# Postgres para guardar leads (email/empresa/rubro en claro, RUT cifrado AES).
+psycopg2-binary==2.9.10       # driver Postgres
+cryptography==44.0.0          # Fernet para cifrar RUTs en reposo
+
 # ── Seguridad / anti-abuso ───────────────────────────────────────────────────
 django-csp==4.0               # CSP por-vista (NO global, ver settings/base.py)
 django-ratelimit==4.1.0       # decoradores @ratelimit por endpoint

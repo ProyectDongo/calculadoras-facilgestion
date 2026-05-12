@@ -3,11 +3,12 @@
 # Diferencias clave vs dev:
 #   - read_only: true en web (tmpfs /tmp para WeasyPrint scratch)
 #   - Sin volumen del código fuente (imagen sellada)
-#   - Redis con password (REDIS_PASSWORD en .env)
+#   - Redis y Postgres con password fuerte (.env)
 #   - Memory limits estrictos
 #   - logging json-driver, max-size/file
+#   - Puerto host 8002 (8000 ERP, 8001 mail-facilgestion)
 #
-# Cloudflare Tunnel apunta a 127.0.0.1:8000 (corre como servicio externo).
+# Cloudflare Tunnel apunta a 127.0.0.1:8002 (corre como servicio externo).
 
 services:
   web:
@@ -25,11 +26,23 @@ services:
       - /tmp:size=64M,uid=10001,gid=10001
     volumes:
       - static_volume:/app/staticfiles:ro
-    # Puerto 8001 (no 8000) para coexistir con el ERP de FácilGestión
-    # que ya escucha en 127.0.0.1:8000 del mismo VPS.
+    # Puerto 8002 — ver comentario superior
     ports:
-      - "127.0.0.1:8001:8000"
+      - "127.0.0.1:8002:8000"
+    # Migrate al arranque (idempotente). Después gunicorn.
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             gunicorn config.wsgi:application
+             --bind 0.0.0.0:8000
+             --workers 3
+             --timeout 60
+             --graceful-timeout 30
+             --access-logfile -
+             --error-logfile -
+             --access-logformat '%({x-real-ip}i)s %(l)s %(u)s %(t)s \"%(r)s\" %(s)s %(b)s %(M)sms'"
     depends_on:
+      db:
+        condition: service_healthy
       redis:
         condition: service_healthy
     deploy:
@@ -43,6 +56,34 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  db:
+    image: postgres:16-alpine
+    container_name: calc_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - db_volume:/var/lib/postgresql/data
+    # NO exponemos puerto al host en prod: solo accesible desde la red docker interna.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    security_opt:
+      - no-new-privileges:true
     logging:
       driver: json-file
       options:
@@ -79,3 +120,4 @@ services:
 
 volumes:
   static_volume:
+  db_volume:

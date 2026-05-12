@@ -3,30 +3,112 @@
 {% block title %}Política de privacidad · {{ BRAND.name }}{% endblock %}
 
 {% block content %}
-<article class="prose max-w-3xl mx-auto bg-white border border-slate-200 rounded-2xl p-6 sm:p-10">
+<article class="max-w-3xl mx-auto bg-white border border-slate-200 rounded-2xl p-6 sm:p-10">
   <h1 class="text-3xl font-bold text-brand-dark mb-1">Política de privacidad</h1>
-  <p class="text-brand-light text-sm mb-8">calculadoras.facilgestion.cl · Ley 19.628 Chile · Última actualización: mayo 2026</p>
+  <p class="text-brand-light text-sm mb-8">calculadoras.facilgestion.cl · Ley 19.628 (Chile) · Última actualización: mayo 2026</p>
 
-  <h2 class="text-xl font-bold text-brand-dark mt-6 mb-2">1. Qué datos recopilamos</h2>
-  <p class="text-brand-light mb-3"><strong class="text-brand-dark">Ninguno de manera persistente.</strong> Las calculadoras funcionan sin pedirte datos:</p>
-  <ul class="list-disc list-inside text-brand-light space-y-1 mb-4">
-    <li>El cálculo lo hace tu navegador en conjunto con un cálculo de verificación en nuestro servidor.</li>
-    <li>El servidor no guarda los montos que ingresas.</li>
+  <p class="text-brand-light leading-relaxed mb-6 italic">
+    Este documento explica qué datos recopilamos, cuándo, cómo los protegemos y cuáles son tus derechos.
+  </p>
+
+  {# ── 1 ── #}
+  <h2 class="text-xl font-bold text-brand-dark mt-8 mb-3">1. Uso libre de las calculadoras</h2>
+  <p class="text-brand-light leading-relaxed mb-3">
+    Calcular con cualquiera de las 4 herramientas (IVA, Precio de Venta, Honorarios, Sueldo Líquido) <strong class="text-brand-dark">no requiere registro ni datos personales</strong>.
+    Los montos que ingresas se procesan en tiempo real y no quedan almacenados en nuestros servidores.
+  </p>
+
+  {# ── 2 ── #}
+  <h2 class="text-xl font-bold text-brand-dark mt-8 mb-3">2. Datos que recopilamos al descargar PDF o solicitar envío por correo</h2>
+  <p class="text-brand-light leading-relaxed mb-3">
+    Si decides <strong class="text-brand-dark">descargar el PDF</strong> o <strong class="text-brand-dark">recibirlo por correo</strong>, te pedimos los siguientes datos:
+  </p>
+  <div class="overflow-x-auto rounded-lg border border-slate-200 mb-4">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 text-brand-light text-xs uppercase tracking-wider">
+        <tr>
+          <th class="px-4 py-2 text-left">Campo</th>
+          <th class="px-4 py-2 text-left">Obligatorio</th>
+          <th class="px-4 py-2 text-left">Cómo se almacena</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100 text-brand-dark">
+        <tr><td class="px-4 py-2">Correo electrónico</td><td class="px-4 py-2">Sí</td><td class="px-4 py-2">En claro (necesario para enviar y contactar)</td></tr>
+        <tr><td class="px-4 py-2">Empresa / Razón social</td><td class="px-4 py-2">Sí</td><td class="px-4 py-2">En claro</td></tr>
+        <tr><td class="px-4 py-2">Nombre de contacto</td><td class="px-4 py-2">No</td><td class="px-4 py-2">En claro</td></tr>
+        <tr><td class="px-4 py-2">Nombre de fantasía</td><td class="px-4 py-2">No</td><td class="px-4 py-2">En claro</td></tr>
+        <tr><td class="px-4 py-2">Rubro</td><td class="px-4 py-2">No</td><td class="px-4 py-2">En claro (categoría predefinida)</td></tr>
+        <tr><td class="px-4 py-2 font-medium">RUT</td><td class="px-4 py-2">No</td><td class="px-4 py-2 font-medium text-emerald-700">Cifrado en reposo (AES-128 vía Fernet)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="text-brand-light leading-relaxed mb-3">
+    Adicionalmente registramos: fecha y hora de la captura, calculadora usada, acción (descargar o enviar), un hash de tu IP (no la IP en claro, sólo SHA-256 con sal del proyecto) y los primeros 300 caracteres del user-agent.
+  </p>
+
+  {# ── 3 ── #}
+  <h2 class="text-xl font-bold text-brand-dark mt-8 mb-3">3. Para qué usamos tus datos</h2>
+  <ul class="list-disc list-inside text-brand-light space-y-2 mb-4 leading-relaxed">
+    <li><strong class="text-brand-dark">Entregar el resultado:</strong> generar y enviarte el PDF que solicitaste.</li>
+    <li><strong class="text-brand-dark">Comunicaciones de {{ BRAND.name }}</strong> (sólo si marcaste el opt-in correspondiente): novedades del ERP, nuevas calculadoras, actualizaciones tributarias relevantes para PyMEs chilenas. No vendemos ni cedemos tu información a terceros.</li>
+    <li><strong class="text-brand-dark">Métricas internas:</strong> entender qué calculadoras son más usadas, en qué rubros, para mejorar el producto. Estos análisis nunca te identifican individualmente.</li>
   </ul>
 
-  <h2 class="text-xl font-bold text-brand-dark mt-6 mb-2">2. Qué pasa si pides PDF por correo</h2>
-  <p class="text-brand-light mb-4">Si nos das tu email para recibir el PDF, lo usamos <strong class="text-brand-dark">una sola vez</strong> para el envío. No lo guardamos en ninguna base de datos ni lo usamos para campañas de marketing.</p>
+  {# ── 4 ── #}
+  <h2 class="text-xl font-bold text-brand-dark mt-8 mb-3">4. Cómo protegemos tus datos</h2>
+  <ul class="list-disc list-inside text-brand-light space-y-2 mb-4 leading-relaxed">
+    <li><strong class="text-brand-dark">Cifrado en tránsito:</strong> todas las conexiones usan HTTPS (TLS 1.3) terminado en Cloudflare con certificado válido y HSTS preload.</li>
+    <li><strong class="text-brand-dark">Cifrado en reposo:</strong> el RUT (el dato más sensible) se cifra con clave simétrica antes de guardarse en la base de datos. Si alguien obtuviera el dump SQL, no podría leer los RUTs.</li>
+    <li><strong class="text-brand-dark">Acceso restringido:</strong> sólo el equipo autorizado de {{ BRAND.name }} accede a los leads, mediante credenciales y registros de auditoría.</li>
+    <li><strong class="text-brand-dark">Anti-abuso:</strong> usamos Cloudflare Turnstile y rate limiting para evitar bots y spam.</li>
+  </ul>
 
-  <h2 class="text-xl font-bold text-brand-dark mt-6 mb-2">3. Cookies</h2>
-  <p class="text-brand-light mb-4">Usamos una única cookie técnica (<code class="bg-slate-100 px-1 rounded">tc_accepted_v1</code>) que recuerda que aceptaste estos términos para no mostrarte el aviso cada vez. No es de tracking ni de marketing.</p>
+  {# ── 5 ── #}
+  <h2 class="text-xl font-bold text-brand-dark mt-8 mb-3">5. Cookies</h2>
+  <p class="text-brand-light leading-relaxed mb-3">
+    Usamos sólo cookies técnicas, firmadas con clave del servidor y sin información personal:
+  </p>
+  <ul class="list-disc list-inside text-brand-light space-y-1 mb-4 leading-relaxed">
+    <li><code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">tc_accepted_v1</code> — recuerda que aceptaste esta política (30 días).</li>
+    <li><code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">calc_session</code> — sesión efímera firmada con secret del servidor.</li>
+  </ul>
+  <p class="text-brand-light leading-relaxed mb-3">
+    No usamos cookies de terceros, ni trackers publicitarios, ni Google Analytics. La verificación anti-bot de Cloudflare Turnstile puede cargar un script de <code>challenges.cloudflare.com</code> que <strong class="text-brand-dark">no instala cookies</strong>.
+  </p>
 
-  <h2 class="text-xl font-bold text-brand-dark mt-6 mb-2">4. Anti-abuso</h2>
-  <p class="text-brand-light mb-4">Para evitar abuso por bots, usamos Cloudflare Turnstile (sin tracking) y un contador efímero por IP-hash (la IP nunca se almacena en claro, sólo un hash con sal). El contador se borra solo cada 5–15 minutos.</p>
+  {# ── 6 ── #}
+  <h2 class="text-xl font-bold text-brand-dark mt-8 mb-3">6. Tus derechos (Ley 19.628 — derechos ARCO)</h2>
+  <p class="text-brand-light leading-relaxed mb-3">
+    Podés ejercer en cualquier momento los siguientes derechos sobre los datos que nos diste:
+  </p>
+  <ul class="list-disc list-inside text-brand-light space-y-2 mb-4 leading-relaxed">
+    <li><strong class="text-brand-dark">Acceso:</strong> solicitar una copia de los datos que tenemos sobre ti.</li>
+    <li><strong class="text-brand-dark">Rectificación:</strong> corregir información incorrecta o desactualizada.</li>
+    <li><strong class="text-brand-dark">Cancelación:</strong> pedir la eliminación total de tu registro.</li>
+    <li><strong class="text-brand-dark">Oposición:</strong> retirar el consentimiento de marketing (te seguimos pudiendo entregar el PDF si te lo enviamos, pero dejamos de mandarte promos).</li>
+  </ul>
+  <p class="text-brand-light leading-relaxed mb-3">
+    Para ejercerlos, escribinos a <a href="mailto:privacidad@facilgestion.cl" class="text-brand underline">privacidad@facilgestion.cl</a> desde el correo que registraste. Respondemos dentro de 10 días hábiles.
+  </p>
 
-  <h2 class="text-xl font-bold text-brand-dark mt-6 mb-2">5. Tus derechos</h2>
-  <p class="text-brand-light mb-4">Como no guardamos tus datos, no hay datos que rectificar ni borrar. Si nos enviaste un email y luego te arrepentiste, puedes ignorar el mensaje — no quedó en ningún sistema nuestro.</p>
+  {# ── 7 ── #}
+  <h2 class="text-xl font-bold text-brand-dark mt-8 mb-3">7. Retención</h2>
+  <p class="text-brand-light leading-relaxed mb-3">
+    Conservamos tus datos mientras tu consentimiento siga vigente. Si solicitás la cancelación,
+    los eliminamos en menos de 30 días. Las copias de respaldo expiran a los 90 días.
+  </p>
 
-  <h2 class="text-xl font-bold text-brand-dark mt-6 mb-2">6. Contacto</h2>
-  <p class="text-brand-light">Cualquier consulta sobre privacidad puedes escribirnos a <a href="mailto:contacto@facilgestion.cl" class="text-brand">contacto@facilgestion.cl</a>.</p>
+  {# ── 8 ── #}
+  <h2 class="text-xl font-bold text-brand-dark mt-8 mb-3">8. Cambios a esta política</h2>
+  <p class="text-brand-light leading-relaxed mb-3">
+    Si la política cambia sustancialmente, te pediremos aceptar la nueva versión la próxima vez que descargues o envíes un cálculo.
+    La versión actual queda registrada con tu consentimiento.
+  </p>
+
+  {# ── 9 ── #}
+  <h2 class="text-xl font-bold text-brand-dark mt-8 mb-3">9. Contacto</h2>
+  <p class="text-brand-light leading-relaxed">
+    Responsable del tratamiento: <strong class="text-brand-dark">{{ BRAND.name }}</strong> · Chile · <a href="mailto:privacidad@facilgestion.cl" class="text-brand underline">privacidad@facilgestion.cl</a>
+  </p>
 </article>
 {% endblock %}

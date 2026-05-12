@@ -42,25 +42,43 @@ chmod 600 .env
 nano .env
 ```
 
-Rellena con valores reales (NO commitear). Genera los 3 secretos con:
+Rellena con valores reales (NO commitear). Genera los 5 secretos con:
 
 ```bash
 python3 -c "import secrets; print('DJANGO_SECRET_KEY=' + secrets.token_urlsafe(50))"
 python3 -c "import secrets; print('IP_HASH_SALT=' + secrets.token_urlsafe(32))"
 python3 -c "import secrets; print('REDIS_PASSWORD=' + secrets.token_urlsafe(32))"
+python3 -c "import secrets; print('POSTGRES_PASSWORD=' + secrets.token_urlsafe(32))"
+python3 -c "from cryptography.fernet import Fernet; print('RUT_ENCRYPTION_KEY=' + Fernet.generate_key().decode())"
 ```
+
+> El último comando requiere `pip install cryptography` o ejecutarlo dentro del container `calc_web`:
+> `docker compose -f docker-compose.prod.yml run --rm web python -c '...'`
 
 Variables que NO pueden quedar vacías:
 
 - `DJANGO_SECRET_KEY` (generado arriba)
 - `IP_HASH_SALT` (generado arriba)
 - `REDIS_PASSWORD` (generado arriba)
+- `POSTGRES_PASSWORD` (generado arriba) — Postgres dedicado para leads
+- `RUT_ENCRYPTION_KEY` (generado arriba) — cifrado en reposo de los RUTs
 - `DJANGO_ALLOWED_HOSTS=calculadoras.facilgestion.cl`
 - `DJANGO_DEBUG=False`
 - `DJANGO_SETTINGS_MODULE=config.settings.prod`
-- `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` (obtener en Cloudflare Dashboard → Turnstile → Add site)
-- `EMAIL_HOST` / `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD` (puedes reusar las credenciales SMTP del ERP)
+- `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` (Cloudflare Dashboard → Turnstile → Add site)
+- `EMAIL_HOST` / `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD` (puedes reusar las del ERP)
 - `DEFAULT_FROM_EMAIL=FacilGestion Calculadoras <calculadoras@facilgestion.cl>`
+
+### ⚠ Sobre `RUT_ENCRYPTION_KEY`
+
+Esta clave **cifra los RUTs en la tabla `leads`**. Si la perdés, los RUTs ya
+almacenados quedan ilegibles (los demás datos siguen accesibles). Reglas:
+
+- Guardala fuera del repo (ya está en `.env`, que está gitignored).
+- Si la rotás, los RUTs viejos quedan inaccesibles hasta que migres con la
+  clave nueva. Para rotar en producción se necesita `MultiFernet` (no
+  implementado todavía).
+- Si la comprometés, generá una nueva, re-cifrá los RUTs y revocá la vieja.
 
 ## 3. Build + up con el compose de producción
 
@@ -70,7 +88,14 @@ docker compose -f docker-compose.prod.yml up -d
 docker compose -f docker-compose.prod.yml logs -f web
 ```
 
-Verifica que gunicorn arranca sin errores. El container expone `127.0.0.1:8001:8000` (puerto 8001 en el host).
+El arranque hace `python manage.py migrate --noinput` automáticamente y
+después gunicorn. La primera vez crea la tabla `leads`. Verifica que
+gunicorn arranca sin errores. El container expone `127.0.0.1:8002:8000`
+(puerto 8002 en el host — 8000 es ERP, 8001 es mail-facilgestion).
+
+> **Si actualizás desde una versión sin Postgres**: borrá el volumen viejo
+> de staticfiles para que el nuevo container con `migrate` arranque limpio:
+> `docker volume rm calculadoras-facilgestion_static_volume`
 
 ## 4. Smoke test local en el VPS
 
