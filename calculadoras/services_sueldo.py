@@ -45,34 +45,43 @@ _CLP_QUANTIZER: Final = Decimal("1")
 
 @dataclass(frozen=True, slots=True)
 class ResultadoSueldo:
-    bruto: Decimal
-    renta_imponible: Decimal     # con tope aplicado
+    # ── Bruto y composición ─────────────────────────────────────
+    sueldo_base: Decimal         # lo que ingresó el user (sin gratif)
+    gratificacion_legal: Decimal # 25% × sueldo_base con tope, o 0
+    bruto: Decimal               # sueldo_base + gratificacion_legal (IMPONIBLE)
+
+    # ── Cálculo ─────────────────────────────────────────────────
+    renta_imponible: Decimal     # con tope AFP/Salud aplicado
     afp_total: Decimal           # 10% + comisión
-    afp_obligatoria: Decimal     # solo el 10%
-    afp_comision: Decimal        # solo la comisión
-    afp_comision_pct: Decimal    # % aplicado (para display en PDF/UI)
+    afp_obligatoria: Decimal
+    afp_comision: Decimal
+    afp_comision_pct: Decimal
     salud: Decimal
     salud_tipo: str              # "fonasa" | "isapre"
     cesantia: Decimal
-    cesantia_pct: Decimal        # % aplicado (0 o 0.6%)
+    cesantia_pct: Decimal
     base_igc: Decimal            # bruto - AFP - salud - cesantía
-    igc: Decimal                 # impuesto único
-    liquido: Decimal
+    igc: Decimal
+    liquido: Decimal             # bruto - todos los descuentos
     total_descuentos: Decimal
-    modo: str                    # "bruto_a_liquido" | "liquido_a_bruto"
-    utm_usada: Decimal           # UTM al momento del cálculo (para auditar PDF)
-    uf_usada: Decimal            # UF al momento del cálculo
+    modo: str
+    utm_usada: Decimal
+    uf_usada: Decimal
 
-    # Asignaciones no imponibles (se SUMAN al líquido, no descuentan)
+    # ── Asignaciones NO imponibles (suman al líquido) ────────
     colacion: Decimal
     movilizacion: Decimal
-    gratificacion_legal: Decimal    # 0 si no aplica
-    liquido_total: Decimal          # liquido + colacion + movilizacion + gratificacion
+    liquido_total: Decimal       # liquido + colacion + movilizacion
 
-    # Monto original que ingresó el usuario (= bruto si modo bruto_a_liquido,
-    # = líquido objetivo si modo liquido_a_bruto). Útil para mostrar el valor
-    # tal como lo pidió, sin la pérdida de precisión de la búsqueda binaria.
+    # ── Lo que pidió el user (para display fiel) ─────────────
     monto_input: Decimal
+
+    # ── Costo empleador ─────────────────────────────────────
+    aporte_afp_empleador: Decimal
+    aporte_sis: Decimal
+    aporte_mutual: Decimal
+    aporte_cesantia_empleador: Decimal
+    costo_total_empleador: Decimal
 
     # Costo total empleador (trabajador NO ve, es para info del empresario)
     aporte_afp_empleador: Decimal   # 0.1% sobre renta imponible
@@ -156,30 +165,43 @@ def calcular(
     if monto_d < 0:
         raise ValueError("El monto no puede ser negativo.")
 
-    # Si el modo es invertido, resolvemos por búsqueda binaria.
-    # IMPORTANTE: el "líquido" objetivo del usuario se refiere SOLO al sueldo
-    # neto sin asignaciones (colación, movilización, gratificación se suman
-    # APARTE al final). Por eso la búsqueda binaria no las considera.
+    comision_d = _to_decimal(afp_comision)
+    if comision_d < 0 or comision_d > Decimal("0.05"):
+        raise ValueError("Comisión AFP fuera de rango razonable.")
+
+    # Resolver sueldo_base según el modo.
+    # IMPORTANTE: la gratificación legal Art. 50 es IMPONIBLE. Se suma al
+    # sueldo base ANTES de calcular AFP, salud, cesantía, IGC.
+    # Las asignaciones (colación, movilización) NO son imponibles y se
+    # consideran solo al final, como suma al líquido.
     if modo == "liquido_a_bruto":
-        bruto_d = _resolver_bruto_desde_liquido(
+        sueldo_base = _resolver_sueldo_base_desde_liquido(
             monto_d,
             afp_comision=afp_comision,
             salud_tipo=salud_tipo,
             salud_isapre_uf=salud_isapre_uf,
             contrato=contrato,
+            gratificacion_legal=gratificacion_legal,
         )
     else:
-        bruto_d = monto_d
+        sueldo_base = monto_d
 
-    comision_d = _to_decimal(afp_comision)
-    if comision_d < 0 or comision_d > Decimal("0.05"):
-        raise ValueError("Comisión AFP fuera de rango razonable.")
-
-    # Valores de indicadores en tiempo real (con fallback hardcoded si la API cae)
+    # Indicadores en tiempo real (cache 24h, fallback si API cae)
     uf_clp = get_uf()
     utm_clp = get_utm()
 
-    # 1. Renta imponible con tope
+    # Gratificación legal mensual (Art. 50): IMPONIBLE, se suma al sueldo base.
+    # min(25% × sueldo_base, 4,75 × IMM / 12)
+    if gratificacion_legal:
+        grat_por_pct = sueldo_base * GRATIFICACION_LEGAL_TASA
+        grat_tope = (GRATIFICACION_LEGAL_TOPE_IMM_ANUAL * INGRESO_MINIMO_MENSUAL) / Decimal("12")
+        gratificacion_clp = min(grat_por_pct, grat_tope)
+    else:
+        gratificacion_clp = Decimal("0")
+
+    bruto_d = sueldo_base + gratificacion_clp   # bruto imponible
+
+    # 1. Renta imponible con tope (sobre bruto incluyendo gratificación)
     tope_clp = TOPE_IMPONIBLE_UF * uf_clp
     renta_imponible = min(bruto_d, tope_clp)
 
@@ -199,7 +221,7 @@ def calcular(
     else:
         raise ValueError(f"salud_tipo inválido: {salud_tipo!r}")
 
-    # 4. Seguro Cesantía — tiene SU PROPIO tope (Ley 19.728), mayor que AFP/Salud.
+    # 4. Seguro Cesantía — tiene SU PROPIO tope (Ley 19.728), mayor que AFP.
     if contrato == "indefinido":
         cesantia_pct_d = SEGURO_CESANTIA_INDEFINIDO
         cesantia_emp_pct = SEGURO_CESANTIA_EMPLEADOR_INDEFINIDO
@@ -219,42 +241,33 @@ def calcular(
     # 6. IGC
     igc = _calcular_igc(base_igc, utm_clp)
 
-    # 7. Líquido (sin asignaciones)
+    # 7. Líquido (sin asignaciones no imponibles)
     total_descuentos = afp_total + salud + cesantia + igc
     liquido = bruto_d - total_descuentos
 
-    # 8. Asignaciones no imponibles
+    # 8. Asignaciones NO imponibles
     colacion_d = _to_decimal(colacion)
     movilizacion_d = _to_decimal(movilizacion)
     if colacion_d < 0 or movilizacion_d < 0:
         raise ValueError("Asignaciones no pueden ser negativas.")
 
-    # 9. Gratificación legal mensual (Art. 50 Código del Trabajo)
-    # min(25% sueldo, 4.75 × IMM / 12). Es IMPONIBLE pero el SII la trata
-    # como parte del sueldo bruto — acá la mostramos como "extra" porque
-    # algunos contratos la pagan separadamente.
-    if gratificacion_legal:
-        grat_por_pct = bruto_d * GRATIFICACION_LEGAL_TASA
-        grat_tope = (GRATIFICACION_LEGAL_TOPE_IMM_ANUAL * INGRESO_MINIMO_MENSUAL) / Decimal("12")
-        gratificacion_clp = min(grat_por_pct, grat_tope)
-    else:
-        gratificacion_clp = Decimal("0")
+    # 9. Líquido total = líquido + asignaciones no imponibles
+    liquido_total = liquido + colacion_d + movilizacion_d
 
-    # 10. Líquido total con asignaciones + gratificación
-    liquido_total = liquido + colacion_d + movilizacion_d + gratificacion_clp
-
-    # 11. COSTO TOTAL EMPLEADOR
+    # 10. COSTO TOTAL EMPLEADOR
     aporte_afp_emp = renta_imponible * AFP_CARGO_EMPLEADOR
     aporte_sis     = renta_imponible * SIS_TASA
     aporte_mutual  = renta_imponible * MUTUAL_TASA_BASE
     aporte_cesantia_emp = base_cesantia * cesantia_emp_pct
     costo_total_emp = (
-        bruto_d
-        + colacion_d + movilizacion_d + gratificacion_clp
+        bruto_d           # ya incluye gratificación
+        + colacion_d + movilizacion_d
         + aporte_afp_emp + aporte_sis + aporte_mutual + aporte_cesantia_emp
     )
 
     return ResultadoSueldo(
+        sueldo_base=_q(sueldo_base),
+        gratificacion_legal=_q(gratificacion_clp),
         bruto=_q(bruto_d),
         renta_imponible=_q(renta_imponible),
         afp_total=_q(afp_total),
@@ -274,40 +287,42 @@ def calcular(
         uf_usada=_q(uf_clp),
         colacion=_q(colacion_d),
         movilizacion=_q(movilizacion_d),
-        gratificacion_legal=_q(gratificacion_clp),
         liquido_total=_q(liquido_total),
+        monto_input=_q(monto_d),
         aporte_afp_empleador=_q(aporte_afp_emp),
         aporte_sis=_q(aporte_sis),
         aporte_mutual=_q(aporte_mutual),
         aporte_cesantia_empleador=_q(aporte_cesantia_emp),
         costo_total_empleador=_q(costo_total_emp),
-        monto_input=_q(monto_d),
     )
 
 
-# ── Búsqueda binaria: líquido → bruto ────────────────────────────────────────
+# ── Búsqueda binaria: líquido → sueldo base ─────────────────────────────────
 
-def _resolver_bruto_desde_liquido(
+def _resolver_sueldo_base_desde_liquido(
     liquido_objetivo: Decimal,
     *,
     afp_comision: Decimal,
     salud_tipo: str,
     salud_isapre_uf: Decimal,
     contrato: str,
-    tol: Decimal = Decimal("1"),       # tolerancia 1 CLP
+    gratificacion_legal: bool,
+    tol: Decimal = Decimal("1"),
     max_iter: int = 60,
 ) -> Decimal:
     """
-    Invierte el cálculo del sueldo: dado el líquido deseado, encuentra el bruto.
+    Invierte el cálculo: dado el líquido deseado (sin asignaciones), encuentra
+    el SUELDO BASE (sin gratificación). La búsqueda binaria considera la
+    gratificación como parte del bruto imponible en cada iteración.
 
-    Como el IGC es por tramos progresivos, la función bruto → líquido es
-    monotónica y suave a trozos. Búsqueda binaria converge en ~25 iter.
+    Como el IGC es por tramos progresivos, la función sueldo_base → líquido
+    es monotónica y suave a trozos. Converge en ~25 iter.
     """
     if liquido_objetivo <= 0:
         return Decimal("0")
 
-    lo = liquido_objetivo                              # bruto ≥ líquido siempre
-    hi = liquido_objetivo * Decimal("3")               # heurística: bruto < 3× líquido
+    lo = liquido_objetivo                              # sueldo_base ≥ líquido siempre
+    hi = liquido_objetivo * Decimal("3")               # heurística: < 3× líquido
     for _ in range(max_iter):
         mid = (lo + hi) / 2
         r = calcular(
@@ -317,6 +332,7 @@ def _resolver_bruto_desde_liquido(
             salud_tipo=salud_tipo,
             salud_isapre_uf=salud_isapre_uf,
             contrato=contrato,
+            gratificacion_legal=gratificacion_legal,
         )
         diff = r.liquido - liquido_objetivo
         if abs(diff) <= tol:
@@ -325,4 +341,4 @@ def _resolver_bruto_desde_liquido(
             lo = mid
         else:
             hi = mid
-    return mid    # devolvemos la mejor aproximación al llegar al máx iter
+    return mid

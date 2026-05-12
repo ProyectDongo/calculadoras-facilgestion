@@ -72,12 +72,12 @@ def test_isapre_monto_fijo():
 
 
 def test_tope_imponible_aplica():
-    """Sueldos altos: imponible se topa en 85.7 UF ≈ 3.36M CLP."""
+    """Sueldos altos: imponible se topa en 90 UF (previred abr 2026)."""
     r = calcular(10_000_000)
-    tope = Decimal("85.7") * Decimal("39200")
+    tope = Decimal("90") * Decimal("39200")   # UF mockeada = 39200
     assert r.renta_imponible == tope.quantize(Decimal("1"))
     # AFP/salud/cesantía se calculan sobre tope, NO sobre 10M
-    assert r.afp_total < Decimal("400000")  # mucho menos que 10M*0.1104
+    assert r.afp_total < Decimal("420000")
 
 
 def test_comision_fuera_de_rango_lanza():
@@ -92,23 +92,51 @@ def test_tipo_salud_invalido_lanza():
 
 def test_tope_cesantia_independiente_del_tope_afp():
     """
-    Para sueldos entre tope AFP (85,7 UF ≈ $3.359k con UF=$39.200) y tope
-    cesantía (128,5 UF ≈ $5.037k), la cesantía debe seguir creciendo aunque
+    Para sueldos entre tope AFP (90 UF ≈ $3.528k con UF=$39.200) y tope
+    cesantía (135.2 UF ≈ $5.299k), la cesantía debe seguir creciendo aunque
     la base AFP ya esté topeada.
     """
-    # Bruto $4.000.000 — por encima del tope AFP, por debajo del tope cesantía
+    # Bruto $4.000.000: > tope AFP, < tope cesantía → cesantía sobre bruto entero
     r = calcular(4_000_000, contrato="indefinido")
-    # base_AFP = min(4M, 85.7 × 39200) = min(4M, 3_359_440) = 3_359_440
-    # base_Cesantia = min(4M, 128.5 × 39200) = min(4M, 5_037_200) = 4_000_000
-    # cesantia = 4_000_000 × 0.006 = 24_000
-    assert r.cesantia == Decimal("24000")
-    # AFP topeada al imponible AFP
-    base_afp_esperada = Decimal("85.7") * Decimal("39200")
+    assert r.cesantia == Decimal("24000")  # 4M × 0.6%
+    # AFP topeada al imponible AFP (90 UF × 39200)
+    base_afp_esperada = Decimal("90") * Decimal("39200")
     assert r.afp_total == (base_afp_esperada * Decimal("0.1104")).quantize(Decimal("1"))
 
 
 def test_tope_cesantia_se_aplica_para_sueldos_muy_altos():
-    """Bruto $10M supera ambos topes; cesantía debe topear en 128.5 UF."""
+    """Bruto $10M supera ambos topes; cesantía debe topear en 135.2 UF."""
     r = calcular(10_000_000, contrato="indefinido")
-    base_cesantia_esperada = (Decimal("128.5") * Decimal("39200")) * Decimal("0.006")
+    base_cesantia_esperada = (Decimal("135.2") * Decimal("39200")) * Decimal("0.006")
     assert r.cesantia == base_cesantia_esperada.quantize(Decimal("1"))
+
+
+def test_gratificacion_legal_es_imponible():
+    """
+    Marcar gratificación legal: se suma al sueldo_base como bruto imponible
+    y todos los descuentos se calculan sobre el total.
+    """
+    r = calcular(1_000_000, gratificacion_legal=True)
+    # sueldo_base × 25% = 250.000 ; tope = 4.75 × 539.000 / 12 ≈ 213.354
+    # gratificación = min(250000, 213354) = 213.354
+    assert r.sueldo_base == Decimal("1000000")
+    assert r.gratificacion_legal == Decimal("213354")
+    assert r.bruto == Decimal("1213354")
+    # Los descuentos se aplican sobre 1.213.354, no sobre 1M
+    assert r.afp_total > Decimal("130000")  # > 1M × 0.1104 = 110.400
+
+
+def test_gratificacion_legal_sin_checkbox_no_aplica():
+    r = calcular(1_000_000, gratificacion_legal=False)
+    assert r.gratificacion_legal == Decimal("0")
+    assert r.bruto == r.sueldo_base == Decimal("1000000")
+
+
+def test_asignaciones_no_imponibles_se_suman_al_liquido():
+    """Colación y movilización no descuentan, pero suman al líquido total."""
+    sin = calcular(1_000_000)
+    con = calcular(1_000_000, colacion=Decimal("30000"), movilizacion=Decimal("20000"))
+    # Líquido base no cambia (no descuentan)
+    assert sin.liquido == con.liquido
+    # Líquido total = líquido + 50k
+    assert con.liquido_total == con.liquido + Decimal("50000")

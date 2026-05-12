@@ -32,9 +32,10 @@
   {# ── Form ───────────────────────────────────────────────────────── #}
   <div class="bg-white border border-slate-200 rounded-2xl p-6">
     <form
+      x-ref="calcForm"
       hx-post="{% url 'calculadoras:api_calcular_honorarios' %}"
       hx-target="#resultado-honorarios" hx-swap="innerHTML"
-      hx-trigger="change from:input[name=modo], keyup changed delay:300ms from:input[name=monto]"
+      hx-trigger="change from:input[name=modo], keyup changed delay:300ms from:input[name=monto], recalc"
     >
       {% csrf_token %}
 
@@ -66,9 +67,15 @@
         </div>
       </label>
 
-      <div class="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-900">
-        <strong>Importante:</strong> la tasa sube anualmente. En 2027 será <strong>16%</strong> y en 2028 <strong>17%</strong>.
-      </div>
+      <button type="button"
+              @click="htmx.trigger($refs.calcForm, 'recalc')"
+              class="mt-4 w-full inline-flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-brand-dark font-semibold rounded-lg py-2.5 text-sm transition">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+          <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+        </svg>
+        Recalcular
+      </button>
     </form>
   </div>
 
