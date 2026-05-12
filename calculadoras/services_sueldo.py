@@ -27,6 +27,7 @@ from config.tributario import (
     SALUD_FONASA,
     SEGURO_CESANTIA_INDEFINIDO,
     SEGURO_CESANTIA_PLAZO_FIJO,
+    TOPE_CESANTIA_UF,
     TOPE_IMPONIBLE_UF,
 )
 from core.services.mindicador import get_uf, get_utm
@@ -163,14 +164,16 @@ def calcular(
     else:
         raise ValueError(f"salud_tipo inválido: {salud_tipo!r}")
 
-    # 4. Seguro Cesantía
+    # 4. Seguro Cesantía — tiene SU PROPIO tope (Ley 19.728), mayor que AFP/Salud.
     if contrato == "indefinido":
         cesantia_pct_d = SEGURO_CESANTIA_INDEFINIDO
     elif contrato == "plazo_fijo":
         cesantia_pct_d = SEGURO_CESANTIA_PLAZO_FIJO
     else:
         raise ValueError(f"contrato inválido: {contrato!r}")
-    cesantia = renta_imponible * cesantia_pct_d
+    tope_cesantia_clp = TOPE_CESANTIA_UF * uf_clp
+    base_cesantia = min(bruto_d, tope_cesantia_clp)
+    cesantia = base_cesantia * cesantia_pct_d
 
     # 5. Base imponible IGC
     base_igc = bruto_d - afp_total - salud - cesantia

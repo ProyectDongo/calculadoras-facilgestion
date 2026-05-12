@@ -121,6 +121,10 @@ class PrecioVentaCalcForm(forms.Form):
         min_value=Decimal("0"), max_value=Decimal("1000"),
         max_digits=6, decimal_places=2,
     )
+    modo_porcentaje = forms.ChoiceField(
+        choices=[("markup", "Markup sobre costo"), ("margen", "Margen sobre venta")],
+        required=False,
+    )
     comision_tarjeta = forms.DecimalField(
         required=False, min_value=Decimal("0"), max_value=Decimal("99"),
         max_digits=5, decimal_places=2,
@@ -129,6 +133,9 @@ class PrecioVentaCalcForm(forms.Form):
     def clean_flete(self):
         v = self.cleaned_data.get("flete")
         return Decimal(int(v)) if v else Decimal("0")
+
+    def clean_modo_porcentaje(self):
+        return self.cleaned_data.get("modo_porcentaje") or "markup"
 
     def clean_comision_tarjeta(self):
         v = self.cleaned_data.get("comision_tarjeta")

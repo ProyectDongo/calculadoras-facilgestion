@@ -80,8 +80,10 @@ SEGURO_CESANTIA_PLAZO_FIJO = Decimal("0.0")    # plazo fijo: lo paga el empleado
 
 # Tope imponible mensual (UF). Sobre este monto no se cotiza.
 # Cambia anualmente. Fuente: Superintendencia de Pensiones.
-# 2026: 85.7 UF (anuncio de la SP en oct/nov del año anterior).
-TOPE_IMPONIBLE_UF = Decimal("85.7")
+# 2026: AFP/Salud 85.7 UF, Cesantía 128.5 UF (≈ Ley 19.728 art. 6).
+# La cesantía tiene su PROPIO tope (mayor que AFP/salud).
+TOPE_IMPONIBLE_UF = Decimal("85.7")             # AFP + Salud
+TOPE_CESANTIA_UF  = Decimal("128.5")            # Seguro Cesantía (Ley 19.728)
 
 # UF fallback. Para valor real-time → core.services.mindicador.get_uf().
 UF_VALOR_FALLBACK = Decimal("40290")        # 2026-05-12 (mindicador.cl)

@@ -19,7 +19,10 @@
     </div>
 
     <div class="flex justify-between items-baseline">
-      <span class="text-brand-light">Utilidad ({{ r.porcentaje_markup|floatformat:"-2" }}% sobre costo)</span>
+      <span class="text-brand-light">
+        Utilidad
+        <span class="text-xs">({% if r.modo_porcentaje == "margen" %}margen{% else %}markup{% endif %} {{ r.porcentaje_markup|floatformat:"-2" }}% / margen {{ r.porcentaje_margen|floatformat:"-2" }}%){% comment %}clean{% endcomment %}</span>
+      </span>
       <span class="font-medium text-emerald-600">+ ${{ r.utilidad|floatformat:0|intcomma }}</span>
     </div>
     <div class="flex justify-between items-baseline border-b border-slate-200 pb-2.5">
@@ -44,7 +47,10 @@
     {# ── Precio con tarjeta (solo si se ingresó comisión) ──────────────── #}
     {% if r.comision_tarjeta_pct > 0 %}
     <div class="flex justify-between items-baseline">
-      <span class="text-brand-light">Recargo tarjeta ({{ r.comision_tarjeta_pct|floatformat:"-2" }}%)</span>
+      <span class="text-brand-light">
+        Recargo tarjeta
+        <span class="text-xs">({{ r.comision_tarjeta_pct|floatformat:"-2" }}% nominal + IVA)</span>
+      </span>
       <span class="font-medium text-blue-600">+ ${{ r.recargo_tarjeta|floatformat:0|intcomma }}</span>
     </div>
     <div class="flex justify-between items-baseline bg-blue-50 border border-blue-200 -mx-2 px-3 py-3 rounded-lg">
@@ -56,9 +62,16 @@
     </div>
     {% endif %}
 
-    <div class="flex justify-between items-baseline pt-2">
-      <span class="text-xs text-brand-light">Margen real sobre venta</span>
-      <span class="text-sm font-semibold text-brand-light">{{ r.margen_real_pct|floatformat:"-2" }} %</span>
+    {# ── Métricas de utilidad ─────────────────────────────────────────── #}
+    <div class="grid grid-cols-2 gap-2 pt-2 text-xs">
+      <div class="bg-slate-50 border border-slate-200 rounded-md px-2.5 py-1.5">
+        <div class="text-[10px] uppercase tracking-wide text-brand-light">Markup (sobre costo)</div>
+        <div class="font-semibold text-brand-dark">{{ r.porcentaje_markup|floatformat:"-2" }} %</div>
+      </div>
+      <div class="bg-slate-50 border border-slate-200 rounded-md px-2.5 py-1.5">
+        <div class="text-[10px] uppercase tracking-wide text-brand-light">Margen (sobre venta)</div>
+        <div class="font-semibold text-brand-dark">{{ r.porcentaje_margen|floatformat:"-2" }} %</div>
+      </div>
     </div>
   </div>
 </div>

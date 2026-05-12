@@ -12,26 +12,25 @@
   <div class="absolute inset-0 opacity-[0.04] pointer-events-none"
        style="background-image: linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px); background-size: 32px 32px;"></div>
 
-  <div class="max-w-3xl mx-auto text-center relative">
-    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur text-white text-xs font-medium mb-5 border border-white/10">
-      <span class="w-1.5 h-1.5 rounded-full bg-brand animate-pulse"></span>
-      Plataforma SaaS · Hecho en Chile
-    </span>
-    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 tracking-tight leading-[1.1]">
-      Calculadoras
-      <span class="block text-brand">para PyMEs</span>
+  <div class="max-w-4xl mx-auto text-center relative">
+    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.07] backdrop-blur text-slate-200 text-[11px] sm:text-xs font-medium mb-7 border border-white/10 uppercase tracking-[0.15em]">
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+      Suite tributaria · Chile 2026
+    </div>
+    <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold mb-5 tracking-tight leading-[1.02] text-white">
+      Calculadoras para PyMEs
     </h1>
     <p class="text-slate-300 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
       Cálculos tributarios y previsionales actualizados a 2026.
     </p>
 
     {# CTA principal: scroll a las cards #}
-    <div class="mt-7 flex flex-wrap justify-center gap-3">
-      <a href="#calculadoras" class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg px-5 py-2.5 text-sm transition shadow-lg shadow-brand/20">
+    <div class="mt-8 flex flex-wrap justify-center gap-3">
+      <a href="#calculadoras" class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg px-6 py-3 text-sm transition shadow-xl shadow-brand/25">
         Ver calculadoras
         <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 011.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z" clip-rule="evenodd"/></svg>
       </a>
-      <a href="{% url 'calculadoras:glosario' %}" class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white font-semibold rounded-lg px-5 py-2.5 text-sm transition border border-white/10">
+      <a href="{% url 'calculadoras:glosario' %}" class="inline-flex items-center gap-2 bg-white/[0.07] hover:bg-white/15 text-white font-semibold rounded-lg px-6 py-3 text-sm transition border border-white/10">
         Glosario tributario
       </a>
     </div>

@@ -207,6 +207,7 @@ def _payload_precio_venta(r) -> str:
         "costo":                int(r.costo),
         "flete":                int(r.flete),
         "porcentaje_utilidad":  float(r.porcentaje_markup),
+        "modo_porcentaje":      r.modo_porcentaje,
         "comision_tarjeta":     float(r.comision_tarjeta_pct),
         "costo_total":          int(r.costo_total),
         "utilidad":             int(r.utilidad),
@@ -284,6 +285,7 @@ def api_calcular_precio_venta(request):
         costo=form.cleaned_data["costo"],
         flete=form.cleaned_data["flete"],
         porcentaje_utilidad=form.cleaned_data["porcentaje_utilidad"],
+        modo_porcentaje=form.cleaned_data["modo_porcentaje"],
         comision_tarjeta=form.cleaned_data["comision_tarjeta"],
     )
     registrar_calculo(request)
@@ -349,6 +351,7 @@ def _recalcular(calc: str, payload: dict):
             costo=payload.get("costo"),
             flete=payload.get("flete", 0),
             porcentaje_utilidad=payload.get("porcentaje_utilidad"),
+            modo_porcentaje=payload.get("modo_porcentaje", "markup"),
             comision_tarjeta=payload.get("comision_tarjeta", 0),
         )
 

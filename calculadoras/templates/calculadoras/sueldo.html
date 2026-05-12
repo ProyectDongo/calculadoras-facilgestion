@@ -72,9 +72,10 @@
         <select name="afp_comision" x-model="afp_comision"
                 class="mt-1.5 w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-white">
           {% for afp in afps %}
-          <option value="{{ afp.comision }}">{{ afp.nombre }} ({{ afp.comision|floatformat:"-2" }}% + 10% obligatorio)</option>
+          <option value="{{ afp.comision }}">AFP {{ afp.nombre }} — {{ afp.comision_pct }}% (+ 10% obligatorio)</option>
           {% endfor %}
         </select>
+        <p class="text-xs text-brand-light mt-1.5">Comisiones vigentes en Chile · {% now "F Y" %}</p>
       </label>
 
       <div class="mb-4">

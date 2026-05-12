@@ -57,16 +57,34 @@
         </div>
       </label>
 
-      <label class="block mb-4">
-        <span class="text-sm font-medium text-brand-dark">Utilidad deseada</span>
-        <div class="mt-1.5 relative">
+      <div class="mb-4">
+        <span class="text-sm font-medium text-brand-dark block mb-1.5">Utilidad deseada</span>
+        {# Toggle modo Markup/Margen — ambos válidos, calculan distinto #}
+        <div class="grid grid-cols-2 bg-slate-100 rounded-lg p-1 mb-2 text-xs font-medium">
+          <label class="cursor-pointer">
+            <input type="radio" name="modo_porcentaje" value="markup" class="sr-only peer" x-model="modo_porcentaje" checked>
+            <div class="text-center py-1.5 rounded-md peer-checked:bg-white peer-checked:shadow text-brand-light peer-checked:text-brand-dark transition">
+              Markup <span class="text-[10px] opacity-70">(sobre costo)</span>
+            </div>
+          </label>
+          <label class="cursor-pointer">
+            <input type="radio" name="modo_porcentaje" value="margen" class="sr-only peer" x-model="modo_porcentaje">
+            <div class="text-center py-1.5 rounded-md peer-checked:bg-white peer-checked:shadow text-brand-light peer-checked:text-brand-dark transition">
+              Margen <span class="text-[10px] opacity-70">(sobre venta)</span>
+            </div>
+          </label>
+        </div>
+        <div class="relative">
           <input type="number" name="porcentaje_utilidad" inputmode="decimal" min="0" max="1000" step="0.5"
                  placeholder="30" x-model.number="porcentaje_utilidad" required
                  class="w-full pl-3 pr-9 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-lg">
           <span class="absolute right-3 top-1/2 -translate-y-1/2 text-brand-light">%</span>
         </div>
-        <p class="text-xs text-brand-light mt-1.5">Markup sobre el costo. Ejemplo: 30% sobre $12.000 = $3.600 de utilidad.</p>
-      </label>
+        <p class="text-xs text-brand-light mt-1.5"
+           x-text="modo_porcentaje === 'margen'
+              ? 'Margen sobre venta: el % es del precio final. 30% → precio = costo / 0.70.'
+              : 'Markup sobre costo: el % se suma al costo. 30% sobre $12.000 = $3.600 de utilidad.'"></p>
+      </div>
 
       <label class="block mb-4">
         <span class="text-sm font-medium text-brand-dark">Comisión tarjeta bancaria <span class="text-brand-light text-xs">(opcional)</span></span>
@@ -76,7 +94,7 @@
                  class="w-full pl-3 pr-9 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-lg">
           <span class="absolute right-3 top-1/2 -translate-y-1/2 text-brand-light">%</span>
         </div>
-        <p class="text-xs text-brand-light mt-1.5">Ej: Transbank 1.49 %. Se calcula fuera de la utilidad para evitar referencia circular.</p>
+        <p class="text-xs text-brand-light mt-1.5">Tasa nominal del operador (Transbank 2,95%, Klap 1,95%, etc.). Le aplicamos IVA 19% automáticamente para que el comercio reciba el monto exacto.</p>
       </label>
 
       <label class="block">
@@ -126,6 +144,7 @@ function precioVentaCalc() {
     costo: null,
     flete: null,
     porcentaje_utilidad: 30,
+    modo_porcentaje: 'markup',
     comision_tarjeta: null,
     descripcion: '',
     agregando: false,

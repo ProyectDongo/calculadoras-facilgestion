@@ -88,3 +88,27 @@ def test_comision_fuera_de_rango_lanza():
 def test_tipo_salud_invalido_lanza():
     with pytest.raises(ValueError):
         calcular(500_000, salud_tipo="otro")
+
+
+def test_tope_cesantia_independiente_del_tope_afp():
+    """
+    Para sueldos entre tope AFP (85,7 UF ≈ $3.359k con UF=$39.200) y tope
+    cesantía (128,5 UF ≈ $5.037k), la cesantía debe seguir creciendo aunque
+    la base AFP ya esté topeada.
+    """
+    # Bruto $4.000.000 — por encima del tope AFP, por debajo del tope cesantía
+    r = calcular(4_000_000, contrato="indefinido")
+    # base_AFP = min(4M, 85.7 × 39200) = min(4M, 3_359_440) = 3_359_440
+    # base_Cesantia = min(4M, 128.5 × 39200) = min(4M, 5_037_200) = 4_000_000
+    # cesantia = 4_000_000 × 0.006 = 24_000
+    assert r.cesantia == Decimal("24000")
+    # AFP topeada al imponible AFP
+    base_afp_esperada = Decimal("85.7") * Decimal("39200")
+    assert r.afp_total == (base_afp_esperada * Decimal("0.1104")).quantize(Decimal("1"))
+
+
+def test_tope_cesantia_se_aplica_para_sueldos_muy_altos():
+    """Bruto $10M supera ambos topes; cesantía debe topear en 128.5 UF."""
+    r = calcular(10_000_000, contrato="indefinido")
+    base_cesantia_esperada = (Decimal("128.5") * Decimal("39200")) * Decimal("0.006")
+    assert r.cesantia == base_cesantia_esperada.quantize(Decimal("1"))
