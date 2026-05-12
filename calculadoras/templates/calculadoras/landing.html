@@ -37,38 +37,6 @@
 </section>
 
 
-{# Recursos complementarios #}
-<section class="mt-12">
-  <h2 class="text-lg font-semibold text-brand-dark mb-3">Recursos complementarios</h2>
-
-  <div class="grid gap-3 sm:grid-cols-2">
-    <a href="{% url 'calculadoras:cotizacion' %}"
-       class="group bg-white border border-slate-200 rounded-xl px-5 py-4 hover:border-emerald-500 hover:shadow-sm transition flex items-center gap-4">
-      <div class="w-10 h-10 rounded-md bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="15" y2="16"/></svg>
-      </div>
-      <div class="flex-1 min-w-0">
-        <h3 class="font-bold text-brand-dark text-sm">Mi cotización</h3>
-        <p class="text-xs text-brand-light leading-snug mt-0.5">Arma una lista de productos desde Precio Venta y envíala por correo.</p>
-      </div>
-      <span class="text-emerald-600 group-hover:translate-x-0.5 transition text-sm">→</span>
-    </a>
-
-    <a href="{% url 'calculadoras:glosario' %}"
-       class="group bg-white border border-slate-200 rounded-xl px-5 py-4 hover:border-brand hover:shadow-sm transition flex items-center gap-4">
-      <div class="w-10 h-10 rounded-md bg-brand/10 text-brand flex items-center justify-center shrink-0">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
-      </div>
-      <div class="flex-1 min-w-0">
-        <h3 class="font-bold text-brand-dark text-sm">Glosario tributario</h3>
-        <p class="text-xs text-brand-light leading-snug mt-0.5">12 términos esenciales: IVA, retenciones, AFP, UF, UTM, IGC, F29.</p>
-      </div>
-      <span class="text-brand group-hover:translate-x-0.5 transition text-sm">→</span>
-    </a>
-  </div>
-</section>
-
-
 {# CTA al ERP — sin duplicar las cifras que ya están en el hero #}
 <section class="mt-12 bg-gradient-to-br from-brand-dark to-brand-mid rounded-xl p-6 sm:p-8 text-white border border-slate-700/30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
   <div>
