@@ -5,40 +5,75 @@
 
 {% block content %}
 
-{# Hero institucional sobrio #}
-<section class="-mt-8 -mx-4 mb-12 bg-gradient-to-b from-brand-dark to-brand-mid text-white px-4 pt-14 pb-14 sm:pt-20 sm:pb-16 rounded-b-2xl border-b border-slate-700/40 relative overflow-hidden">
+{# Hero split: texto izq + métricas der #}
+<section class="-mt-8 -mx-4 mb-12 bg-gradient-to-br from-brand-dark via-brand-mid to-brand-dark text-white px-4 pt-12 pb-12 sm:pt-16 sm:pb-16 rounded-b-2xl border-b border-slate-700/40 relative overflow-hidden">
 
   <div aria-hidden="true" class="absolute inset-0 opacity-[0.04] pointer-events-none"
-       style="background-image: linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px); background-size: 48px 48px; mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%);"></div>
+       style="background-image: linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px); background-size: 48px 48px; mask-image: radial-gradient(ellipse at center, black 35%, transparent 80%);"></div>
 
-  <div class="max-w-5xl mx-auto relative">
+  <div class="max-w-6xl mx-auto relative grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
 
-    <div class="flex items-center gap-2 text-[10px] sm:text-xs text-slate-400 uppercase tracking-[0.2em] font-semibold mb-6">
-      <span class="w-6 h-px bg-slate-500"></span>
-      Suite Tributaria
-      <span class="text-slate-600">·</span>
-      Chile 2026
+    {# ── Columna izquierda: texto + CTA ── #}
+    <div class="lg:col-span-7">
+      <div class="flex items-center gap-2 text-[10px] sm:text-xs text-slate-400 uppercase tracking-[0.2em] font-semibold mb-6">
+        <span class="w-6 h-px bg-slate-500"></span>
+        Suite Tributaria · Chile 2026
+      </div>
+
+      {# Título con jerarquía: kicker + main + descriptor #}
+      <div class="space-y-1.5 mb-5">
+        <p class="text-brand-light text-sm font-semibold uppercase tracking-[0.18em]">FácilGestión</p>
+        <h1 class="text-[2.75rem] sm:text-5xl lg:text-[3.75rem] font-extrabold leading-[1] tracking-[-0.035em] text-white">
+          Calculadoras
+        </h1>
+        <p class="text-2xl sm:text-3xl lg:text-4xl font-light text-slate-300 tracking-tight leading-tight">
+          para tu PyME chilena<span class="text-brand">.</span>
+        </p>
+      </div>
+
+      <p class="text-slate-300 text-base leading-relaxed max-w-xl mb-7">
+        IVA, honorarios, sueldo líquido y precio de venta. Actualizadas a 2026 según
+        normativa del SII, Superintendencia de Pensiones y Ley 21.133.
+      </p>
+
+      <div class="flex flex-wrap gap-3">
+        <a href="#calculadoras"
+           class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white font-semibold rounded-md px-5 py-3 text-sm transition shadow-md">
+          Ver las 4 calculadoras
+          <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 011.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z" clip-rule="evenodd"/></svg>
+        </a>
+        <a href="{% url 'calculadoras:glosario' %}"
+           class="inline-flex items-center gap-2 bg-white/[0.06] hover:bg-white/[0.12] text-white font-medium rounded-md px-5 py-3 text-sm transition border border-white/10">
+          Glosario tributario
+        </a>
+      </div>
     </div>
 
-    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-[-0.03em] text-white mb-5 max-w-3xl">
-      Calculadoras para PyMEs chilenas.
-    </h1>
-
-    <p class="text-slate-300 text-base sm:text-lg leading-relaxed max-w-2xl">
-      Cálculos tributarios y previsionales actualizados a 2026 según la normativa del SII,
-      Superintendencia de Pensiones y Ley 21.133.
-    </p>
-
-    <div class="mt-8 flex flex-wrap gap-3">
-      <a href="#calculadoras"
-         class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white font-semibold rounded-md px-5 py-3 text-sm transition shadow-md">
-        Ver las 4 calculadoras
-        <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 011.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z" clip-rule="evenodd"/></svg>
-      </a>
-      <a href="{% url 'calculadoras:glosario' %}"
-         class="inline-flex items-center gap-2 bg-white/[0.06] hover:bg-white/[0.12] text-white font-medium rounded-md px-5 py-3 text-sm transition border border-white/10">
-        Glosario tributario
-      </a>
+    {# ── Columna derecha: bento de métricas ── #}
+    <div class="lg:col-span-5">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-white/[0.04] hover:bg-white/[0.07] transition border border-white/[0.08] rounded-xl p-4 backdrop-blur">
+          <div class="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-bold mb-1.5">IVA</div>
+          <div class="text-3xl font-extrabold text-white leading-none">19<span class="text-xl">%</span></div>
+          <div class="text-[10px] text-slate-500 mt-1.5">DL 825</div>
+        </div>
+        <div class="bg-white/[0.04] hover:bg-white/[0.07] transition border border-white/[0.08] rounded-xl p-4 backdrop-blur">
+          <div class="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-bold mb-1.5">Retención hon.</div>
+          <div class="text-3xl font-extrabold text-white leading-none">15,25<span class="text-xl">%</span></div>
+          <div class="text-[10px] text-slate-500 mt-1.5">Ley 21.133</div>
+        </div>
+        <div class="bg-white/[0.04] hover:bg-white/[0.07] transition border border-white/[0.08] rounded-xl p-4 backdrop-blur">
+          <div class="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-bold mb-1.5">Tope AFP/Salud</div>
+          <div class="text-3xl font-extrabold text-white leading-none">85,7<span class="text-xl ml-1">UF</span></div>
+          <div class="text-[10px] text-slate-500 mt-1.5">SP Chile</div>
+        </div>
+        <div class="bg-white/[0.04] hover:bg-white/[0.07] transition border border-white/[0.08] rounded-xl p-4 backdrop-blur">
+          <div class="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-bold mb-1.5">Exención IGC</div>
+          <div class="text-3xl font-extrabold text-white leading-none">13,5<span class="text-xl ml-1">UTM</span></div>
+          <div class="text-[10px] text-slate-500 mt-1.5">SII mensual</div>
+        </div>
+      </div>
+      <p class="text-[11px] text-slate-500 mt-3 text-center">Tasas y topes vigentes · mayo 2026</p>
     </div>
   </div>
 </section>
@@ -106,45 +141,17 @@
 </section>
 
 
-{# Trust strip institucional #}
-<section class="mt-12 bg-gradient-to-br from-brand-dark to-brand-mid rounded-xl p-6 sm:p-8 text-white border border-slate-700/30">
-  <div class="text-[10px] uppercase tracking-[0.2em] font-bold text-slate-400 mb-5">
-    Bases tributarias 2026
+{# CTA al ERP — sin duplicar las cifras que ya están en el hero #}
+<section class="mt-12 bg-gradient-to-br from-brand-dark to-brand-mid rounded-xl p-6 sm:p-8 text-white border border-slate-700/30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  <div>
+    <h3 class="text-lg font-bold text-white mb-1">¿Necesitas más que una calculadora?</h3>
+    <p class="text-sm text-slate-300">{{ BRAND.name }} es el ERP modular para PyMEs chilenas. Factura, inventario, RRHH y contabilidad en un solo lugar.</p>
   </div>
-
-  <div class="grid gap-4 sm:grid-cols-4 mb-6">
-    <div class="border-l-2 border-blue-400/40 pl-3.5">
-      <div class="text-3xl font-bold text-white">19%</div>
-      <div class="text-xs text-slate-400 uppercase tracking-wide mt-0.5">IVA</div>
-      <div class="text-[11px] text-slate-500 mt-1">DL 825</div>
-    </div>
-    <div class="border-l-2 border-indigo-400/40 pl-3.5">
-      <div class="text-3xl font-bold text-white">15,25%</div>
-      <div class="text-xs text-slate-400 uppercase tracking-wide mt-0.5">Retención hon.</div>
-      <div class="text-[11px] text-slate-500 mt-1">Ley 21.133</div>
-    </div>
-    <div class="border-l-2 border-emerald-400/40 pl-3.5">
-      <div class="text-3xl font-bold text-white">85,7 UF</div>
-      <div class="text-xs text-slate-400 uppercase tracking-wide mt-0.5">Tope AFP/Salud</div>
-      <div class="text-[11px] text-slate-500 mt-1">SP Chile</div>
-    </div>
-    <div class="border-l-2 border-rose-400/40 pl-3.5">
-      <div class="text-3xl font-bold text-white">13,5 UTM</div>
-      <div class="text-xs text-slate-400 uppercase tracking-wide mt-0.5">Exención IGC</div>
-      <div class="text-[11px] text-slate-500 mt-1">SII tabla mens.</div>
-    </div>
-  </div>
-
-  <div class="pt-5 border-t border-white/10 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-    <p class="text-sm text-slate-300">
-      Mantenidas por <span class="font-semibold text-white">{{ BRAND.name }}</span> — ERP modular para PyMEs chilenas.
-    </p>
-    <a href="{{ BRAND.url }}" target="_blank" rel="noopener"
-       class="inline-flex items-center gap-2 bg-white hover:bg-slate-100 text-brand-dark font-semibold rounded-md px-4 py-2 text-sm transition w-fit">
-      Conocer FácilGestión
-      <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd"/></svg>
-    </a>
-  </div>
+  <a href="{{ BRAND.url }}" target="_blank" rel="noopener"
+     class="inline-flex items-center gap-2 bg-white hover:bg-slate-100 text-brand-dark font-semibold rounded-md px-5 py-2.5 text-sm transition w-fit shrink-0">
+    Conocer FácilGestión
+    <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd"/></svg>
+  </a>
 </section>
 
 {% endblock %}
