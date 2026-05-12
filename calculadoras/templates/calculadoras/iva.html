@@ -59,8 +59,10 @@
               x-text="modo==='neto_a_bruto' ? 'Monto NETO (CLP)' : 'Monto BRUTO con IVA (CLP)'"></span>
         <div class="mt-1.5 relative">
           <span class="absolute left-3 top-1/2 -translate-y-1/2 text-brand-light">$</span>
-          <input type="number" name="monto" inputmode="numeric" min="0" max="9999999999" step="1"
-                 placeholder="0" x-model.number="monto" required
+          <input type="text" name="monto" inputmode="numeric" required
+                 :value="fmtCL(monto)"
+                 @input="monto = parseCL($event.target.value)"
+                 placeholder="0"
                  class="w-full pl-7 pr-3 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-lg">
         </div>
       </label>

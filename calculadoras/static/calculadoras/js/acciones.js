@@ -1,3 +1,19 @@
+/* Formato chileno de miles (1.234.567) — usable inline en Alpine.
+ * Recibe número o string; devuelve string formateado o vacío. */
+window.fmtCL = function (n) {
+  const v = parseInt(String(n).replace(/\D/g, ''), 10);
+  if (!v && v !== 0) return '';
+  if (Number.isNaN(v)) return '';
+  return v.toLocaleString('es-CL');
+};
+
+/* Parser inverso: extrae el número desde un input formateado.
+ * "1.234.567" → 1234567 ; "abc" → 0 */
+window.parseCL = function (str) {
+  const clean = String(str || '').replace(/\D/g, '');
+  return clean ? parseInt(clean, 10) : 0;
+};
+
 /* acciones.js — Lógica compartida del modal de descarga/envío.
  *
  * Cada calc registra una función Alpine con Alpine.data() y la mezcla:

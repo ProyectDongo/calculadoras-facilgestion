@@ -239,6 +239,11 @@ def _payload_sueldo(r) -> str:
         "modo":              r.modo,
         "utm_usada":         int(r.utm_usada),
         "uf_usada":          int(r.uf_usada),
+        "colacion":          int(r.colacion),
+        "movilizacion":      int(r.movilizacion),
+        "gratificacion_legal_clp": int(r.gratificacion_legal),
+        "liquido_total":     int(r.liquido_total),
+        "costo_total_empleador": int(r.costo_total_empleador),
     })
 
 
@@ -308,6 +313,9 @@ def api_calcular_sueldo(request):
         salud_tipo=form.cleaned_data["salud_tipo"],
         salud_isapre_uf=form.cleaned_data["salud_isapre_uf"],
         contrato=form.cleaned_data["contrato"],
+        colacion=form.cleaned_data["colacion"],
+        movilizacion=form.cleaned_data["movilizacion"],
+        gratificacion_legal=form.cleaned_data.get("gratificacion_legal", False),
     )
     registrar_calculo(request)
 
@@ -316,6 +324,9 @@ def api_calcular_sueldo(request):
     payload["afp_comision_ratio"] = float(form.cleaned_data["afp_comision"])
     payload["salud_isapre_uf"]    = float(form.cleaned_data["salud_isapre_uf"])
     payload["contrato"]           = form.cleaned_data["contrato"]
+    payload["colacion"]           = int(form.cleaned_data["colacion"])
+    payload["movilizacion"]       = int(form.cleaned_data["movilizacion"])
+    payload["gratificacion_legal"] = bool(form.cleaned_data.get("gratificacion_legal", False))
 
     return render(request, "calculadoras/_resultado_sueldo.html", {
         "r": r, "r_json": json.dumps(payload),
@@ -364,6 +375,9 @@ def _recalcular(calc: str, payload: dict):
             salud_tipo=payload.get("salud_tipo", "fonasa"),
             salud_isapre_uf=Decimal(str(payload.get("salud_isapre_uf", "0"))),
             contrato=payload.get("contrato", "indefinido"),
+            colacion=Decimal(str(payload.get("colacion", 0))),
+            movilizacion=Decimal(str(payload.get("movilizacion", 0))),
+            gratificacion_legal=bool(payload.get("gratificacion_legal", False)),
         )
 
     raise ValueError(f"Calc desconocida: {calc!r}")

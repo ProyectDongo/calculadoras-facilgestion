@@ -34,6 +34,20 @@ def _parse_decimal_es(valor) -> Decimal | None:
         return None
 
 
+def _parse_miles_es(valor) -> int | None:
+    """
+    Acepta '1.234.567', '1 234 567', '1234567' (con o sin separadores
+    de miles chilenos) y devuelve un entero. Cualquier carácter no-dígito
+    se descarta. Devuelve None si queda vacío.
+    """
+    if valor is None or valor == "":
+        return None
+    s = "".join(ch for ch in str(valor) if ch.isdigit())
+    if not s:
+        return None
+    return int(s)
+
+
 # ─── IVA ─────────────────────────────────────────────────────────────────────
 
 class IVACalcForm(forms.Form):
@@ -44,15 +58,16 @@ class IVACalcForm(forms.Form):
     ]
 
     modo = forms.ChoiceField(choices=MODO_CHOICES)
-    monto = forms.DecimalField(
-        min_value=Decimal("0"),
-        max_value=Decimal("9999999999"),
-        max_digits=10,
-        decimal_places=0,
-    )
+    # CharField para aceptar formato chileno con miles (1.234.567 / 1 234 567)
+    monto = forms.CharField(max_length=15)
 
     def clean_monto(self):
-        return Decimal(int(self.cleaned_data["monto"]))
+        v = _parse_miles_es(self.cleaned_data.get("monto"))
+        if v is None:
+            raise forms.ValidationError("Monto inválido.")
+        if v < 0 or v > 9_999_999_999:
+            raise forms.ValidationError("Monto fuera de rango.")
+        return Decimal(v)
 
 
 class HonorariosCalcForm(forms.Form):
@@ -63,15 +78,15 @@ class HonorariosCalcForm(forms.Form):
     ]
 
     modo = forms.ChoiceField(choices=MODO_CHOICES)
-    monto = forms.DecimalField(
-        min_value=Decimal("0"),
-        max_value=Decimal("9999999999"),
-        max_digits=10,
-        decimal_places=0,
-    )
+    monto = forms.CharField(max_length=15)
 
     def clean_monto(self):
-        return Decimal(int(self.cleaned_data["monto"]))
+        v = _parse_miles_es(self.cleaned_data.get("monto"))
+        if v is None:
+            raise forms.ValidationError("Monto inválido.")
+        if v < 0 or v > 9_999_999_999:
+            raise forms.ValidationError("Monto fuera de rango.")
+        return Decimal(v)
 
 
 class SueldoCalcForm(forms.Form):
@@ -81,10 +96,7 @@ class SueldoCalcForm(forms.Form):
         ("liquido_a_bruto", "Líquido → Bruto"),
     ]
     modo = forms.ChoiceField(choices=MODO_CHOICES, required=False)
-    monto = forms.DecimalField(
-        min_value=Decimal("0"), max_value=Decimal("9999999999"),
-        max_digits=10, decimal_places=0,
-    )
+    monto = forms.CharField(max_length=15)
     afp_comision = forms.DecimalField(
         required=False, min_value=Decimal("0"), max_value=Decimal("0.05"),
         max_digits=6, decimal_places=4,
@@ -93,19 +105,26 @@ class SueldoCalcForm(forms.Form):
         choices=[("fonasa", "Fonasa"), ("isapre", "Isapre")],
         required=False,
     )
-    # CharField + parse manual porque el locale chileno usa coma como
-    # separador decimal y type=number HTML rechaza el punto en ese caso.
     salud_isapre_uf = forms.CharField(required=False, max_length=10)
     contrato = forms.ChoiceField(
         choices=[("indefinido", "Indefinido"), ("plazo_fijo", "Plazo fijo")],
         required=False,
     )
+    # Asignaciones no imponibles + gratificación
+    colacion             = forms.CharField(required=False, max_length=15)
+    movilizacion         = forms.CharField(required=False, max_length=15)
+    gratificacion_legal  = forms.BooleanField(required=False)
 
     def clean_modo(self):
         return self.cleaned_data.get("modo") or "bruto_a_liquido"
 
     def clean_monto(self):
-        return Decimal(int(self.cleaned_data["monto"]))
+        v = _parse_miles_es(self.cleaned_data.get("monto"))
+        if v is None:
+            raise forms.ValidationError("Monto inválido.")
+        if v < 0 or v > 9_999_999_999:
+            raise forms.ValidationError("Monto fuera de rango.")
+        return Decimal(v)
 
     def clean_afp_comision(self):
         v = self.cleaned_data.get("afp_comision")
@@ -125,18 +144,19 @@ class SueldoCalcForm(forms.Form):
     def clean_contrato(self):
         return self.cleaned_data.get("contrato") or "indefinido"
 
+    def clean_colacion(self):
+        v = _parse_miles_es(self.cleaned_data.get("colacion"))
+        return Decimal(v) if v is not None else Decimal("0")
+
+    def clean_movilizacion(self):
+        v = _parse_miles_es(self.cleaned_data.get("movilizacion"))
+        return Decimal(v) if v is not None else Decimal("0")
+
 
 class PrecioVentaCalcForm(forms.Form):
     """Cálculo de precio de venta."""
-    costo = forms.DecimalField(
-        min_value=Decimal("0"), max_value=Decimal("9999999999"),
-        max_digits=10, decimal_places=0,
-    )
-    flete = forms.DecimalField(
-        required=False, min_value=Decimal("0"), max_value=Decimal("9999999999"),
-        max_digits=10, decimal_places=0,
-    )
-    # CharFields para decimales con coma chilena (parse manual en clean_*).
+    costo = forms.CharField(max_length=15)
+    flete = forms.CharField(required=False, max_length=15)
     porcentaje_utilidad = forms.CharField(max_length=10)
     modo_porcentaje = forms.ChoiceField(
         choices=[("markup", "Markup sobre costo"), ("margen", "Margen sobre venta")],
@@ -144,9 +164,17 @@ class PrecioVentaCalcForm(forms.Form):
     )
     comision_tarjeta = forms.CharField(required=False, max_length=10)
 
+    def clean_costo(self):
+        v = _parse_miles_es(self.cleaned_data.get("costo"))
+        if v is None:
+            raise forms.ValidationError("Costo inválido.")
+        if v < 0 or v > 9_999_999_999:
+            raise forms.ValidationError("Costo fuera de rango.")
+        return Decimal(v)
+
     def clean_flete(self):
-        v = self.cleaned_data.get("flete")
-        return Decimal(int(v)) if v else Decimal("0")
+        v = _parse_miles_es(self.cleaned_data.get("flete"))
+        return Decimal(v) if v is not None else Decimal("0")
 
     def clean_modo_porcentaje(self):
         return self.cleaned_data.get("modo_porcentaje") or "markup"

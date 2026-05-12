@@ -41,8 +41,10 @@
         <span class="text-sm font-medium text-brand-dark">Costo unitario (neto, CLP)</span>
         <div class="mt-1.5 relative">
           <span class="absolute left-3 top-1/2 -translate-y-1/2 text-brand-light">$</span>
-          <input type="number" name="costo" inputmode="numeric" min="0" max="9999999999" step="1"
-                 placeholder="0" x-model.number="costo" required
+          <input type="text" name="costo" inputmode="numeric" required
+                 :value="fmtCL(costo)"
+                 @input="costo = parseCL($event.target.value)"
+                 placeholder="0"
                  class="w-full pl-7 pr-3 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-lg">
         </div>
       </label>
@@ -51,8 +53,10 @@
         <span class="text-sm font-medium text-brand-dark">Flete unitario <span class="text-brand-light text-xs">(opcional)</span></span>
         <div class="mt-1.5 relative">
           <span class="absolute left-3 top-1/2 -translate-y-1/2 text-brand-light">$</span>
-          <input type="number" name="flete" inputmode="numeric" min="0" max="9999999999" step="1"
-                 placeholder="0" x-model.number="flete"
+          <input type="text" name="flete" inputmode="numeric"
+                 :value="fmtCL(flete)"
+                 @input="flete = parseCL($event.target.value)"
+                 placeholder="0"
                  class="w-full pl-7 pr-3 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-lg">
         </div>
       </label>

@@ -47,8 +47,9 @@ RETENCION_HONORARIOS_PROXIMO_CAMBIO = "2027-01-01"  # → 0.16
 # Fuente mensual: https://www.sii.cl/valores_y_fechas/utm/utm2026.htm
 #
 # Fallback hardcoded. Para valor real-time → core.services.mindicador.get_utm().
-UTM_VALOR_FALLBACK = Decimal("70588")  # mayo 2026 (mindicador.cl verificado 2026-05-12)
+UTM_VALOR_FALLBACK = Decimal("69889")  # abril 2026 (previred.com verificado)
 UTM_VALOR_ACTUAL = UTM_VALOR_FALLBACK  # alias backward-compat
+UTA_VALOR_FALLBACK = Decimal("838668")  # abril 2026 (previred.com)
 
 
 # ── Tramos del Impuesto Único de Segunda Categoría (IGC mensual 2026) ────────
@@ -69,9 +70,12 @@ IGC_TRAMOS_2026 = (
 )
 
 
-# ── Cotizaciones previsionales ────────────────────────────────────────────────
+# ── Cotizaciones previsionales (trabajador dependiente) ─────────────────────
 # Cargas obligatorias para trabajador dependiente con contrato indefinido.
-# Fuente: Superintendencia de Pensiones y Superintendencia de Salud.
+# Fuentes verificadas a abril 2026:
+#   - Superintendencia de Pensiones (previred.com/indicadores-previsionales)
+#   - Superintendencia de Salud
+#   - Ley 19.728 (cesantía)
 AFP_COTIZACION_OBLIGATORIA = Decimal("0.10")   # 10% sobre renta imponible
 AFP_COMISION_PROMEDIO = Decimal("0.0104")      # Promedio simple, 2026
 SALUD_FONASA = Decimal("0.07")                 # 7% obligatorio Fonasa
@@ -79,14 +83,33 @@ SEGURO_CESANTIA_INDEFINIDO = Decimal("0.006")  # 0.6% indefinido (trab.)
 SEGURO_CESANTIA_PLAZO_FIJO = Decimal("0.0")    # plazo fijo: lo paga el empleador
 
 # Tope imponible mensual (UF). Sobre este monto no se cotiza.
-# Cambia anualmente. Fuente: Superintendencia de Pensiones.
-# 2026: AFP/Salud 85.7 UF, Cesantía 128.5 UF (≈ Ley 19.728 art. 6).
-# La cesantía tiene su PROPIO tope (mayor que AFP/salud).
-TOPE_IMPONIBLE_UF = Decimal("85.7")             # AFP + Salud
-TOPE_CESANTIA_UF  = Decimal("128.5")            # Seguro Cesantía (Ley 19.728)
+# Fuente: previred.com — Indicadores previsionales abril 2026:
+#   AFP/Salud: 90 UF (tope SP)
+#   Cesantía: 135,2 UF (Ley 19.728)
+# Cambia anualmente. Verificar en enero de cada año.
+TOPE_IMPONIBLE_UF = Decimal("90")               # AFP + Salud
+TOPE_CESANTIA_UF  = Decimal("135.2")            # Seguro Cesantía (Ley 19.728)
+
+# Cargas del EMPLEADOR (no descuenta al trabajador; suman al costo empresa).
+SIS_TASA = Decimal("0.0162")                    # Seguro Invalidez/Sobrev. — 1,62% abril 2026
+MUTUAL_TASA_BASE = Decimal("0.0095")            # Mutual (accidentes laborales) básica 0,95%
+AFP_CARGO_EMPLEADOR = Decimal("0.001")          # 0,1% adicional a todas las AFP
+SEGURO_CESANTIA_EMPLEADOR_INDEFINIDO = Decimal("0.024")  # 2,4% indefinido
+SEGURO_CESANTIA_EMPLEADOR_PLAZO_FIJO = Decimal("0.03")   # 3,0% plazo fijo
+
+# Ingreso Mínimo Mensual (IMM). Reajustable anualmente por ley.
+# 2026: $539.000 (trabajadores dependientes/independientes, previred abril 2026).
+INGRESO_MINIMO_MENSUAL = Decimal("539000")
+
+# Gratificación legal (Art. 50 Código del Trabajo).
+# 25% del sueldo mensual con tope de 4,75 IMM al año = (4,75 × IMM) / 12 mensual.
+# Al usuario se le aplica el menor entre 25% sueldo y el tope mensual.
+GRATIFICACION_LEGAL_TASA = Decimal("0.25")
+GRATIFICACION_LEGAL_TOPE_IMM_ANUAL = Decimal("4.75")    # × IMM / 12 = tope mensual
 
 # UF fallback. Para valor real-time → core.services.mindicador.get_uf().
-UF_VALOR_FALLBACK = Decimal("40290")        # 2026-05-12 (mindicador.cl)
+# Fuente: previred al 30/abr/2026.
+UF_VALOR_FALLBACK = Decimal("40120.20")
 UF_VALOR_REFERENCIAL = UF_VALOR_FALLBACK    # alias backward-compat
 
 # Choices de AFPs comunes con sus comisiones (% sobre renta imponible).

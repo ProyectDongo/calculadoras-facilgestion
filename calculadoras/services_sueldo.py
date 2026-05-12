@@ -22,11 +22,19 @@ from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Final
 
 from config.tributario import (
+    AFP_CARGO_EMPLEADOR,
     AFP_COTIZACION_OBLIGATORIA,
+    GRATIFICACION_LEGAL_TASA,
+    GRATIFICACION_LEGAL_TOPE_IMM_ANUAL,
     IGC_TRAMOS_2026,
+    INGRESO_MINIMO_MENSUAL,
+    MUTUAL_TASA_BASE,
     SALUD_FONASA,
+    SEGURO_CESANTIA_EMPLEADOR_INDEFINIDO,
+    SEGURO_CESANTIA_EMPLEADOR_PLAZO_FIJO,
     SEGURO_CESANTIA_INDEFINIDO,
     SEGURO_CESANTIA_PLAZO_FIJO,
+    SIS_TASA,
     TOPE_CESANTIA_UF,
     TOPE_IMPONIBLE_UF,
 )
@@ -54,6 +62,19 @@ class ResultadoSueldo:
     modo: str                    # "bruto_a_liquido" | "liquido_a_bruto"
     utm_usada: Decimal           # UTM al momento del cálculo (para auditar PDF)
     uf_usada: Decimal            # UF al momento del cálculo
+
+    # Asignaciones no imponibles (se SUMAN al líquido, no descuentan)
+    colacion: Decimal
+    movilizacion: Decimal
+    gratificacion_legal: Decimal    # 0 si no aplica
+    liquido_total: Decimal          # liquido + colacion + movilizacion + gratificacion
+
+    # Costo total empleador (trabajador NO ve, es para info del empresario)
+    aporte_afp_empleador: Decimal   # 0.1% sobre renta imponible
+    aporte_sis: Decimal             # 1,62% sobre renta imponible
+    aporte_mutual: Decimal          # 0,95% sobre renta imponible
+    aporte_cesantia_empleador: Decimal  # 2,4% indefinido o 3% plazo fijo
+    costo_total_empleador: Decimal  # bruto + asignaciones + todos los aportes
 
 
 def _to_decimal(valor) -> Decimal:
@@ -105,6 +126,9 @@ def calcular(
     salud_tipo: str = "fonasa",
     salud_isapre_uf=Decimal("0"),
     contrato: str = "indefinido",
+    colacion=Decimal("0"),
+    movilizacion=Decimal("0"),
+    gratificacion_legal: bool = False,
 ) -> ResultadoSueldo:
     """
     Args:
@@ -116,6 +140,9 @@ def calcular(
         salud_tipo:      'fonasa' o 'isapre'.
         salud_isapre_uf: si isapre, plan en UF mensual.
         contrato:        'indefinido' | 'plazo_fijo'.
+        colacion:        asignación colación CLP (no imponible, se suma al líquido).
+        movilizacion:    asignación movilización CLP (no imponible).
+        gratificacion_legal: si True, agrega 25% del sueldo con tope 4,75 IMM/12.
     """
     if modo not in ("bruto_a_liquido", "liquido_a_bruto"):
         raise ValueError(f"Modo inválido: {modo!r}")
@@ -125,6 +152,9 @@ def calcular(
         raise ValueError("El monto no puede ser negativo.")
 
     # Si el modo es invertido, resolvemos por búsqueda binaria.
+    # IMPORTANTE: el "líquido" objetivo del usuario se refiere SOLO al sueldo
+    # neto sin asignaciones (colación, movilización, gratificación se suman
+    # APARTE al final). Por eso la búsqueda binaria no las considera.
     if modo == "liquido_a_bruto":
         bruto_d = _resolver_bruto_desde_liquido(
             monto_d,
@@ -167,8 +197,10 @@ def calcular(
     # 4. Seguro Cesantía — tiene SU PROPIO tope (Ley 19.728), mayor que AFP/Salud.
     if contrato == "indefinido":
         cesantia_pct_d = SEGURO_CESANTIA_INDEFINIDO
+        cesantia_emp_pct = SEGURO_CESANTIA_EMPLEADOR_INDEFINIDO
     elif contrato == "plazo_fijo":
         cesantia_pct_d = SEGURO_CESANTIA_PLAZO_FIJO
+        cesantia_emp_pct = SEGURO_CESANTIA_EMPLEADOR_PLAZO_FIJO
     else:
         raise ValueError(f"contrato inválido: {contrato!r}")
     tope_cesantia_clp = TOPE_CESANTIA_UF * uf_clp
@@ -182,9 +214,40 @@ def calcular(
     # 6. IGC
     igc = _calcular_igc(base_igc, utm_clp)
 
-    # 7. Líquido
+    # 7. Líquido (sin asignaciones)
     total_descuentos = afp_total + salud + cesantia + igc
     liquido = bruto_d - total_descuentos
+
+    # 8. Asignaciones no imponibles
+    colacion_d = _to_decimal(colacion)
+    movilizacion_d = _to_decimal(movilizacion)
+    if colacion_d < 0 or movilizacion_d < 0:
+        raise ValueError("Asignaciones no pueden ser negativas.")
+
+    # 9. Gratificación legal mensual (Art. 50 Código del Trabajo)
+    # min(25% sueldo, 4.75 × IMM / 12). Es IMPONIBLE pero el SII la trata
+    # como parte del sueldo bruto — acá la mostramos como "extra" porque
+    # algunos contratos la pagan separadamente.
+    if gratificacion_legal:
+        grat_por_pct = bruto_d * GRATIFICACION_LEGAL_TASA
+        grat_tope = (GRATIFICACION_LEGAL_TOPE_IMM_ANUAL * INGRESO_MINIMO_MENSUAL) / Decimal("12")
+        gratificacion_clp = min(grat_por_pct, grat_tope)
+    else:
+        gratificacion_clp = Decimal("0")
+
+    # 10. Líquido total con asignaciones + gratificación
+    liquido_total = liquido + colacion_d + movilizacion_d + gratificacion_clp
+
+    # 11. COSTO TOTAL EMPLEADOR
+    aporte_afp_emp = renta_imponible * AFP_CARGO_EMPLEADOR
+    aporte_sis     = renta_imponible * SIS_TASA
+    aporte_mutual  = renta_imponible * MUTUAL_TASA_BASE
+    aporte_cesantia_emp = base_cesantia * cesantia_emp_pct
+    costo_total_emp = (
+        bruto_d
+        + colacion_d + movilizacion_d + gratificacion_clp
+        + aporte_afp_emp + aporte_sis + aporte_mutual + aporte_cesantia_emp
+    )
 
     return ResultadoSueldo(
         bruto=_q(bruto_d),
@@ -204,6 +267,15 @@ def calcular(
         modo=modo,
         utm_usada=_q(utm_clp),
         uf_usada=_q(uf_clp),
+        colacion=_q(colacion_d),
+        movilizacion=_q(movilizacion_d),
+        gratificacion_legal=_q(gratificacion_clp),
+        liquido_total=_q(liquido_total),
+        aporte_afp_empleador=_q(aporte_afp_emp),
+        aporte_sis=_q(aporte_sis),
+        aporte_mutual=_q(aporte_mutual),
+        aporte_cesantia_empleador=_q(aporte_cesantia_emp),
+        costo_total_empleador=_q(costo_total_emp),
     )
 
 
