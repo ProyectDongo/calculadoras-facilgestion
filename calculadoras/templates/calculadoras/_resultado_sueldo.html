@@ -129,6 +129,13 @@
     </div>
     {% endif %}
 
+    {# ── Indicadores usados en el cálculo ─────────────────────────────── #}
+    <div class="mt-3 flex flex-wrap gap-3 text-[10px] text-brand-light italic">
+      <span>UF usada: <strong class="text-brand-dark not-italic">${{ r.uf_usada|floatformat:2|intcomma }}</strong> <span class="text-[9px]">(último día mes anterior)</span></span>
+      <span>·</span>
+      <span>UTM usada: <strong class="text-brand-dark not-italic">${{ r.utm_usada|floatformat:0|intcomma }}</strong> <span class="text-[9px]">(mes actual)</span></span>
+    </div>
+
     {# ── Costo empleador (acordeón) ──────────────────────────────────── #}
     <details class="mt-4 group bg-slate-50 rounded-lg overflow-hidden border border-slate-200">
       <summary class="cursor-pointer px-3 py-2 flex items-center justify-between text-xs font-medium text-brand-dark hover:bg-slate-100 transition">

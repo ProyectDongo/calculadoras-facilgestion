@@ -176,8 +176,18 @@ def calcular(
     # Las asignaciones (colación, movilización) NO son imponibles y se
     # consideran solo al final, como suma al líquido.
     if modo == "liquido_a_bruto":
+        # El usuario ingresa el LÍQUIDO TOTAL deseado (incluyendo
+        # asignaciones no imponibles). Para que el resultado coincida,
+        # restamos colación + movilización antes de la búsqueda binaria.
+        colacion_pre = _to_decimal(colacion)
+        movilizacion_pre = _to_decimal(movilizacion)
+        liquido_sin_asign = monto_d - colacion_pre - movilizacion_pre
+        if liquido_sin_asign < 0:
+            raise ValueError(
+                "El líquido objetivo debe ser mayor que la suma de asignaciones."
+            )
         sueldo_base = _resolver_sueldo_base_desde_liquido(
-            monto_d,
+            liquido_sin_asign,
             afp_comision=afp_comision,
             salud_tipo=salud_tipo,
             salud_isapre_uf=salud_isapre_uf,
