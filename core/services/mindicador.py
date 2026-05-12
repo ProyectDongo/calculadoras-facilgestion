@@ -83,3 +83,29 @@ def get_uf() -> Decimal:
 def get_utm() -> Decimal:
     """UTM del mes (en pesos). Fallback a config/tributario.UTM_VALOR_FALLBACK."""
     return _get_cached_or_fetch("utm", UTM_VALOR_FALLBACK)
+
+
+def get_dolar() -> Decimal:
+    """Dólar observado del día (en pesos). Fallback razonable."""
+    return _get_cached_or_fetch("dolar", Decimal("950"))
+
+
+def get_euro() -> Decimal:
+    """Euro del día (en pesos). Fallback razonable."""
+    return _get_cached_or_fetch("euro", Decimal("1050"))
+
+
+def get_ipc() -> Decimal:
+    """IPC mensual (% variación). Fallback 0."""
+    return _get_cached_or_fetch("ipc", Decimal("0.2"))
+
+
+def get_indicadores_resumen() -> dict:
+    """Snapshot de los 5 principales indicadores para el banner sticky."""
+    return {
+        "uf":    get_uf(),
+        "utm":   get_utm(),
+        "dolar": get_dolar(),
+        "euro":  get_euro(),
+        "ipc":   get_ipc(),
+    }

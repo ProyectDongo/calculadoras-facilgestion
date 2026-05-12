@@ -59,8 +59,13 @@ class HonorariosCalcForm(forms.Form):
 
 
 class SueldoCalcForm(forms.Form):
-    """Cálculo de sueldo líquido."""
-    bruto = forms.DecimalField(
+    """Cálculo de sueldo líquido. Soporta ambos sentidos (bruto↔líquido)."""
+    MODO_CHOICES = [
+        ("bruto_a_liquido", "Bruto → Líquido"),
+        ("liquido_a_bruto", "Líquido → Bruto"),
+    ]
+    modo = forms.ChoiceField(choices=MODO_CHOICES, required=False)
+    monto = forms.DecimalField(
         min_value=Decimal("0"), max_value=Decimal("9999999999"),
         max_digits=10, decimal_places=0,
     )
@@ -81,8 +86,11 @@ class SueldoCalcForm(forms.Form):
         required=False,
     )
 
-    def clean_bruto(self):
-        return Decimal(int(self.cleaned_data["bruto"]))
+    def clean_modo(self):
+        return self.cleaned_data.get("modo") or "bruto_a_liquido"
+
+    def clean_monto(self):
+        return Decimal(int(self.cleaned_data["monto"]))
 
     def clean_afp_comision(self):
         v = self.cleaned_data.get("afp_comision")

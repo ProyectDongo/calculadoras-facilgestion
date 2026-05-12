@@ -41,13 +41,18 @@ class ResultadoSueldo:
     afp_total: Decimal           # 10% + comisión
     afp_obligatoria: Decimal     # solo el 10%
     afp_comision: Decimal        # solo la comisión
+    afp_comision_pct: Decimal    # % aplicado (para display en PDF/UI)
     salud: Decimal
     salud_tipo: str              # "fonasa" | "isapre"
     cesantia: Decimal
+    cesantia_pct: Decimal        # % aplicado (0 o 0.6%)
     base_igc: Decimal            # bruto - AFP - salud - cesantía
     igc: Decimal                 # impuesto único
     liquido: Decimal
     total_descuentos: Decimal
+    modo: str                    # "bruto_a_liquido" | "liquido_a_bruto"
+    utm_usada: Decimal           # UTM al momento del cálculo (para auditar PDF)
+    uf_usada: Decimal            # UF al momento del cálculo
 
 
 def _to_decimal(valor) -> Decimal:
@@ -92,8 +97,9 @@ def _calcular_igc(base_imponible_clp: Decimal, utm_valor: Decimal) -> Decimal:
 
 
 def calcular(
-    bruto,
+    monto,
     *,
+    modo: str = "bruto_a_liquido",
     afp_comision=Decimal("0.0104"),
     salud_tipo: str = "fonasa",
     salud_isapre_uf=Decimal("0"),
@@ -101,17 +107,35 @@ def calcular(
 ) -> ResultadoSueldo:
     """
     Args:
-        bruto:           renta mensual bruta en CLP.
+        monto:           si modo='bruto_a_liquido': bruto en CLP.
+                         si modo='liquido_a_bruto': líquido objetivo en CLP.
+        modo:            'bruto_a_liquido' (default) o 'liquido_a_bruto'.
         afp_comision:    comisión adicional de la AFP (ej: 0.0104 = 1.04%).
                          No incluye el 10% obligatorio (ese va aparte).
         salud_tipo:      'fonasa' o 'isapre'.
         salud_isapre_uf: si isapre, plan en UF mensual.
         contrato:        'indefinido' | 'plazo_fijo'.
     """
-    bruto_d = _to_decimal(bruto)
+    if modo not in ("bruto_a_liquido", "liquido_a_bruto"):
+        raise ValueError(f"Modo inválido: {modo!r}")
+
+    monto_d = _to_decimal(monto)
+    if monto_d < 0:
+        raise ValueError("El monto no puede ser negativo.")
+
+    # Si el modo es invertido, resolvemos por búsqueda binaria.
+    if modo == "liquido_a_bruto":
+        bruto_d = _resolver_bruto_desde_liquido(
+            monto_d,
+            afp_comision=afp_comision,
+            salud_tipo=salud_tipo,
+            salud_isapre_uf=salud_isapre_uf,
+            contrato=contrato,
+        )
+    else:
+        bruto_d = monto_d
+
     comision_d = _to_decimal(afp_comision)
-    if bruto_d < 0:
-        raise ValueError("El sueldo bruto no puede ser negativo.")
     if comision_d < 0 or comision_d > Decimal("0.05"):
         raise ValueError("Comisión AFP fuera de rango razonable.")
 
@@ -141,11 +165,12 @@ def calcular(
 
     # 4. Seguro Cesantía
     if contrato == "indefinido":
-        cesantia = renta_imponible * SEGURO_CESANTIA_INDEFINIDO
+        cesantia_pct_d = SEGURO_CESANTIA_INDEFINIDO
     elif contrato == "plazo_fijo":
-        cesantia = renta_imponible * SEGURO_CESANTIA_PLAZO_FIJO
+        cesantia_pct_d = SEGURO_CESANTIA_PLAZO_FIJO
     else:
         raise ValueError(f"contrato inválido: {contrato!r}")
+    cesantia = renta_imponible * cesantia_pct_d
 
     # 5. Base imponible IGC
     base_igc = bruto_d - afp_total - salud - cesantia
@@ -164,11 +189,59 @@ def calcular(
         afp_total=_q(afp_total),
         afp_obligatoria=_q(afp_obligatoria),
         afp_comision=_q(afp_comision_clp),
+        afp_comision_pct=comision_d * Decimal("100"),
         salud=_q(salud),
         salud_tipo=salud_tipo,
         cesantia=_q(cesantia),
+        cesantia_pct=cesantia_pct_d * Decimal("100"),
         base_igc=_q(base_igc),
         igc=_q(igc),
         liquido=_q(liquido),
         total_descuentos=_q(total_descuentos),
+        modo=modo,
+        utm_usada=_q(utm_clp),
+        uf_usada=_q(uf_clp),
     )
+
+
+# ── Búsqueda binaria: líquido → bruto ────────────────────────────────────────
+
+def _resolver_bruto_desde_liquido(
+    liquido_objetivo: Decimal,
+    *,
+    afp_comision: Decimal,
+    salud_tipo: str,
+    salud_isapre_uf: Decimal,
+    contrato: str,
+    tol: Decimal = Decimal("1"),       # tolerancia 1 CLP
+    max_iter: int = 60,
+) -> Decimal:
+    """
+    Invierte el cálculo del sueldo: dado el líquido deseado, encuentra el bruto.
+
+    Como el IGC es por tramos progresivos, la función bruto → líquido es
+    monotónica y suave a trozos. Búsqueda binaria converge en ~25 iter.
+    """
+    if liquido_objetivo <= 0:
+        return Decimal("0")
+
+    lo = liquido_objetivo                              # bruto ≥ líquido siempre
+    hi = liquido_objetivo * Decimal("3")               # heurística: bruto < 3× líquido
+    for _ in range(max_iter):
+        mid = (lo + hi) / 2
+        r = calcular(
+            mid,
+            modo="bruto_a_liquido",
+            afp_comision=afp_comision,
+            salud_tipo=salud_tipo,
+            salud_isapre_uf=salud_isapre_uf,
+            contrato=contrato,
+        )
+        diff = r.liquido - liquido_objetivo
+        if abs(diff) <= tol:
+            return mid
+        if diff < 0:
+            lo = mid
+        else:
+            hi = mid
+    return mid    # devolvemos la mejor aproximación al llegar al máx iter

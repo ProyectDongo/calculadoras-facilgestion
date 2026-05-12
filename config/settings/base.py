@@ -68,8 +68,9 @@ TEMPLATES = [
             "context_processors": [
                 "django.template.context_processors.request",
                 "django.template.context_processors.static",
-                "core.context_processors.brand",       # inyecta colores/logo
-                "core.context_processors.turnstile",   # inyecta SITE_KEY
+                "core.context_processors.brand",        # inyecta colores/logo
+                "core.context_processors.turnstile",    # inyecta SITE_KEY
+                "core.context_processors.indicadores",  # UF/USD/UTM/IPC para banner
             ],
         },
     },

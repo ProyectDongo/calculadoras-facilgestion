@@ -38,14 +38,33 @@
     >
       {% csrf_token %}
 
+      {# ── Toggle bruto ↔ líquido ──────────────────────────────────────── #}
+      <div class="grid grid-cols-2 bg-slate-100 rounded-lg p-1 mb-5 text-sm font-medium">
+        <label class="cursor-pointer">
+          <input type="radio" name="modo" value="bruto_a_liquido" class="sr-only peer" x-model="modo" checked>
+          <div class="text-center py-2 rounded-md peer-checked:bg-white peer-checked:shadow text-brand-light peer-checked:text-brand-dark transition">
+            Bruto → Líquido
+          </div>
+        </label>
+        <label class="cursor-pointer">
+          <input type="radio" name="modo" value="liquido_a_bruto" class="sr-only peer" x-model="modo">
+          <div class="text-center py-2 rounded-md peer-checked:bg-white peer-checked:shadow text-brand-light peer-checked:text-brand-dark transition">
+            Líquido → Bruto
+          </div>
+        </label>
+      </div>
+
       <label class="block mb-4">
-        <span class="text-sm font-medium text-brand-dark">Sueldo Bruto Mensual (CLP)</span>
+        <span class="text-sm font-medium text-brand-dark"
+              x-text="modo === 'liquido_a_bruto' ? 'Sueldo Líquido objetivo (CLP)' : 'Sueldo Bruto Mensual (CLP)'"></span>
         <div class="mt-1.5 relative">
           <span class="absolute left-3 top-1/2 -translate-y-1/2 text-brand-light">$</span>
-          <input type="number" name="bruto" inputmode="numeric" min="0" max="9999999999" step="1"
-                 placeholder="0" x-model.number="bruto" required
+          <input type="number" name="monto" inputmode="numeric" min="0" max="9999999999" step="1"
+                 placeholder="0" x-model.number="monto" required
                  class="w-full pl-7 pr-3 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-lg">
         </div>
+        <p class="text-xs text-brand-light mt-1.5"
+           x-text="modo === 'liquido_a_bruto' ? 'Te calculamos el sueldo bruto necesario para recibir este líquido.' : 'Ingresa tu sueldo bruto y verás todos los descuentos.'"></p>
       </label>
 
       <label class="block mb-4">
@@ -126,7 +145,8 @@
 <script>
 function sueldoCalc() {
   return Object.assign(accionesMixin(), {
-    bruto: null,
+    modo: 'bruto_a_liquido',
+    monto: null,
     afp_comision: 0.0104,
     salud_tipo: 'fonasa',
     salud_isapre_uf: null,

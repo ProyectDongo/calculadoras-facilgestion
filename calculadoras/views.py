@@ -220,18 +220,23 @@ def _payload_precio_venta(r) -> str:
 
 def _payload_sueldo(r) -> str:
     return json.dumps({
-        "bruto":            int(r.bruto),
-        "renta_imponible":  int(r.renta_imponible),
-        "afp_total":        int(r.afp_total),
-        "afp_obligatoria":  int(r.afp_obligatoria),
-        "afp_comision":     int(r.afp_comision),
-        "salud":            int(r.salud),
-        "salud_tipo":       r.salud_tipo,
-        "cesantia":         int(r.cesantia),
-        "base_igc":         int(r.base_igc),
-        "igc":              int(r.igc),
-        "liquido":          int(r.liquido),
-        "total_descuentos": int(r.total_descuentos),
+        "bruto":             int(r.bruto),
+        "renta_imponible":   int(r.renta_imponible),
+        "afp_total":         int(r.afp_total),
+        "afp_obligatoria":   int(r.afp_obligatoria),
+        "afp_comision":      int(r.afp_comision),
+        "afp_comision_pct":  float(r.afp_comision_pct),
+        "salud":             int(r.salud),
+        "salud_tipo":        r.salud_tipo,
+        "cesantia":          int(r.cesantia),
+        "cesantia_pct":      float(r.cesantia_pct),
+        "base_igc":          int(r.base_igc),
+        "igc":               int(r.igc),
+        "liquido":           int(r.liquido),
+        "total_descuentos":  int(r.total_descuentos),
+        "modo":              r.modo,
+        "utm_usada":         int(r.utm_usada),
+        "uf_usada":          int(r.uf_usada),
     })
 
 
@@ -294,7 +299,8 @@ def api_calcular_sueldo(request):
         return _error_partial()
 
     r = calc_sueldo(
-        form.cleaned_data["bruto"],
+        form.cleaned_data["monto"],
+        modo=form.cleaned_data["modo"],
         afp_comision=form.cleaned_data["afp_comision"],
         salud_tipo=form.cleaned_data["salud_tipo"],
         salud_isapre_uf=form.cleaned_data["salud_isapre_uf"],
@@ -349,6 +355,7 @@ def _recalcular(calc: str, payload: dict):
         from decimal import Decimal
         return calc_sueldo(
             payload.get("bruto"),
+            modo="bruto_a_liquido",   # PDF/email siempre recalcula desde bruto guardado
             afp_comision=Decimal(str(payload.get("afp_comision_ratio", "0.0104"))),
             salud_tipo=payload.get("salud_tipo", "fonasa"),
             salud_isapre_uf=Decimal(str(payload.get("salud_isapre_uf", "0"))),

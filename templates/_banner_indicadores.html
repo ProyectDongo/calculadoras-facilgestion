@@ -1,0 +1,45 @@
+{% load humanize %}
+{% comment %}
+Banner sticky con indicadores económicos chilenos. Aparece en todas las páginas
+arriba del header. Datos vía mindicador.cl con cache 24h.
+{% endcomment %}
+
+{% if INDICADORES %}
+<div class="bg-slate-900 text-slate-300 text-[11px] sm:text-xs border-b border-slate-800/60 overflow-x-auto whitespace-nowrap">
+  <div class="max-w-6xl mx-auto px-3 sm:px-6 py-1.5 flex items-center gap-4 sm:gap-6">
+    <span class="hidden sm:inline-flex items-center gap-1 text-[10px] uppercase tracking-widest text-slate-500 font-semibold shrink-0">
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+      Mercado CL
+    </span>
+
+    <span class="inline-flex items-center gap-1.5 shrink-0">
+      <span class="font-semibold text-slate-400">UF</span>
+      <span class="font-mono text-white">${{ INDICADORES.uf|floatformat:0|intcomma }}</span>
+    </span>
+
+    <span class="inline-flex items-center gap-1.5 shrink-0">
+      <span class="font-semibold text-slate-400">USD</span>
+      <span class="font-mono text-white">${{ INDICADORES.dolar|floatformat:"0"|intcomma }}</span>
+    </span>
+
+    <span class="inline-flex items-center gap-1.5 shrink-0">
+      <span class="font-semibold text-slate-400">EUR</span>
+      <span class="font-mono text-white">${{ INDICADORES.euro|floatformat:"0"|intcomma }}</span>
+    </span>
+
+    <span class="inline-flex items-center gap-1.5 shrink-0">
+      <span class="font-semibold text-slate-400">UTM</span>
+      <span class="font-mono text-white">${{ INDICADORES.utm|floatformat:0|intcomma }}</span>
+    </span>
+
+    <span class="inline-flex items-center gap-1.5 shrink-0">
+      <span class="font-semibold text-slate-400">IPC</span>
+      <span class="font-mono text-white">{{ INDICADORES.ipc|floatformat:"-2" }}%</span>
+    </span>
+
+    <span class="ml-auto hidden md:inline text-slate-500 text-[10px] shrink-0">
+      Fuente: <a href="https://mindicador.cl" target="_blank" rel="noopener" class="hover:text-slate-300 underline">mindicador.cl</a>
+    </span>
+  </div>
+</div>
+{% endif %}

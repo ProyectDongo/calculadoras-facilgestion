@@ -31,3 +31,16 @@ def brand(_request):
 def turnstile(_request):
     """Site key de Cloudflare Turnstile para inyectar en templates."""
     return {"TURNSTILE_SITE_KEY": settings.TURNSTILE_SITE_KEY}
+
+
+def indicadores(_request):
+    """Indicadores económicos chilenos (UF, USD, EUR, UTM, IPC) para banner sticky.
+
+    Lectura con cache 24h vía mindicador.cl; fail-open al fallback hardcoded.
+    Coste por request: 0 llamadas HTTP (cache); peor caso 5 llamadas con timeout 3s.
+    """
+    from core.services.mindicador import get_indicadores_resumen
+    try:
+        return {"INDICADORES": get_indicadores_resumen()}
+    except Exception:
+        return {"INDICADORES": None}
