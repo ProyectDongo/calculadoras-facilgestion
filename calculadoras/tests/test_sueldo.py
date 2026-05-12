@@ -140,3 +140,25 @@ def test_asignaciones_no_imponibles_se_suman_al_liquido():
     assert sin.liquido == con.liquido
     # Líquido total = líquido + 50k
     assert con.liquido_total == con.liquido + Decimal("50000")
+
+
+def test_modo_invertido_con_gratificacion_sueldo_bajo():
+    """
+    Bug regresión: con gratificación marcada y sueldos bajos (sin IGC), la
+    búsqueda binaria fallaba porque arrancaba con lo=líquido_objetivo. Cuando
+    el sueldo_base correcto era MENOR que ese líquido (porque la gratif 25%
+    suma al bruto), nunca convergía.
+
+    Caso: líquido $475.000, AFP Uno 0.49%, con gratificación.
+    El líquido resultante debe ser exactamente $475.000 (±$1 por redondeo).
+    """
+    r = calcular(
+        475_000,
+        modo="liquido_a_bruto",
+        afp_comision=Decimal("0.0049"),  # AFP Uno
+        gratificacion_legal=True,
+    )
+    # Verifica que el líquido calculado coincide con el objetivo
+    assert abs(r.liquido - Decimal("475000")) <= Decimal("1")
+    # El sueldo_base debe ser menor que el líquido (sin IGC + gratif al 25%)
+    assert r.sueldo_base < Decimal("475000")

@@ -308,7 +308,7 @@ def _resolver_sueldo_base_desde_liquido(
     contrato: str,
     gratificacion_legal: bool,
     tol: Decimal = Decimal("1"),
-    max_iter: int = 60,
+    max_iter: int = 80,
 ) -> Decimal:
     """
     Invierte el cálculo: dado el líquido deseado (sin asignaciones), encuentra
@@ -316,13 +316,18 @@ def _resolver_sueldo_base_desde_liquido(
     gratificación como parte del bruto imponible en cada iteración.
 
     Como el IGC es por tramos progresivos, la función sueldo_base → líquido
-    es monotónica y suave a trozos. Converge en ~25 iter.
+    es monotónica y suave a trozos. Converge en ~30 iter con bracket amplio.
+
+    BUG conocido y arreglado: con gratificación marcada y sueldos bajos
+    (sin IGC), el sueldo_base puede ser MENOR que el líquido objetivo
+    porque la gratificación 25% incrementa el bruto sin descontar
+    proporcionalmente. Por eso 'lo' debe ser 0, no liquido_objetivo.
     """
     if liquido_objetivo <= 0:
         return Decimal("0")
 
-    lo = liquido_objetivo                              # sueldo_base ≥ líquido siempre
-    hi = liquido_objetivo * Decimal("3")               # heurística: < 3× líquido
+    lo = Decimal("0")                                  # bracket inferior amplio
+    hi = liquido_objetivo * Decimal("3")               # heurística: bruto < 3× líquido
     for _ in range(max_iter):
         mid = (lo + hi) / 2
         r = calcular(
