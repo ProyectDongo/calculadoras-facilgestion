@@ -5,16 +5,14 @@
 
 {% block content %}
 
-{# ══ Hero institucional: sobrio, sin animaciones llamativas ══════════════ #}
-<section class="-mt-8 -mx-4 mb-10 bg-gradient-to-b from-brand-dark to-brand-mid text-white px-4 pt-14 pb-12 sm:pt-20 sm:pb-16 rounded-b-2xl border-b border-slate-700/40 relative overflow-hidden">
+{# Hero institucional sobrio #}
+<section class="-mt-8 -mx-4 mb-12 bg-gradient-to-b from-brand-dark to-brand-mid text-white px-4 pt-14 pb-14 sm:pt-20 sm:pb-16 rounded-b-2xl border-b border-slate-700/40 relative overflow-hidden">
 
-  {# Grid sutil de fondo, sin animaciones #}
   <div aria-hidden="true" class="absolute inset-0 opacity-[0.04] pointer-events-none"
        style="background-image: linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px); background-size: 48px 48px; mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%);"></div>
 
   <div class="max-w-5xl mx-auto relative">
 
-    {# Eyebrow corporativo #}
     <div class="flex items-center gap-2 text-[10px] sm:text-xs text-slate-400 uppercase tracking-[0.2em] font-semibold mb-6">
       <span class="w-6 h-px bg-slate-500"></span>
       Suite Tributaria
@@ -22,9 +20,8 @@
       Chile 2026
     </div>
 
-    {# Título serif editorial #}
-    <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-medium leading-[1.05] tracking-tight text-white mb-5 max-w-3xl">
-      Herramientas oficiales <em class="italic font-medium text-slate-300">para tu PyME</em> chilena.
+    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-[-0.03em] text-white mb-5 max-w-3xl">
+      Calculadoras para PyMEs chilenas.
     </h1>
 
     <p class="text-slate-300 text-base sm:text-lg leading-relaxed max-w-2xl">
@@ -32,7 +29,6 @@
       Superintendencia de Pensiones y Ley 21.133.
     </p>
 
-    {# CTA primarios institucionales #}
     <div class="mt-8 flex flex-wrap gap-3">
       <a href="#calculadoras"
          class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white font-semibold rounded-md px-5 py-3 text-sm transition shadow-md">
@@ -48,52 +44,43 @@
 </section>
 
 
-{# ══ Tabla institucional de calculadoras ═══════════════════════════════ #}
+{# Cards grandes — protagonistas de la página #}
 <section id="calculadoras" class="scroll-mt-8">
 
-  <header class="mb-5 flex items-end justify-between flex-wrap gap-2">
+  <header class="mb-6 flex items-end justify-between flex-wrap gap-2">
     <div>
-      <h2 class="font-serif text-2xl sm:text-3xl font-medium text-brand-dark tracking-tight">Calculadoras disponibles</h2>
-      <p class="text-sm text-brand-light mt-1">Cuatro herramientas. Todas con cálculo en vivo y exportación a PDF.</p>
+      <h2 class="text-2xl sm:text-3xl font-bold text-brand-dark tracking-tight">Las 4 calculadoras</h2>
+      <p class="text-sm text-brand-light mt-1">Toca cualquiera para comenzar. Cálculo en vivo, sin recargas.</p>
     </div>
-    <span class="text-xs text-brand-light italic">Última actualización tributaria: mayo 2026</span>
+    <span class="hidden sm:inline-flex text-xs text-brand-light items-center gap-1.5 pb-1">
+      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Resultado al instante
+    </span>
   </header>
 
-  {# Tabla desktop · Cards en mobile #}
-  <div class="bg-white border border-slate-200 rounded-lg overflow-hidden">
-
-    {# Encabezado tabla — solo desktop #}
-    <div class="hidden md:grid md:grid-cols-12 gap-4 bg-slate-50 border-b border-slate-200 px-6 py-3 text-[11px] uppercase tracking-wider text-brand-light font-bold">
-      <div class="col-span-4">Calculadora</div>
-      <div class="col-span-2">Tasa / Tipo</div>
-      <div class="col-span-3">Ejemplo</div>
-      <div class="col-span-2">Fuente legal</div>
-      <div class="col-span-1 text-right">Acción</div>
-    </div>
-
-    {# Filas de calcs #}
+  <div class="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
     {% for c in calculadoras %}
       {% if c.color_tw == "blue" %}
-        {% include "calculadoras/_row_calc.html" with c=c chip_bg="bg-blue-500/10" chip_text="text-blue-600" preview_bg="bg-blue-50" preview_border="border-blue-200" preview_text="text-blue-700" cta_bg="bg-blue-600 hover:bg-blue-700" ref_legal="DL 825" %}
+        {% include "calculadoras/_card_calc.html" with c=c chip_bg="bg-blue-500/10" chip_text="text-blue-600" border_hover="hover:border-blue-500" badge_grad="from-blue-500 to-blue-600" arrow="text-blue-600" preview_bg="bg-blue-50" preview_border="border-blue-200" preview_text="text-blue-700" %}
       {% elif c.color_tw == "emerald" %}
-        {% include "calculadoras/_row_calc.html" with c=c chip_bg="bg-emerald-500/10" chip_text="text-emerald-600" preview_bg="bg-emerald-50" preview_border="border-emerald-200" preview_text="text-emerald-700" cta_bg="bg-emerald-600 hover:bg-emerald-700" ref_legal="DL 825" %}
+        {% include "calculadoras/_card_calc.html" with c=c chip_bg="bg-emerald-500/10" chip_text="text-emerald-600" border_hover="hover:border-emerald-500" badge_grad="from-emerald-500 to-emerald-600" arrow="text-emerald-600" preview_bg="bg-emerald-50" preview_border="border-emerald-200" preview_text="text-emerald-700" %}
       {% elif c.color_tw == "indigo" %}
-        {% include "calculadoras/_row_calc.html" with c=c chip_bg="bg-indigo-500/10" chip_text="text-indigo-600" preview_bg="bg-indigo-50" preview_border="border-indigo-200" preview_text="text-indigo-700" cta_bg="bg-indigo-600 hover:bg-indigo-700" ref_legal="Ley 21.133" %}
+        {% include "calculadoras/_card_calc.html" with c=c chip_bg="bg-indigo-500/10" chip_text="text-indigo-600" border_hover="hover:border-indigo-500" badge_grad="from-indigo-500 to-indigo-600" arrow="text-indigo-600" preview_bg="bg-indigo-50" preview_border="border-indigo-200" preview_text="text-indigo-700" %}
       {% elif c.color_tw == "rose" %}
-        {% include "calculadoras/_row_calc.html" with c=c chip_bg="bg-rose-500/10" chip_text="text-rose-600" preview_bg="bg-rose-50" preview_border="border-rose-200" preview_text="text-rose-700" cta_bg="bg-rose-600 hover:bg-rose-700" ref_legal="DL 824 · 19.728" %}
+        {% include "calculadoras/_card_calc.html" with c=c chip_bg="bg-rose-500/10" chip_text="text-rose-600" border_hover="hover:border-rose-500" badge_grad="from-rose-500 to-rose-600" arrow="text-rose-600" preview_bg="bg-rose-50" preview_border="border-rose-200" preview_text="text-rose-700" %}
       {% endif %}
     {% endfor %}
   </div>
 </section>
 
 
-{# ══ Recursos complementarios ═════════════════════════════════════════ #}
+{# Recursos complementarios #}
 <section class="mt-12">
-  <h2 class="font-serif text-xl sm:text-2xl font-medium text-brand-dark mb-4 tracking-tight">Recursos complementarios</h2>
+  <h2 class="text-lg font-semibold text-brand-dark mb-3">Recursos complementarios</h2>
 
   <div class="grid gap-3 sm:grid-cols-2">
     <a href="{% url 'calculadoras:cotizacion' %}"
-       class="group bg-white border border-slate-200 rounded-lg px-5 py-4 hover:border-emerald-500 hover:shadow-sm transition flex items-center gap-4">
+       class="group bg-white border border-slate-200 rounded-xl px-5 py-4 hover:border-emerald-500 hover:shadow-sm transition flex items-center gap-4">
       <div class="w-10 h-10 rounded-md bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="15" y2="16"/></svg>
       </div>
@@ -105,7 +92,7 @@
     </a>
 
     <a href="{% url 'calculadoras:glosario' %}"
-       class="group bg-white border border-slate-200 rounded-lg px-5 py-4 hover:border-brand hover:shadow-sm transition flex items-center gap-4">
+       class="group bg-white border border-slate-200 rounded-xl px-5 py-4 hover:border-brand hover:shadow-sm transition flex items-center gap-4">
       <div class="w-10 h-10 rounded-md bg-brand/10 text-brand flex items-center justify-center shrink-0">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
       </div>
@@ -119,30 +106,30 @@
 </section>
 
 
-{# ══ Trust strip institucional — datos verificables ════════════════════ #}
+{# Trust strip institucional #}
 <section class="mt-12 bg-gradient-to-br from-brand-dark to-brand-mid rounded-xl p-6 sm:p-8 text-white border border-slate-700/30">
-  <div class="flex items-start gap-3 mb-5">
-    <span class="text-[10px] uppercase tracking-[0.2em] font-bold text-slate-400">Bases tributarias 2026</span>
+  <div class="text-[10px] uppercase tracking-[0.2em] font-bold text-slate-400 mb-5">
+    Bases tributarias 2026
   </div>
 
   <div class="grid gap-4 sm:grid-cols-4 mb-6">
     <div class="border-l-2 border-blue-400/40 pl-3.5">
-      <div class="font-serif text-3xl font-bold text-white">19%</div>
+      <div class="text-3xl font-bold text-white">19%</div>
       <div class="text-xs text-slate-400 uppercase tracking-wide mt-0.5">IVA</div>
       <div class="text-[11px] text-slate-500 mt-1">DL 825</div>
     </div>
     <div class="border-l-2 border-indigo-400/40 pl-3.5">
-      <div class="font-serif text-3xl font-bold text-white">15,25%</div>
+      <div class="text-3xl font-bold text-white">15,25%</div>
       <div class="text-xs text-slate-400 uppercase tracking-wide mt-0.5">Retención hon.</div>
       <div class="text-[11px] text-slate-500 mt-1">Ley 21.133</div>
     </div>
     <div class="border-l-2 border-emerald-400/40 pl-3.5">
-      <div class="font-serif text-3xl font-bold text-white">85,7 UF</div>
+      <div class="text-3xl font-bold text-white">85,7 UF</div>
       <div class="text-xs text-slate-400 uppercase tracking-wide mt-0.5">Tope AFP/Salud</div>
       <div class="text-[11px] text-slate-500 mt-1">SP Chile</div>
     </div>
     <div class="border-l-2 border-rose-400/40 pl-3.5">
-      <div class="font-serif text-3xl font-bold text-white">13,5 UTM</div>
+      <div class="text-3xl font-bold text-white">13,5 UTM</div>
       <div class="text-xs text-slate-400 uppercase tracking-wide mt-0.5">Exención IGC</div>
       <div class="text-[11px] text-slate-500 mt-1">SII tabla mens.</div>
     </div>
