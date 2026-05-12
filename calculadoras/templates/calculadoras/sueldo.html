@@ -97,9 +97,13 @@
         <div x-show="salud_tipo==='isapre'" x-cloak class="mt-3">
           <label class="block">
             <span class="text-xs text-brand-light">Plan Isapre (UF mensual)</span>
-            <input type="number" name="salud_isapre_uf" min="0" max="100" step="0.01"
-                   placeholder="3.5" x-model.number="salud_isapre_uf"
+            <input type="text" name="salud_isapre_uf"
+                   inputmode="decimal"
+                   pattern="[0-9]+([.,][0-9]{1,2})?"
+                   placeholder="3,5 o 3.5"
+                   x-model="salud_isapre_uf"
                    class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-sm">
+            <p class="text-[10px] text-brand-light mt-1">Acepta punto (3.5) o coma (3,5).</p>
           </label>
         </div>
       </div>

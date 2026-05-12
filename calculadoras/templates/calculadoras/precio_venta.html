@@ -75,8 +75,10 @@
           </label>
         </div>
         <div class="relative">
-          <input type="number" name="porcentaje_utilidad" inputmode="decimal" min="0" max="1000" step="0.5"
-                 placeholder="30" x-model.number="porcentaje_utilidad" required
+          <input type="text" name="porcentaje_utilidad"
+                 inputmode="decimal"
+                 pattern="[0-9]+([.,][0-9]{1,2})?"
+                 placeholder="30" x-model="porcentaje_utilidad" required
                  class="w-full pl-3 pr-9 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-lg">
           <span class="absolute right-3 top-1/2 -translate-y-1/2 text-brand-light">%</span>
         </div>
@@ -89,12 +91,14 @@
       <label class="block mb-4">
         <span class="text-sm font-medium text-brand-dark">Comisión tarjeta bancaria <span class="text-brand-light text-xs">(opcional)</span></span>
         <div class="mt-1.5 relative">
-          <input type="number" name="comision_tarjeta" inputmode="decimal" min="0" max="99" step="0.01"
-                 placeholder="0" x-model.number="comision_tarjeta"
+          <input type="text" name="comision_tarjeta"
+                 inputmode="decimal"
+                 pattern="[0-9]+([.,][0-9]{1,2})?"
+                 placeholder="2,95" x-model="comision_tarjeta"
                  class="w-full pl-3 pr-9 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-lg">
           <span class="absolute right-3 top-1/2 -translate-y-1/2 text-brand-light">%</span>
         </div>
-        <p class="text-xs text-brand-light mt-1.5">Tasa nominal del operador (Transbank 2,95%, Klap 1,95%, etc.). Le aplicamos IVA 19% automáticamente para que el comercio reciba el monto exacto.</p>
+        <p class="text-xs text-brand-light mt-1.5">Acepta punto o coma. Tasa nominal (Transbank 2,95%, Klap 1,95%). Le sumamos IVA 19% automáticamente para que el comercio reciba el monto exacto.</p>
       </label>
 
       <label class="block">

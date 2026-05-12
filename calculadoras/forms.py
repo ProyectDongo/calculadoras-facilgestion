@@ -9,13 +9,29 @@ Convención:
 El RUT y email del usuario son opcionales y NUNCA se almacenan; sólo se usan
 para renderizar el PDF (RUT) o enviarlo (email) y se descartan.
 """
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 from django import forms
 from django.core.validators import validate_email
 
 from core.forms import AntiBotFormMixin
 from core.services import rut as rut_svc
+
+
+def _parse_decimal_es(valor) -> Decimal | None:
+    """
+    Acepta '3,5' y '3.5' como input decimal (locale es-CL usa coma).
+    Devuelve None si el valor está vacío o es inválido.
+    """
+    if valor is None or valor == "":
+        return None
+    if isinstance(valor, Decimal):
+        return valor
+    s = str(valor).strip().replace(",", ".")
+    try:
+        return Decimal(s)
+    except InvalidOperation:
+        return None
 
 
 # ─── IVA ─────────────────────────────────────────────────────────────────────
@@ -77,10 +93,9 @@ class SueldoCalcForm(forms.Form):
         choices=[("fonasa", "Fonasa"), ("isapre", "Isapre")],
         required=False,
     )
-    salud_isapre_uf = forms.DecimalField(
-        required=False, min_value=Decimal("0"), max_value=Decimal("100"),
-        max_digits=6, decimal_places=2,
-    )
+    # CharField + parse manual porque el locale chileno usa coma como
+    # separador decimal y type=number HTML rechaza el punto en ese caso.
+    salud_isapre_uf = forms.CharField(required=False, max_length=10)
     contrato = forms.ChoiceField(
         choices=[("indefinido", "Indefinido"), ("plazo_fijo", "Plazo fijo")],
         required=False,
@@ -100,8 +115,12 @@ class SueldoCalcForm(forms.Form):
         return self.cleaned_data.get("salud_tipo") or "fonasa"
 
     def clean_salud_isapre_uf(self):
-        v = self.cleaned_data.get("salud_isapre_uf")
-        return v if v is not None else Decimal("0")
+        v = _parse_decimal_es(self.cleaned_data.get("salud_isapre_uf"))
+        if v is None:
+            return Decimal("0")
+        if v < 0 or v > Decimal("100"):
+            raise forms.ValidationError("Plan Isapre fuera de rango (0–100 UF).")
+        return v
 
     def clean_contrato(self):
         return self.cleaned_data.get("contrato") or "indefinido"
@@ -117,18 +136,13 @@ class PrecioVentaCalcForm(forms.Form):
         required=False, min_value=Decimal("0"), max_value=Decimal("9999999999"),
         max_digits=10, decimal_places=0,
     )
-    porcentaje_utilidad = forms.DecimalField(
-        min_value=Decimal("0"), max_value=Decimal("1000"),
-        max_digits=6, decimal_places=2,
-    )
+    # CharFields para decimales con coma chilena (parse manual en clean_*).
+    porcentaje_utilidad = forms.CharField(max_length=10)
     modo_porcentaje = forms.ChoiceField(
         choices=[("markup", "Markup sobre costo"), ("margen", "Margen sobre venta")],
         required=False,
     )
-    comision_tarjeta = forms.DecimalField(
-        required=False, min_value=Decimal("0"), max_value=Decimal("99"),
-        max_digits=5, decimal_places=2,
-    )
+    comision_tarjeta = forms.CharField(required=False, max_length=10)
 
     def clean_flete(self):
         v = self.cleaned_data.get("flete")
@@ -137,9 +151,21 @@ class PrecioVentaCalcForm(forms.Form):
     def clean_modo_porcentaje(self):
         return self.cleaned_data.get("modo_porcentaje") or "markup"
 
+    def clean_porcentaje_utilidad(self):
+        v = _parse_decimal_es(self.cleaned_data.get("porcentaje_utilidad"))
+        if v is None or v < 0:
+            raise forms.ValidationError("Porcentaje inválido.")
+        if v > Decimal("1000"):
+            raise forms.ValidationError("Porcentaje fuera de rango.")
+        return v
+
     def clean_comision_tarjeta(self):
-        v = self.cleaned_data.get("comision_tarjeta")
-        return v if v is not None else Decimal("0")
+        v = _parse_decimal_es(self.cleaned_data.get("comision_tarjeta"))
+        if v is None:
+            return Decimal("0")
+        if v < 0 or v >= Decimal("100"):
+            raise forms.ValidationError("Comisión fuera de rango (0–99).")
+        return v
 
 
 class EnviarOdescargarForm(AntiBotFormMixin, forms.Form):
