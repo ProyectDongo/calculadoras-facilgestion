@@ -1,6 +1,19 @@
 {% load humanize %}
 <div data-resultado="{{ r_json }}"
      x-data x-init="$dispatch('resultado-listo', JSON.parse($el.dataset.resultado))">
+
+  {# ── Alerta IMM: sueldo base bajo el ingreso mínimo legal ─────────── #}
+  {% if r.sueldo_base < IMM and r.sueldo_base > 0 %}
+  <div class="mb-3 bg-amber-50 border border-amber-300 rounded-lg p-3 text-xs text-amber-900 flex gap-2.5">
+    <svg class="w-4 h-4 shrink-0 mt-0.5 text-amber-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
+    <div>
+      <strong class="block">Sueldo base bajo el mínimo legal</strong>
+      <span class="block mt-0.5">El sueldo base resultante (${{ r.sueldo_base|floatformat:0|intcomma }}) está bajo el Ingreso Mínimo Mensual de Chile (${{ IMM|floatformat:0|intcomma }}, 2026).</span>
+      <span class="block mt-0.5 text-amber-800">Solo válido para jornada parcial, aprendices (Art. 81), trabajadores de casa particular o casos especiales con autorización.</span>
+    </div>
+  </div>
+  {% endif %}
+
   <div class="space-y-2 text-sm">
 
     {% if r.gratificacion_legal > 0 %}

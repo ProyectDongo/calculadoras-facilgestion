@@ -328,8 +328,10 @@ def api_calcular_sueldo(request):
     payload["movilizacion"]       = int(form.cleaned_data["movilizacion"])
     payload["gratificacion_legal"] = bool(form.cleaned_data.get("gratificacion_legal", False))
 
+    from config.tributario import INGRESO_MINIMO_MENSUAL
     return render(request, "calculadoras/_resultado_sueldo.html", {
         "r": r, "r_json": json.dumps(payload),
+        "IMM": INGRESO_MINIMO_MENSUAL,
     })
 
 
