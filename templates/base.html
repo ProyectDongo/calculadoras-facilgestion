@@ -136,7 +136,6 @@ document.addEventListener('htmx:afterRequest', function(ev) {
     <div>
       <div class="text-white font-semibold text-sm mb-2">Recursos</div>
       <ul class="space-y-1.5 text-xs">
-        <li><a href="{% url 'calculadoras:cotizacion' %}" class="hover:text-white transition">Mi cotización</a></li>
         <li><a href="{% url 'calculadoras:glosario' %}" class="hover:text-white transition">Glosario tributario</a></li>
         <li><a href="{% url 'calculadoras:privacidad' %}" class="hover:text-white transition">Política de privacidad</a></li>
         <li><a href="{{ BRAND.url }}" target="_blank" rel="noopener" class="hover:text-white transition">Ir a {{ BRAND.name }} →</a></li>
