@@ -156,6 +156,11 @@ class AntiFloodMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        # Bypass total cuando el rate limit está desactivado (dev).
+        # En prod RATELIMIT_ENABLE = True (default), el middleware funciona.
+        if not getattr(settings, "RATELIMIT_ENABLE", True):
+            return self.get_response(request)
+
         # Sólo monitoreamos métodos mutantes
         if request.method not in _RATE_LIMITED_METHODS:
             return self.get_response(request)

@@ -30,6 +30,11 @@ if not config("EMAIL_HOST_PASSWORD", default=""):
 # Permitir hosts locales
 ALLOWED_HOSTS = ["*"]
 
+# En dev NO aplicamos rate limit: en local todas las requests vienen del
+# mismo IP interno docker, así que tipear en HTMX se acumula rapidísimo
+# y bloquea al desarrollador. En prod sí está activo.
+RATELIMIT_ENABLE = False
+
 # CSRF en dev: permite calculadoras.facilgestion.cl y túneles temporales (ngrok)
 CSRF_TRUSTED_ORIGINS = [
     "https://calculadoras.facilgestion.cl",
