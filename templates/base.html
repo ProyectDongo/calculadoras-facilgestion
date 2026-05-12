@@ -28,12 +28,32 @@
           },
         },
         fontFamily: {
-          sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+          sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+          display: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        },
+        animation: {
+          'float-slow': 'float 8s ease-in-out infinite',
+          'glow':       'glow 4s ease-in-out infinite',
+        },
+        keyframes: {
+          float: {
+            '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+            '50%':      { transform: 'translateY(-12px) rotate(2deg)' },
+          },
+          glow: {
+            '0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
+            '50%':      { opacity: '0.7', transform: 'scale(1.05)' },
+          },
         },
       },
     },
   };
 </script>
+
+{# Inter via Google Fonts: 1 request HTTP/2, woff2, font-display swap (no FOUT) #}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="{% static 'calculadoras/css/app.css' %}">
 

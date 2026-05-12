@@ -5,32 +5,62 @@
 
 {% block content %}
 
-{# ── Hero navy ─────────────────────────────────────────────────────────── #}
-<section class="-mt-8 -mx-4 mb-10 bg-gradient-to-br from-brand-dark via-brand-mid to-brand-dark text-white py-14 sm:py-20 px-4 rounded-b-3xl shadow-lg relative overflow-hidden">
+{# ── Hero navy con vida ────────────────────────────────────────────────── #}
+<section class="-mt-8 -mx-4 mb-12 bg-gradient-to-br from-brand-dark via-brand-mid to-brand-dark text-white py-16 sm:py-24 px-4 rounded-b-[2rem] shadow-2xl relative overflow-hidden">
 
-  {# Background decorativo: grid sutil #}
-  <div class="absolute inset-0 opacity-[0.04] pointer-events-none"
-       style="background-image: linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px); background-size: 32px 32px;"></div>
+  {# ── Capa 1: grid sutil ─── #}
+  <div class="absolute inset-0 opacity-[0.05] pointer-events-none"
+       style="background-image: linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px); background-size: 40px 40px; mask-image: radial-gradient(ellipse at center, black 35%, transparent 75%);"></div>
+
+  {# ── Capa 2: blobs de color animados (glow detrás del título) ─── #}
+  <div aria-hidden="true" class="absolute inset-0 pointer-events-none overflow-hidden">
+    {# blob azul principal — detrás del título #}
+    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-brand/20 blur-[120px] animate-glow"></div>
+    {# blob emerald sutil — esquina izquierda #}
+    <div class="absolute -left-32 top-1/3 w-[300px] h-[300px] rounded-full bg-emerald-500/10 blur-[100px] animate-float-slow"></div>
+    {# blob indigo sutil — esquina derecha #}
+    <div class="absolute -right-32 bottom-0 w-[280px] h-[280px] rounded-full bg-indigo-500/10 blur-[100px] animate-float-slow" style="animation-delay: 2s;"></div>
+  </div>
 
   <div class="max-w-4xl mx-auto text-center relative">
-    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.07] backdrop-blur text-slate-200 text-[11px] sm:text-xs font-medium mb-7 border border-white/10 uppercase tracking-[0.15em]">
-      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+
+    {# Badge superior animado #}
+    <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/[0.06] backdrop-blur-md text-slate-200 text-[11px] sm:text-xs font-semibold mb-8 border border-white/[0.08] uppercase tracking-[0.15em] shadow-lg">
+      <span class="relative flex h-1.5 w-1.5">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400"></span>
+      </span>
       Suite tributaria · Chile 2026
     </div>
-    <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold mb-5 tracking-tight leading-[1.02] text-white">
-      Calculadoras para PyMEs
+
+    {# Título grande con underline sutil de gradient #}
+    <h1 class="font-display text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 tracking-[-0.04em] leading-[0.98] text-white">
+      Calculadoras
+      <span class="block bg-gradient-to-r from-white via-blue-200 to-white bg-clip-text text-transparent">para PyMEs</span>
     </h1>
+
     <p class="text-slate-300 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
       Cálculos tributarios y previsionales actualizados a 2026.
     </p>
 
-    {# CTA principal: scroll a las cards #}
-    <div class="mt-8 flex flex-wrap justify-center gap-3">
-      <a href="#calculadoras" class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg px-6 py-3 text-sm transition shadow-xl shadow-brand/25">
+    {# Métricas inline — alta densidad de información #}
+    <div class="mt-7 flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-xs sm:text-sm text-slate-400">
+      <span class="inline-flex items-center gap-1.5"><span class="text-white font-semibold text-base">4</span> calculadoras</span>
+      <span class="hidden sm:inline w-px h-3 bg-slate-700"></span>
+      <span class="inline-flex items-center gap-1.5"><span class="text-white font-semibold text-base">19%</span> IVA</span>
+      <span class="hidden sm:inline w-px h-3 bg-slate-700"></span>
+      <span class="inline-flex items-center gap-1.5"><span class="text-white font-semibold text-base">15,25%</span> retención</span>
+      <span class="hidden sm:inline w-px h-3 bg-slate-700"></span>
+      <span class="inline-flex items-center gap-1.5"><span class="text-white font-semibold text-base">2026</span> vigente</span>
+    </div>
+
+    {# CTA principal #}
+    <div class="mt-10 flex flex-wrap justify-center gap-3">
+      <a href="#calculadoras" class="group inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white font-semibold rounded-xl px-7 py-3.5 text-sm transition shadow-2xl shadow-brand/30 ring-1 ring-white/10">
         Ver calculadoras
-        <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 011.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z" clip-rule="evenodd"/></svg>
+        <svg class="w-4 h-4 group-hover:translate-y-0.5 transition-transform" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 011.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z" clip-rule="evenodd"/></svg>
       </a>
-      <a href="{% url 'calculadoras:glosario' %}" class="inline-flex items-center gap-2 bg-white/[0.07] hover:bg-white/15 text-white font-semibold rounded-lg px-6 py-3 text-sm transition border border-white/10">
+      <a href="{% url 'calculadoras:glosario' %}" class="inline-flex items-center gap-2 bg-white/[0.06] hover:bg-white/[0.12] text-white font-semibold rounded-xl px-7 py-3.5 text-sm transition border border-white/10 backdrop-blur">
         Glosario tributario
       </a>
     </div>

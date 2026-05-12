@@ -203,9 +203,11 @@ CONTENT_SECURITY_POLICY = {
         #   - cambiar Tailwind CDN → build standalone (quita 'unsafe-inline')
         #   - cambiar alpine.min.js → @alpinejs/csp build (quita 'unsafe-eval')
         "script-src":  [SELF, "'unsafe-inline'", "'unsafe-eval'", "https://cdn.tailwindcss.com", "https://challenges.cloudflare.com"],
-        "style-src":   [SELF, "'unsafe-inline'"],
+        # fonts.googleapis.com: CSS de Google Fonts (Inter)
+        "style-src":   [SELF, "'unsafe-inline'", "https://fonts.googleapis.com"],
         "img-src":     [SELF, "data:"],
-        "font-src":    [SELF, "data:"],
+        # fonts.gstatic.com: archivos WOFF2 de Google Fonts
+        "font-src":    [SELF, "data:", "https://fonts.gstatic.com"],
         "connect-src": [SELF, "https://challenges.cloudflare.com"],
         "frame-src":   ["https://challenges.cloudflare.com"],
         "frame-ancestors": [NONE],

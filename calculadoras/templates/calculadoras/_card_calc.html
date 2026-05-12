@@ -1,59 +1,60 @@
 {% comment %}
 Card de calculadora. Recibe:
-    c              dict de calculadora (key, nombre, url_name, descripcion, tasa_*, ejemplo_*, disponible, icono_svg)
-    chip_bg        clase bg para el chip del ícono       (ej: "bg-blue-500/10")
-    chip_text      clase text para el ícono              (ej: "text-blue-600")
-    border_hover   clase de border al hover              (ej: "hover:border-blue-500")
-    arrow          clase del arrow CTA                   (ej: "text-blue-600")
-    preview_bg     clase bg del bloque ejemplo           (ej: "bg-blue-50")
-    preview_border clase border del bloque ejemplo       (ej: "border-blue-200")
-    preview_text   clase text de la flecha en preview    (ej: "text-blue-700")
+    c              dict de calculadora
+    chip_bg        bg para chip del ícono       (ej: "bg-blue-500/10")
+    chip_text      text para el ícono           (ej: "text-blue-600")
+    border_hover   border al hover              (ej: "hover:border-blue-500")
+    badge_grad     gradient del badge tasa      (ej: "from-blue-500 to-blue-600")
+    arrow          color del CTA                (ej: "text-blue-600")
+    preview_bg     bg del bloque ejemplo        (ej: "bg-blue-50")
+    preview_border border del ejemplo           (ej: "border-blue-200")
+    preview_text   text del bloque ejemplo      (ej: "text-blue-700")
 {% endcomment %}
 
 {% if c.disponible %}
 <a href="{% url 'calculadoras:'|add:c.url_name %}"
-   class="group relative bg-white rounded-2xl border-2 border-slate-200 {{ border_hover }} hover:shadow-xl hover:-translate-y-0.5 transition-all p-6 flex flex-col">
+   class="group relative bg-white rounded-3xl border border-slate-200/80 hover:border-transparent hover:shadow-2xl hover:-translate-y-1 hover:ring-2 hover:ring-offset-2 hover:ring-offset-brand-bg transition-all duration-300 p-6 sm:p-7 flex flex-col overflow-hidden {{ border_hover }}"
+   style="--hover-ring-color: var(--tw-ring-color);">
+
+  {# Gradient overlay sutil arriba (cobertura ~30%) #}
+  <div aria-hidden="true" class="absolute inset-x-0 top-0 h-32 {{ chip_bg }} opacity-50 blur-2xl pointer-events-none"></div>
 
   {# Badge "Disponible" #}
-  <span class="absolute top-4 right-4 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">
+  <span class="absolute top-4 right-4 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/95 backdrop-blur text-emerald-700 text-[10px] font-bold uppercase tracking-wider border border-emerald-200 z-10 shadow-sm">
     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
     Disponible
   </span>
 {% else %}
-<div class="group relative bg-white/70 rounded-2xl border-2 border-slate-200 opacity-80 p-6 flex flex-col">
+<div class="group relative bg-white/60 rounded-3xl border border-slate-200/80 opacity-75 p-6 sm:p-7 flex flex-col overflow-hidden">
 
-  {# Badge "Próximamente" #}
-  <span class="absolute top-4 right-4 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200">
+  <span class="absolute top-4 right-4 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-wider border border-slate-200 z-10">
     Próximamente
   </span>
 {% endif %}
 
-  {# Ícono #}
-  <div class="w-14 h-14 rounded-2xl {{ chip_bg }} {{ chip_text }} flex items-center justify-center mb-5">
+  {# Ícono prominente con gradient #}
+  <div class="relative w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-2xl {{ chip_bg }} {{ chip_text }} flex items-center justify-center mb-5 shadow-sm ring-1 ring-current/10 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
     {% if c.icono_svg == "calculator" %}
-      <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg class="w-8 h-8 sm:w-9 sm:h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="4" y="2" width="16" height="20" rx="2"/>
         <line x1="8" y1="6" x2="16" y2="6"/>
-        <line x1="8" y1="10" x2="10" y2="10"/>
-        <line x1="14" y1="10" x2="16" y2="10"/>
-        <line x1="8" y1="14" x2="10" y2="14"/>
-        <line x1="14" y1="14" x2="16" y2="14"/>
-        <line x1="8" y1="18" x2="10" y2="18"/>
-        <line x1="14" y1="18" x2="16" y2="18"/>
+        <line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/>
+        <line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/>
+        <line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/>
       </svg>
     {% elif c.icono_svg == "tag" %}
-      <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg class="w-8 h-8 sm:w-9 sm:h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
         <line x1="7" y1="7" x2="7.01" y2="7"/>
       </svg>
     {% elif c.icono_svg == "document" %}
-      <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg class="w-8 h-8 sm:w-9 sm:h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
         <polyline points="14 2 14 8 20 8"/>
         <path d="M9 13l2 2 4-4"/>
       </svg>
     {% elif c.icono_svg == "wallet" %}
-      <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg class="w-8 h-8 sm:w-9 sm:h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="2" y="6" width="20" height="14" rx="2"/>
         <path d="M14 14h4"/><path d="M18 11v6"/>
         <path d="M2 10h20"/>
@@ -61,38 +62,38 @@ Card de calculadora. Recibe:
     {% endif %}
   </div>
 
-  {# Tasa destacada #}
-  <div class="flex items-baseline gap-2 mb-2">
-    <span class="text-2xl font-bold {{ chip_text }}">{{ c.tasa_display }}</span>
-    <span class="text-xs text-brand-light uppercase tracking-wide">{{ c.tasa_label }}</span>
+  {# Tasa destacada como número gigante #}
+  <div class="mb-3 relative">
+    <div class="text-3xl sm:text-4xl font-extrabold {{ chip_text }} tracking-tight leading-none">{{ c.tasa_display }}</div>
+    <div class="text-[10px] sm:text-[11px] text-brand-light uppercase tracking-[0.12em] font-semibold mt-1">{{ c.tasa_label }}</div>
   </div>
 
   {# Título + descripción #}
-  <h2 class="text-xl font-bold text-brand-dark mb-2">{{ c.nombre }}</h2>
-  <p class="text-sm text-brand-light flex-1 mb-5">{{ c.descripcion }}</p>
+  <h2 class="text-lg sm:text-xl font-bold text-brand-dark mb-1.5 tracking-tight">{{ c.nombre }}</h2>
+  <p class="text-xs sm:text-sm text-brand-light flex-1 mb-5 leading-relaxed">{{ c.descripcion }}</p>
 
   {# Preview del cálculo #}
-  <div class="{{ preview_bg }} border {{ preview_border }} rounded-lg px-3 py-2.5 mb-5">
-    <div class="text-[10px] uppercase tracking-wider {{ preview_text }} font-semibold mb-1">{{ c.ejemplo_etiqueta }}</div>
-    <div class="flex items-center gap-2 text-sm font-mono text-brand-dark">
-      <span class="font-semibold">{{ c.ejemplo_input }}</span>
-      <svg class="w-3.5 h-3.5 {{ preview_text }}" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd"/></svg>
-      <span class="font-semibold">{{ c.ejemplo_output }}</span>
+  <div class="{{ preview_bg }} border {{ preview_border }} rounded-xl px-3.5 py-3 mb-5 relative">
+    <div class="text-[10px] uppercase tracking-[0.12em] {{ preview_text }} font-bold mb-1.5 opacity-80">{{ c.ejemplo_etiqueta }}</div>
+    <div class="flex items-center gap-2 text-xs sm:text-sm font-mono text-brand-dark">
+      <span class="font-bold">{{ c.ejemplo_input }}</span>
+      <svg class="w-3.5 h-3.5 {{ preview_text }} shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd"/></svg>
+      <span class="font-bold">{{ c.ejemplo_output }}</span>
     </div>
   </div>
 
   {# CTA #}
   {% if c.disponible %}
-  <div class="flex items-center justify-between mt-auto">
-    <span class="text-sm font-semibold {{ arrow }}">Abrir calculadora</span>
-    <span class="w-8 h-8 rounded-full {{ chip_bg }} {{ chip_text }} flex items-center justify-center group-hover:translate-x-1 transition">
+  <div class="flex items-center justify-between mt-auto pt-1">
+    <span class="text-sm font-bold {{ arrow }}">Abrir calculadora</span>
+    <span class="w-9 h-9 rounded-full bg-gradient-to-br {{ badge_grad }} text-white flex items-center justify-center group-hover:translate-x-1.5 transition-transform shadow-md">
       <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd"/></svg>
     </span>
   </div>
   {% else %}
-  <div class="flex items-center justify-between mt-auto">
+  <div class="flex items-center justify-between mt-auto pt-1">
     <span class="text-sm font-medium text-slate-400">En desarrollo</span>
-    <span class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center">
+    <span class="w-9 h-9 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center">
       <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"/></svg>
     </span>
   </div>
