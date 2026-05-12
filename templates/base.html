@@ -81,94 +81,21 @@ document.addEventListener('htmx:afterRequest', function(ev) {
 </head>
 <body class="min-h-screen bg-brand-bg text-brand-dark antialiased font-sans flex flex-col">
 
-{# ── Modal T&C / cookies — primer ingreso ─────────────────────────────── #}
-<div
-  x-data="{ aceptado: document.cookie.includes('tc_accepted_v1=1') }"
-  x-show="!aceptado"
-  x-cloak
-  class="fixed inset-0 z-[60] bg-slate-900/70 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4"
-  role="dialog" aria-modal="true" aria-labelledby="tc-title"
->
-  <div class="bg-white w-full sm:max-w-xl rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden">
-
-    {# Header con ícono #}
-    <div class="px-6 sm:px-8 pt-6 pb-4 border-b border-slate-100 flex items-start gap-4">
-      <div class="w-11 h-11 rounded-2xl bg-brand/10 text-brand flex items-center justify-center shrink-0">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
-      </div>
-      <div class="flex-1 min-w-0">
-        <h2 id="tc-title" class="text-lg sm:text-xl font-bold text-brand-dark">Privacidad y uso de datos</h2>
-        <p class="text-xs text-brand-light mt-0.5">Ley 19.628 sobre Protección de Datos · Chile</p>
-      </div>
-    </div>
-
-    {# Contenido #}
-    <div class="px-6 sm:px-8 py-5 text-sm text-brand-light leading-relaxed space-y-3 max-h-[60vh] overflow-y-auto">
-      <p class="text-brand-dark font-medium">
-        Las calculadoras son gratuitas y los cálculos se procesan en tiempo real sin almacenar datos personales.
-      </p>
-      <div class="space-y-2.5">
-        <div class="flex gap-2.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 shrink-0"></span>
-          <div>
-            <strong class="text-brand-dark">Cálculo libre:</strong> usar las calculadoras no requiere registro ni datos personales.
-          </div>
-        </div>
-        <div class="flex gap-2.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mt-2 shrink-0"></span>
-          <div>
-            <strong class="text-brand-dark">Descarga o envío por correo:</strong> si decides descargar el PDF o recibirlo por email, te pediremos correo, RUT y datos de empresa.
-            Esos datos se almacenan cifrados y se usan para entregarte el resultado y, si lo autorizas, para enviarte información de FácilGestión.
-          </div>
-        </div>
-        <div class="flex gap-2.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 shrink-0"></span>
-          <div>
-            <strong class="text-brand-dark">Cookies técnicas:</strong> usamos una cookie firmada para recordar tu aceptación. Sin trackers de terceros, sin publicidad.
-          </div>
-        </div>
-      </div>
-      <p class="pt-2 text-xs">
-        Detalles completos en la <a href="{% url 'calculadoras:privacidad' %}" class="text-brand underline font-medium">política de privacidad</a>.
-        Podés retirar tu consentimiento o solicitar la eliminación de tus datos escribiendo a soporte.
-      </p>
-    </div>
-
-    {# Footer con CTA #}
-    <div class="px-6 sm:px-8 py-4 bg-slate-50 border-t border-slate-100 flex flex-col-reverse sm:flex-row gap-2.5 sm:gap-3 sm:items-center sm:justify-end">
-      <a href="{% url 'calculadoras:privacidad' %}"
-         class="text-center sm:text-left text-sm text-brand-light hover:text-brand-dark transition px-2">
-        Leer política completa
-      </a>
-      <button
-        type="button"
-        @click="document.cookie='tc_accepted_v1=1;path=/;max-age=2592000;samesite=Lax'; aceptado=true"
-        class="bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg px-5 py-2.5 text-sm transition shadow-md shadow-brand/20 inline-flex items-center justify-center gap-2"
-      >
-        <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
-        Acepto y continúo
-      </button>
-    </div>
-  </div>
-</div>
-
-{# ── Banner sticky con indicadores económicos chilenos ─────────────────── #}
+{# Topbar sticky: banner indicadores + header navy #}
+<div class="sticky top-0 z-40 shadow-md">
 {% include "_banner_indicadores.html" %}
 
-{# ── Header — navy oscuro como gestion.facilgestion.cl ──────────────────── #}
+{# ── Header navy con título integrado ──────────────────────────── #}
 <header class="bg-brand-dark border-b border-slate-800/50">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-    <a href="{% url 'calculadoras:landing' %}" class="flex items-center gap-4 group">
-      {# Wrapper blanco más prominente — el logo original tiene texto negro #}
-      <div class="bg-white rounded-2xl px-5 py-3 shadow-lg group-hover:shadow-xl group-hover:scale-[1.03] transition-all ring-1 ring-white/10">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+    <a href="{% url 'calculadoras:landing' %}" class="flex items-center gap-3 group shrink-0">
+      <div class="bg-white rounded-lg px-3 py-2 shadow group-hover:shadow-lg transition">
         <img src="{% static 'calculadoras/logo.png' %}" alt="{{ BRAND.name }}"
-             class="h-14 sm:h-16 w-auto">
+             class="h-9 sm:h-10 w-auto">
       </div>
-      <div class="hidden sm:flex flex-col leading-tight border-l border-slate-700 pl-4">
-        <span class="text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold">Suite tributaria</span>
-        <span class="text-lg font-bold text-white">Calculadoras PyME</span>
+      <div class="hidden md:flex flex-col leading-tight">
+        <span class="text-[10px] uppercase tracking-[0.18em] text-slate-400 font-semibold">FácilGestión · Suite Tributaria</span>
+        <span class="text-base font-bold text-white">Calculadoras para PyMEs · Chile 2026</span>
       </div>
     </a>
     <div class="flex items-center gap-2 sm:gap-3"
@@ -197,6 +124,8 @@ document.addEventListener('htmx:afterRequest', function(ev) {
     </div>
   </div>
 </header>
+</div>
+{# ─── fin topbar sticky ─── #}
 
 {# ── Contenido ─────────────────────────────────────────────────────────── #}
 <main class="flex-1 max-w-6xl mx-auto px-4 sm:px-6 py-8 w-full">

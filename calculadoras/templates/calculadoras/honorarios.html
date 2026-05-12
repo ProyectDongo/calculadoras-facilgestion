@@ -40,15 +40,15 @@
 
       <div class="grid grid-cols-2 bg-slate-100 rounded-lg p-1 mb-5 text-sm font-medium">
         <label class="cursor-pointer">
-          <input type="radio" name="modo" value="bruto_a_liquido" class="sr-only peer" x-model="modo" checked>
+          <input type="radio" name="modo" value="liquido_a_bruto" class="sr-only peer" x-model="modo" checked>
           <div class="text-center py-2 rounded-md peer-checked:bg-white peer-checked:shadow text-brand-light peer-checked:text-brand-dark transition">
-            Bruto → Líquido
+            Líquido → Bruto
           </div>
         </label>
         <label class="cursor-pointer">
-          <input type="radio" name="modo" value="liquido_a_bruto" class="sr-only peer" x-model="modo">
+          <input type="radio" name="modo" value="bruto_a_liquido" class="sr-only peer" x-model="modo">
           <div class="text-center py-2 rounded-md peer-checked:bg-white peer-checked:shadow text-brand-light peer-checked:text-brand-dark transition">
-            Líquido → Bruto
+            Bruto → Líquido
           </div>
         </label>
       </div>
@@ -84,12 +84,11 @@
 <script>
 function honorariosCalc() {
   return Object.assign(accionesMixin(), {
-    modo: 'bruto_a_liquido',
+    modo: 'liquido_a_bruto',
     monto: null,
   });
 }
 </script>
 
-{% include "calculadoras/_help_legal.html" with calc_key="honorarios" %}
 {% include "calculadoras/_faq.html" with calc_key="honorarios" %}
 {% endblock %}

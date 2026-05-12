@@ -34,22 +34,22 @@
     <form
       hx-post="{% url 'calculadoras:api_calcular_sueldo' %}"
       hx-target="#resultado-sueldo" hx-swap="innerHTML"
-      hx-trigger="change from:select, change from:input[type=radio], keyup changed delay:400ms from:input[type=number]"
+      hx-trigger="change from:select, change from:input[type=radio], keyup changed delay:400ms from:input"
     >
       {% csrf_token %}
 
-      {# ── Toggle bruto ↔ líquido ──────────────────────────────────────── #}
+      {# ── Toggle líquido ↔ bruto (default líquido → bruto) ─────────── #}
       <div class="grid grid-cols-2 bg-slate-100 rounded-lg p-1 mb-5 text-sm font-medium">
         <label class="cursor-pointer">
-          <input type="radio" name="modo" value="bruto_a_liquido" class="sr-only peer" x-model="modo" checked>
+          <input type="radio" name="modo" value="liquido_a_bruto" class="sr-only peer" x-model="modo" checked>
           <div class="text-center py-2 rounded-md peer-checked:bg-white peer-checked:shadow text-brand-light peer-checked:text-brand-dark transition">
-            Bruto → Líquido
+            Líquido → Bruto
           </div>
         </label>
         <label class="cursor-pointer">
-          <input type="radio" name="modo" value="liquido_a_bruto" class="sr-only peer" x-model="modo">
+          <input type="radio" name="modo" value="bruto_a_liquido" class="sr-only peer" x-model="modo">
           <div class="text-center py-2 rounded-md peer-checked:bg-white peer-checked:shadow text-brand-light peer-checked:text-brand-dark transition">
-            Líquido → Bruto
+            Bruto → Líquido
           </div>
         </label>
       </div>
@@ -63,8 +63,6 @@
                  placeholder="0" x-model.number="monto" required
                  class="w-full pl-7 pr-3 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-lg">
         </div>
-        <p class="text-xs text-brand-light mt-1.5"
-           x-text="modo === 'liquido_a_bruto' ? 'Te calculamos el sueldo bruto necesario para recibir este líquido.' : 'Ingresa tu sueldo bruto y verás todos los descuentos.'"></p>
       </label>
 
       <label class="block mb-4">
@@ -75,7 +73,6 @@
           <option value="{{ afp.comision }}">AFP {{ afp.nombre }} — {{ afp.comision_pct }}% (+ 10% obligatorio)</option>
           {% endfor %}
         </select>
-        <p class="text-xs text-brand-light mt-1.5">Comisiones vigentes en Chile · {% now "F Y" %}</p>
       </label>
 
       <div class="mb-4">
@@ -100,10 +97,9 @@
             <input type="text" name="salud_isapre_uf"
                    inputmode="decimal"
                    pattern="[0-9]+([.,][0-9]{1,2})?"
-                   placeholder="3,5 o 3.5"
+                   placeholder="3,5"
                    x-model="salud_isapre_uf"
                    class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-sm">
-            <p class="text-[10px] text-brand-light mt-1">Acepta punto (3.5) o coma (3,5).</p>
           </label>
         </div>
       </div>
@@ -126,10 +122,6 @@
         </div>
       </div>
 
-      <div class="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-900">
-        Cálculo referencial 2026. No incluye asignaciones (colación, movilización) ni APV.
-        Para casos con tope imponible o gratificación legal, consulta a un contador.
-      </div>
     </form>
   </div>
 
@@ -144,13 +136,12 @@
 
 </div>
 
-{% include "calculadoras/_help_legal.html" with calc_key="sueldo" %}
 {% include "calculadoras/_faq.html" with calc_key="sueldo" %}
 
 <script>
 function sueldoCalc() {
   return Object.assign(accionesMixin(), {
-    modo: 'bruto_a_liquido',
+    modo: 'liquido_a_bruto',
     monto: null,
     afp_comision: 0.0104,
     salud_tipo: 'fonasa',

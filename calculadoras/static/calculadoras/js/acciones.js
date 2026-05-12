@@ -14,7 +14,7 @@ window.accionesMixin = function () {
   return {
     ultimoResultado: null,
     modalAbierto: false,
-    accion: 'descargar',
+    accion: 'enviar',     // Solo se soporta 'enviar' por correo; PDF eliminado.
 
     abrirModal(accion) {
       this.accion = accion;
