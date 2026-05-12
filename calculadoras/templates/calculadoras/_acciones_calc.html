@@ -30,8 +30,9 @@ Variables Django: calc_key
         <svg x-show="accion==='descargar'" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       </div>
       <div class="flex-1 min-w-0">
-        <h3 class="text-base sm:text-lg font-bold text-brand-dark leading-tight"
-            x-text="accion==='enviar' ? 'Enviar PDF a tu correo' : 'Descargar PDF'"></h3>
+        <h3 class="text-base sm:text-lg font-bold text-brand-dark leading-tight">
+          Enviar resultado por correo
+        </h3>
         <p class="text-xs text-brand-light mt-0.5">Completa tus datos para continuar.</p>
       </div>
       <button type="button" @click="modalAbierto=false" aria-label="Cerrar"
@@ -105,7 +106,7 @@ Variables Django: calc_key
           </label>
 
           <label class="block">
-            <span class="text-xs font-semibold text-brand-dark">RUT <span class="text-brand-light text-[10px] font-normal">(opcional, va en PDF)</span></span>
+            <span class="text-xs font-semibold text-brand-dark">RUT <span class="text-brand-light text-[10px] font-normal">(opcional)</span></span>
             <input type="text" name="rut" maxlength="12" placeholder="12.345.678-9"
                    class="mt-1 w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-sm">
           </label>
@@ -151,7 +152,7 @@ Variables Django: calc_key
                 class="flex-1 bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 transition flex items-center justify-center gap-2 text-sm">
           <svg x-show="accion==='enviar'" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           <svg x-show="accion==='descargar'" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <span x-text="accion==='enviar' ? 'Enviar a mi correo' : 'Descargar PDF'"></span>
+          <span>Enviar a mi correo</span>
         </button>
       </div>
     </form>

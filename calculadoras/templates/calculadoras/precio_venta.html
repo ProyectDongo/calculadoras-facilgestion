@@ -38,7 +38,7 @@
       {% csrf_token %}
 
       <label class="block mb-4">
-        <span class="text-sm font-medium text-brand-dark">Costo del producto (neto, CLP)</span>
+        <span class="text-sm font-medium text-brand-dark">Costo unitario (neto, CLP)</span>
         <div class="mt-1.5 relative">
           <span class="absolute left-3 top-1/2 -translate-y-1/2 text-brand-light">$</span>
           <input type="number" name="costo" inputmode="numeric" min="0" max="9999999999" step="1"
@@ -48,7 +48,7 @@
       </label>
 
       <label class="block mb-4">
-        <span class="text-sm font-medium text-brand-dark">Flete / transporte <span class="text-brand-light text-xs">(opcional)</span></span>
+        <span class="text-sm font-medium text-brand-dark">Flete unitario <span class="text-brand-light text-xs">(opcional)</span></span>
         <div class="mt-1.5 relative">
           <span class="absolute left-3 top-1/2 -translate-y-1/2 text-brand-light">$</span>
           <input type="number" name="flete" inputmode="numeric" min="0" max="9999999999" step="1"
@@ -124,9 +124,6 @@
         </template>
         <span x-text="agregado ? '¡Agregado a tu cotización!' : 'Agregar a cotización'"></span>
       </button>
-      <p class="text-xs text-brand-light text-center mt-2">
-        La lista vive en tu navegador. Exporta cuando quieras como PDF profesional.
-      </p>
     </div>
 
     {% include "calculadoras/_acciones_calc.html" with calc_key="precio_venta" %}

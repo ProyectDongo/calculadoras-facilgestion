@@ -4,17 +4,17 @@
   <div class="space-y-2.5 text-sm">
 
     <div class="flex justify-between items-baseline">
-      <span class="text-brand-light">Costo del producto</span>
+      <span class="text-brand-light">Costo unitario</span>
       <span class="font-medium text-brand-dark">${{ r.costo|floatformat:0|intcomma }}</span>
     </div>
     {% if r.flete > 0 %}
     <div class="flex justify-between items-baseline">
-      <span class="text-brand-light">Flete / transporte</span>
+      <span class="text-brand-light">Flete unitario</span>
       <span class="font-medium text-brand-dark">+ ${{ r.flete|floatformat:0|intcomma }}</span>
     </div>
     {% endif %}
     <div class="flex justify-between items-baseline border-b border-slate-200 pb-2.5">
-      <span class="font-medium text-brand-dark">Costo total</span>
+      <span class="font-medium text-brand-dark">Costo total unitario</span>
       <span class="font-semibold text-brand-dark">${{ r.costo_total|floatformat:0|intcomma }}</span>
     </div>
 
@@ -82,16 +82,16 @@
       </summary>
       <dl class="px-3 py-3 border-t border-slate-200 text-[11px] space-y-2 leading-snug text-brand-light">
         <div>
-          <dt class="font-semibold text-brand-dark">Costo del producto</dt>
-          <dd>Lo que pagas a tu proveedor por la unidad. Sin IVA, sin gastos extra.</dd>
+          <dt class="font-semibold text-brand-dark">Costo unitario</dt>
+          <dd>Lo que pagas a tu proveedor por una unidad del producto. Sin IVA, sin gastos extra.</dd>
         </div>
         <div>
-          <dt class="font-semibold text-brand-dark">Flete / transporte</dt>
-          <dd>Costo de llevar el producto hasta tu bodega. Opcional. Se suma al costo del producto.</dd>
+          <dt class="font-semibold text-brand-dark">Flete unitario</dt>
+          <dd>Costo de llevar UNA unidad hasta tu bodega. Si compras por lote, divide el flete total por la cantidad de unidades.</dd>
         </div>
         <div>
-          <dt class="font-semibold text-brand-dark">Costo unitario (= total)</dt>
-          <dd>Costo del producto + flete. Es la base sobre la que se calcula tu utilidad.</dd>
+          <dt class="font-semibold text-brand-dark">Costo total unitario</dt>
+          <dd>Costo unitario + flete unitario. Es la base sobre la que se calcula tu margen.</dd>
         </div>
         <div>
           <dt class="font-semibold text-brand-dark">Margen sobre costo (markup)</dt>

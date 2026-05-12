@@ -25,7 +25,7 @@
   </div>
   <div>
     <h1 class="text-3xl font-bold text-brand-dark">Mi cotización</h1>
-    <p class="text-brand-light mt-1">Lista de productos para exportar como PDF profesional</p>
+    <p class="text-brand-light mt-1">Lista de productos para enviar a tu cliente.</p>
   </div>
 </header>
 
@@ -102,7 +102,7 @@
     {# Panel emisor + acciones #}
     <div class="space-y-4">
       <div class="bg-white border border-slate-200 rounded-2xl p-5">
-        <h3 class="font-semibold text-brand-dark mb-3 text-sm">Datos del emisor <span class="text-brand-light text-xs">(opcional, aparecen en el PDF)</span></h3>
+        <h3 class="font-semibold text-brand-dark mb-3 text-sm">Datos del emisor <span class="text-brand-light text-xs">(opcional)</span></h3>
         <div class="space-y-3">
           <input type="text" maxlength="200" placeholder="Nombre o empresa"
                  x-model="emisor.empresa" @change="guardarEmisor()"
@@ -138,7 +138,7 @@
           <polyline points="7 10 12 15 17 10"/>
           <line x1="12" y1="15" x2="12" y2="3"/>
         </svg>
-        Descargar cotización (PDF)
+        Descargar cotización
       </button>
     </div>
   </div>
