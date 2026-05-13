@@ -92,20 +92,14 @@ Variable: calc_key. Aparece arriba del FAQ.
   </h2>
 
   <div class="space-y-3 text-sm text-brand-dark leading-relaxed">
-    <p>El precio neto se construye sumando markup al costo total; el IVA se aplica al final; la comisión de tarjeta se calcula <em>aparte</em> para no canibalizar la utilidad.</p>
+    <p>El precio neto se construye sumando la utilidad al costo total; el IVA se aplica al final; la comisión de tarjeta se calcula <em>aparte</em> para no canibalizar la utilidad.</p>
 
     <div class="bg-white border border-slate-200 rounded-lg p-4 my-4 font-mono text-sm text-brand-dark space-y-1.5">
       <div>costo_total &nbsp; = costo + flete</div>
-      <div>utilidad &nbsp;&nbsp;&nbsp;&nbsp; = costo_total × markup%</div>
+      <div>utilidad &nbsp;&nbsp;&nbsp;&nbsp; = costo_total × % margen</div>
       <div>precio_neto &nbsp; = costo_total + utilidad</div>
       <div>precio_iva &nbsp;&nbsp; = precio_neto × 1.19</div>
       <div class="text-emerald-700">precio_tarjeta = precio_iva / (1 − comisión%)</div>
-    </div>
-
-    <div class="bg-amber-50/60 border border-amber-200 rounded-lg p-3 my-3">
-      <p class="text-xs text-amber-900">
-        <strong>Markup vs Margen real:</strong> el markup es % sobre el <em>costo</em>; el margen es % sobre la <em>venta</em>. Markup 30 % ≈ margen 23 %.
-      </p>
     </div>
 
     {# ──── Tabla referencial de comisiones de tarjeta ──── #}

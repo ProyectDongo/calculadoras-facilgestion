@@ -55,18 +55,39 @@
         </label>
       </div>
 
-      <label class="block mb-4">
-        <span class="text-sm font-medium text-brand-dark"
-              x-text="modo === 'liquido_a_bruto' ? 'Sueldo Líquido objetivo (CLP)' : 'Sueldo Bruto Mensual (CLP)'"></span>
-        <div class="mt-1.5 relative">
-          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-brand-light">$</span>
-          <input type="text" name="monto" inputmode="numeric" required
-                 :value="fmtCL(monto)"
-                 @input="monto = parseCL($event.target.value)"
-                 placeholder="0"
-                 class="w-full pl-7 pr-3 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-lg">
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <label class="block">
+          <span class="text-sm font-medium text-brand-dark"
+                x-text="modo === 'liquido_a_bruto' ? 'Sueldo Líquido (CLP)' : 'Sueldo Bruto (CLP)'"></span>
+          <div class="mt-1.5 relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-brand-light">$</span>
+            <input type="text" name="monto" inputmode="numeric" required
+                   :value="fmtCL(monto)"
+                   @input="monto = parseCL($event.target.value)"
+                   placeholder="0"
+                   class="w-full pl-7 pr-3 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-lg">
+          </div>
+        </label>
+        <div class="block">
+          <span class="text-sm font-medium text-rose-700"
+                x-text="modo === 'liquido_a_bruto' ? 'Sueldo Líquido calculado' : 'Sueldo Bruto calculado'"></span>
+          <div class="mt-1.5 relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-rose-400">$</span>
+            <input type="text" readonly tabindex="-1"
+                   :value="ultimoResultado ? fmtCL(modo === 'liquido_a_bruto' ? ultimoResultado.liquido_total : ultimoResultado.bruto) : ''"
+                   placeholder="—"
+                   class="w-full pl-7 pr-3 py-3 border border-rose-200 bg-rose-50 rounded-lg text-lg font-semibold text-rose-700 cursor-default focus:outline-none">
+          </div>
+          <span class="text-[10px] text-brand-light italic mt-1 block" x-show="ultimoResultado">
+            <template x-if="modo === 'liquido_a_bruto'">
+              <span>Varianza: $<span x-text="fmtCL(Math.abs((ultimoResultado.liquido_total || 0) - (monto || 0)))"></span></span>
+            </template>
+            <template x-if="modo === 'bruto_a_liquido'">
+              <span>Varianza: $<span x-text="fmtCL(Math.abs((ultimoResultado.bruto || 0) - (monto || 0)))"></span></span>
+            </template>
+          </span>
         </div>
-      </label>
+      </div>
 
       {# ── Asignaciones no imponibles + gratificación (justo después del sueldo) #}
       <div class="mb-5 bg-slate-50/60 border border-slate-200 rounded-lg p-3">
@@ -138,9 +159,9 @@
             <span class="text-xs text-brand-light">Plan Isapre (UF mensual)</span>
             <input type="text" name="salud_isapre_uf"
                    inputmode="decimal"
-                   pattern="[0-9]+([.,][0-9]{1,2})?"
                    placeholder="3,5"
-                   x-model="salud_isapre_uf"
+                   :value="salud_isapre_uf ?? ''"
+                   @input="salud_isapre_uf = $event.target.value.replace(/[^0-9.,]/g, '')"
                    class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand text-sm">
           </label>
         </div>
@@ -162,19 +183,6 @@
             </div>
           </label>
         </div>
-      </div>
-
-      {# ── Botón recalcular (fallback si JS / HTMX no dispara) ─────── #}
-      <div class="mt-5 pt-4 border-t border-slate-100">
-        <button type="button"
-                @click="htmx.trigger($refs.calcForm, 'recalc')"
-                class="w-full inline-flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-brand-dark font-semibold rounded-lg py-2.5 text-sm transition">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
-            <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-          </svg>
-          Recalcular
-        </button>
       </div>
 
     </form>

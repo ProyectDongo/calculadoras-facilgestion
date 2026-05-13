@@ -63,20 +63,6 @@ def landing(request):
                 "icono_svg": "calculator",
             },
             {
-                "key": "precio_venta",
-                "nombre": NOMBRES_DISPLAY["precio_venta"],
-                "url_name": "calc_precio_venta",
-                "descripcion": "Calcula el precio sugerido a partir del costo, flete y utilidad deseada. Crea listas para cotizaciones.",
-                "tasa_display": "+30%",
-                "tasa_label":   "Markup ejemplo",
-                "ejemplo_input":  "Costo $12.000",
-                "ejemplo_output": "Venta $18.564",
-                "ejemplo_etiqueta": "Costo → Precio con IVA",
-                "color_tw": "emerald",
-                "disponible": True,
-                "icono_svg": "tag",
-            },
-            {
                 "key": "honorarios",
                 "nombre": NOMBRES_DISPLAY["honorarios"],
                 "url_name": "calc_honorarios",
@@ -89,6 +75,20 @@ def landing(request):
                 "color_tw": "indigo",
                 "disponible": True,
                 "icono_svg": "document",
+            },
+            {
+                "key": "precio_venta",
+                "nombre": NOMBRES_DISPLAY["precio_venta"],
+                "url_name": "calc_precio_venta",
+                "descripcion": "Calcula el precio sugerido a partir del costo, flete y utilidad deseada. Crea listas para cotizaciones.",
+                "tasa_display": "+30%",
+                "tasa_label":   "Margen ejemplo",
+                "ejemplo_input":  "Costo $12.000",
+                "ejemplo_output": "Venta $18.564",
+                "ejemplo_etiqueta": "Costo → Precio con IVA",
+                "color_tw": "emerald",
+                "disponible": True,
+                "icono_svg": "tag",
             },
             {
                 "key": "sueldo",
@@ -243,6 +243,7 @@ def _payload_sueldo(r) -> str:
         "movilizacion":      int(r.movilizacion),
         "gratificacion_legal_clp": int(r.gratificacion_legal),
         "liquido_total":     int(r.liquido_total),
+        "aportes_patronales_total": int(r.aportes_patronales_total),
         "costo_total_empleador": int(r.costo_total_empleador),
     })
 
@@ -305,6 +306,14 @@ def api_calcular_sueldo(request):
     form = SueldoCalcForm(request.POST)
     if not form.is_valid():
         return _error_partial()
+
+    import logging
+    log = logging.getLogger("django")
+    log.warning(
+        "[SUELDO] raw=%r cleaned=%r",
+        request.POST.get("salud_isapre_uf"),
+        form.cleaned_data.get("salud_isapre_uf"),
+    )
 
     r = calc_sueldo(
         form.cleaned_data["monto"],

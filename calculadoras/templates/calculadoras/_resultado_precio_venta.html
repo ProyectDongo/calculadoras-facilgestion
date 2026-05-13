@@ -21,7 +21,7 @@
     <div class="flex justify-between items-baseline">
       <span class="text-brand-light">
         Utilidad
-        <span class="text-xs">({% if r.modo_porcentaje == "margen" %}margen{% else %}markup{% endif %} {{ r.porcentaje_markup|floatformat:"-2" }}% / margen {{ r.porcentaje_margen|floatformat:"-2" }}%){% comment %}clean{% endcomment %}</span>
+        <span class="text-xs">({% if r.modo_porcentaje == "margen" %}margen sobre venta{% else %}margen sobre costo{% endif %} {{ r.porcentaje_markup|floatformat:"-2" }}%)</span>
       </span>
       <span class="font-medium text-emerald-600">+ ${{ r.utilidad|floatformat:0|intcomma }}</span>
     </div>

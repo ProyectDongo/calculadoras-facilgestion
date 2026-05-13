@@ -6,7 +6,7 @@
 {% block contenido %}
 <h1>Cálculo de Precio de Venta</h1>
 <p class="muted">
-  Markup: {{ r.porcentaje_markup|floatformat:"-2" }}% sobre el costo · IVA 19%
+  Margen sobre costo: {{ r.porcentaje_markup|floatformat:"-2" }}% · IVA 19%
   {% if r.comision_tarjeta_pct > 0 %} · Comisión tarjeta: {{ r.comision_tarjeta_pct|floatformat:"-2" }}%{% endif %}
   {% if rut %} · RUT: {{ rut }}{% endif %}
 </p>
