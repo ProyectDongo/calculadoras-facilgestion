@@ -57,6 +57,22 @@
 
 <link rel="stylesheet" href="{% static 'calculadoras/css/app.css' %}">
 
+{# Helpers globales fmtCL/parseCL inline — garantiza que estén disponibles
+   antes que Alpine evalúe la primera expresión (evita race en prod cuando
+   acciones.js tarda en cargar tras Manifest hashing). #}
+<script>
+window.fmtCL = function (n) {
+  const v = parseInt(String(n).replace(/\D/g, ''), 10);
+  if (!v && v !== 0) return '';
+  if (Number.isNaN(v)) return '';
+  return v.toLocaleString('es-CL');
+};
+window.parseCL = function (str) {
+  const clean = String(str || '').replace(/\D/g, '');
+  return clean ? parseInt(clean, 10) : 0;
+};
+</script>
+
 {# HTMX + Alpine vendoreados (no CDN) #}
 <script src="{% static 'calculadoras/vendor/htmx.min.js' %}" defer></script>
 <script src="{% static 'calculadoras/js/lista.js' %}" defer></script>
