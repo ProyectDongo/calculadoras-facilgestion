@@ -30,16 +30,10 @@ services:
     ports:
       - "127.0.0.1:8002:8000"
     # Migrate al arranque (idempotente). Después gunicorn.
-    command: >
-      sh -c "python manage.py migrate --noinput &&
-             gunicorn config.wsgi:application
-             --bind 0.0.0.0:8000
-             --workers 3
-             --timeout 60
-             --graceful-timeout 30
-             --access-logfile -
-             --error-logfile -
-             --access-logformat '%({x-real-ip}i)s %(l)s %(u)s %(t)s \"%(r)s\" %(s)s %(b)s %(M)sms'"
+    # OJO: forma de lista (JSON-style) para evitar que el YAML folded scalar
+    # rompa el quoting y gunicorn caiga a sus defaults (127.0.0.1:8000, 1 worker).
+    # `exec` reemplaza al sh como PID 1 → SIGTERM llega a gunicorn limpio.
+    command: ["sh", "-c", "python manage.py migrate --noinput && exec gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 60 --graceful-timeout 30 --access-logfile - --error-logfile -"]
     depends_on:
       db:
         condition: service_healthy
