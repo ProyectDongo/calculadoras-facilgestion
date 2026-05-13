@@ -26,6 +26,7 @@ from config.tributario import (
     AFP_COTIZACION_OBLIGATORIA,
     GRATIFICACION_LEGAL_TASA,
     GRATIFICACION_LEGAL_TOPE_IMM_ANUAL,
+    EXPECTATIVA_VIDA_TASA,
     IGC_TRAMOS_2026,
     INGRESO_MINIMO_MENSUAL,
     ISAPRE_ADICIONAL_TOPE_IGC,
@@ -77,19 +78,14 @@ class ResultadoSueldo:
     # ── Lo que pidió el user (para display fiel) ─────────────
     monto_input: Decimal
 
-    # ── Costo empleador ─────────────────────────────────────
-    aporte_afp_empleador: Decimal
-    aporte_sis: Decimal
-    aporte_mutual: Decimal
-    aporte_cesantia_empleador: Decimal
-    costo_total_empleador: Decimal
-
-    # Costo total empleador (trabajador NO ve, es para info del empresario)
-    aporte_afp_empleador: Decimal   # 0.1% sobre renta imponible
-    aporte_sis: Decimal             # 1,62% sobre renta imponible
-    aporte_mutual: Decimal          # 0,95% sobre renta imponible
-    aporte_cesantia_empleador: Decimal  # 2,4% indefinido o 3% plazo fijo
-    costo_total_empleador: Decimal  # bruto + asignaciones + todos los aportes
+    # ── Aportes patronales (cargo del empleador) ────────────
+    aporte_afp_empleador: Decimal       # 0,1% sobre renta imponible
+    aporte_expectativa_vida: Decimal    # 0,9% (reforma previsional 2025)
+    aporte_sis: Decimal                 # 1,62% sobre renta imponible
+    aporte_mutual: Decimal              # 0,93% mutual básica
+    aporte_cesantia_empleador: Decimal  # 2,4% indefinido / 3% plazo fijo
+    aportes_patronales_total: Decimal   # suma de todos los aportes patronales
+    costo_total_empleador: Decimal      # aportes patronales + Total Haberes Tributables
 
 
 def _to_decimal(valor) -> Decimal:
@@ -249,17 +245,19 @@ def calcular(
     cesantia = base_cesantia * cesantia_pct_d
 
     # 5. Base imponible IGC
-    # Si es Isapre, sólo se rebaja del IGC el 7% obligatorio + adicional
-    # hasta el tope mensual. El "adicional Isapre" sobre el 7% que excede
-    # ese tope, NO descuenta IGC (paga impuesto como renta ordinaria).
+    # Rebajan de la base del IGC:
+    #   - AFP total (10% obligatorio + comisión)
+    #   - Salud 7% del imponible (cotización obligatoria)
+    #   - Cesantía trabajador 0,6%
+    #   - Si Isapre: la "rebaja adicional Isapre" — Art. 50 ter DL 824 (Ley 21.420):
+    #     min(plan_Isapre − 7%, tope mensual). Tope 2026: $62.822/mes.
+    salud_obligatoria = renta_imponible * SALUD_FONASA   # 7% del imponible
     if salud_tipo == "isapre":
-        salud_obligatoria = renta_imponible * SALUD_FONASA   # 7% mínimo
         adicional_isapre = max(Decimal("0"), salud - salud_obligatoria)
-        adicional_rebaja_igc = min(adicional_isapre, ISAPRE_ADICIONAL_TOPE_IGC)
-        salud_para_igc = salud_obligatoria + adicional_rebaja_igc
+        rebaja_adicional_igc = min(adicional_isapre, ISAPRE_ADICIONAL_TOPE_IGC)
     else:
-        salud_para_igc = salud   # Fonasa: descuenta todo
-    base_igc = bruto_d - afp_total - salud_para_igc - cesantia
+        rebaja_adicional_igc = Decimal("0")
+    base_igc = bruto_d - afp_total - salud_obligatoria - cesantia - rebaja_adicional_igc
     base_igc = max(Decimal("0"), base_igc)
 
     # 6. IGC
@@ -278,16 +276,17 @@ def calcular(
     # 9. Líquido total = líquido + asignaciones no imponibles
     liquido_total = liquido + colacion_d + movilizacion_d
 
-    # 10. COSTO TOTAL EMPLEADOR
-    aporte_afp_emp = renta_imponible * AFP_CARGO_EMPLEADOR
-    aporte_sis     = renta_imponible * SIS_TASA
-    aporte_mutual  = renta_imponible * MUTUAL_TASA_BASE
-    aporte_cesantia_emp = base_cesantia * cesantia_emp_pct
-    costo_total_emp = (
-        bruto_d           # ya incluye gratificación
-        + colacion_d + movilizacion_d
-        + aporte_afp_emp + aporte_sis + aporte_mutual + aporte_cesantia_emp
+    # 10. APORTES PATRONALES (cargo del empleador)
+    aporte_afp_emp        = renta_imponible * AFP_CARGO_EMPLEADOR
+    aporte_expectativa    = renta_imponible * EXPECTATIVA_VIDA_TASA
+    aporte_sis            = renta_imponible * SIS_TASA
+    aporte_mutual         = renta_imponible * MUTUAL_TASA_BASE
+    aporte_cesantia_emp   = base_cesantia * cesantia_emp_pct
+    aportes_patronales_total = (
+        aporte_afp_emp + aporte_expectativa + aporte_sis + aporte_mutual + aporte_cesantia_emp
     )
+    # Costo total = Aportes patronales + Total Haberes (imponibles + no imponibles)
+    costo_total_emp = aportes_patronales_total + bruto_d + colacion_d + movilizacion_d
 
     return ResultadoSueldo(
         sueldo_base=_q(sueldo_base),
@@ -314,14 +313,63 @@ def calcular(
         liquido_total=_q(liquido_total),
         monto_input=_q(monto_d),
         aporte_afp_empleador=_q(aporte_afp_emp),
+        aporte_expectativa_vida=_q(aporte_expectativa),
         aporte_sis=_q(aporte_sis),
         aporte_mutual=_q(aporte_mutual),
         aporte_cesantia_empleador=_q(aporte_cesantia_emp),
+        aportes_patronales_total=_q(aportes_patronales_total),
         costo_total_empleador=_q(costo_total_emp),
     )
 
 
 # ── Búsqueda binaria: líquido → sueldo base ─────────────────────────────────
+
+def _liquido_raw_desde_sueldo_base(
+    sueldo_base: Decimal,
+    *,
+    afp_comision: Decimal,
+    salud_tipo: str,
+    salud_isapre_uf: Decimal,
+    contrato: str,
+    gratificacion_legal: bool,
+    uf_clp: Decimal,
+    utm_clp: Decimal,
+) -> Decimal:
+    """Igual lógica que calcular(), pero SIN quantize. Devuelve líquido
+    (sin asignaciones) como Decimal de precisión arbitraria. Usado por la
+    búsqueda binaria para evitar el efecto plateau del redondeo a peso."""
+    if gratificacion_legal:
+        grat_por_pct = sueldo_base * GRATIFICACION_LEGAL_TASA
+        grat_tope = (GRATIFICACION_LEGAL_TOPE_IMM_ANUAL * INGRESO_MINIMO_MENSUAL) / Decimal("12")
+        gratificacion_clp = min(grat_por_pct, grat_tope)
+    else:
+        gratificacion_clp = Decimal("0")
+    bruto_d = sueldo_base + gratificacion_clp
+    tope_clp = TOPE_IMPONIBLE_UF * uf_clp
+    renta_imponible = min(bruto_d, tope_clp)
+    afp_total = renta_imponible * (AFP_COTIZACION_OBLIGATORIA + afp_comision)
+    if salud_tipo == "fonasa":
+        salud = renta_imponible * SALUD_FONASA
+    else:
+        salud = salud_isapre_uf * uf_clp
+    if contrato == "indefinido":
+        cesantia_pct_d = SEGURO_CESANTIA_INDEFINIDO
+    else:
+        cesantia_pct_d = SEGURO_CESANTIA_PLAZO_FIJO
+    tope_cesantia_clp = TOPE_CESANTIA_UF * uf_clp
+    base_cesantia = min(bruto_d, tope_cesantia_clp)
+    cesantia = base_cesantia * cesantia_pct_d
+    salud_obligatoria = renta_imponible * SALUD_FONASA
+    if salud_tipo == "isapre":
+        adicional_isapre = max(Decimal("0"), salud - salud_obligatoria)
+        rebaja_adicional_igc = min(adicional_isapre, ISAPRE_ADICIONAL_TOPE_IGC)
+    else:
+        rebaja_adicional_igc = Decimal("0")
+    base_igc = bruto_d - afp_total - salud_obligatoria - cesantia - rebaja_adicional_igc
+    base_igc = max(Decimal("0"), base_igc)
+    igc = _calcular_igc(base_igc, utm_clp)
+    return bruto_d - afp_total - salud - cesantia - igc
+
 
 def _resolver_sueldo_base_desde_liquido(
     liquido_objetivo: Decimal,
@@ -331,41 +379,36 @@ def _resolver_sueldo_base_desde_liquido(
     salud_isapre_uf: Decimal,
     contrato: str,
     gratificacion_legal: bool,
-    tol: Decimal = Decimal("1"),
-    max_iter: int = 80,
+    tol: Decimal = Decimal("0.01"),
+    max_iter: int = 200,
 ) -> Decimal:
-    """
-    Invierte el cálculo: dado el líquido deseado (sin asignaciones), encuentra
-    el SUELDO BASE (sin gratificación). La búsqueda binaria considera la
-    gratificación como parte del bruto imponible en cada iteración.
-
-    Como el IGC es por tramos progresivos, la función sueldo_base → líquido
-    es monotónica y suave a trozos. Converge en ~30 iter con bracket amplio.
-
-    BUG conocido y arreglado: con gratificación marcada y sueldos bajos
-    (sin IGC), el sueldo_base puede ser MENOR que el líquido objetivo
-    porque la gratificación 25% incrementa el bruto sin descontar
-    proporcionalmente. Por eso 'lo' debe ser 0, no liquido_objetivo.
-    """
+    """Invierte el cálculo: dado el líquido deseado (sin asignaciones),
+    encuentra el SUELDO BASE (sin gratificación). Usa _liquido_raw_* sin
+    quantize para evitar plateaus de redondeo: la búsqueda converge al peso."""
     if liquido_objetivo <= 0:
         return Decimal("0")
 
-    lo = Decimal("0")                                  # bracket inferior amplio
-    hi = liquido_objetivo * Decimal("3")               # heurística: bruto < 3× líquido
+    uf_clp = get_uf_liquidacion()
+    utm_clp = get_utm()
+
+    lo = Decimal("0")
+    hi = liquido_objetivo * Decimal("3")
+    mid = (lo + hi) / 2
     for _ in range(max_iter):
         mid = (lo + hi) / 2
-        r = calcular(
+        liquido_calc = _liquido_raw_desde_sueldo_base(
             mid,
-            modo="bruto_a_liquido",
             afp_comision=afp_comision,
             salud_tipo=salud_tipo,
             salud_isapre_uf=salud_isapre_uf,
             contrato=contrato,
             gratificacion_legal=gratificacion_legal,
+            uf_clp=uf_clp,
+            utm_clp=utm_clp,
         )
-        diff = r.liquido - liquido_objetivo
+        diff = liquido_calc - liquido_objetivo
         if abs(diff) <= tol:
-            return mid
+            break
         if diff < 0:
             lo = mid
         else:

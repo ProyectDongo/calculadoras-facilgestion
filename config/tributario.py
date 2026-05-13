@@ -98,9 +98,10 @@ TOPE_IMPONIBLE_UF = Decimal("90")               # AFP + Salud
 TOPE_CESANTIA_UF  = Decimal("135.2")            # Seguro Cesantía (Ley 19.728)
 
 # Cargas del EMPLEADOR (no descuenta al trabajador; suman al costo empresa).
-SIS_TASA = Decimal("0.0162")                    # Seguro Invalidez/Sobrev. — 1,62% abril 2026
-MUTUAL_TASA_BASE = Decimal("0.0095")            # Mutual (accidentes laborales) básica 0,95%
+SIS_TASA = Decimal("0.0162")                    # Seguro Invalidez/Sobrev. — 1,62%
+MUTUAL_TASA_BASE = Decimal("0.0093")            # Mutual (accidentes laborales) básica 0,93%
 AFP_CARGO_EMPLEADOR = Decimal("0.001")          # 0,1% adicional a todas las AFP
+EXPECTATIVA_VIDA_TASA = Decimal("0.009")        # 0,9% cargo empleador (reforma previsional 2025)
 SEGURO_CESANTIA_EMPLEADOR_INDEFINIDO = Decimal("0.024")  # 2,4% indefinido
 SEGURO_CESANTIA_EMPLEADOR_PLAZO_FIJO = Decimal("0.03")   # 3,0% plazo fijo
 
