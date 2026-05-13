@@ -250,7 +250,7 @@ def _payload_sueldo(r) -> str:
 
 
 @require_POST
-@ratelimit(key="ip", rate="60/m", method="POST", block=True)
+@ratelimit(key="ip", rate="300/m", method="POST", block=True)
 def api_calcular_iva(request):
     form = IVACalcForm(request.POST)
     if not form.is_valid():
@@ -266,7 +266,7 @@ def api_calcular_iva(request):
 
 
 @require_POST
-@ratelimit(key="ip", rate="60/m", method="POST", block=True)
+@ratelimit(key="ip", rate="300/m", method="POST", block=True)
 def api_calcular_honorarios(request):
     form = HonorariosCalcForm(request.POST)
     if not form.is_valid():
@@ -282,7 +282,7 @@ def api_calcular_honorarios(request):
 
 
 @require_POST
-@ratelimit(key="ip", rate="60/m", method="POST", block=True)
+@ratelimit(key="ip", rate="300/m", method="POST", block=True)
 def api_calcular_precio_venta(request):
     form = PrecioVentaCalcForm(request.POST)
     if not form.is_valid():
@@ -302,7 +302,7 @@ def api_calcular_precio_venta(request):
 
 
 @require_POST
-@ratelimit(key="ip", rate="60/m", method="POST", block=True)
+@ratelimit(key="ip", rate="300/m", method="POST", block=True)
 def api_calcular_sueldo(request):
     form = SueldoCalcForm(request.POST)
     if not form.is_valid():
