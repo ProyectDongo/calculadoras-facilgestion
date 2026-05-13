@@ -1,17 +1,40 @@
 {% load humanize %}TU CÁLCULO DE SUELDO LÍQUIDO - FácilGestión
-===========================================
+==============================================
 
-Sueldo Bruto:        ${{ r.bruto|floatformat:0|intcomma }}
-AFP:                – ${{ r.afp_total|floatformat:0|intcomma }}
-Salud:              – ${{ r.salud|floatformat:0|intcomma }}
-{% if r.cesantia > 0 %}Seguro Cesantía:    – ${{ r.cesantia|floatformat:0|intcomma }}
-{% endif %}{% if r.igc > 0 %}Impuesto IGC:       – ${{ r.igc|floatformat:0|intcomma }}
-{% endif %}---
-Líquido:             ${{ r.liquido|floatformat:0|intcomma }}
+HABERES TRIBUTABLES E IMPONIBLES
+  Sueldo base:                  ${{ r.sueldo_base|floatformat:0|intcomma }}
+{% if r.gratificacion_legal > 0 %}  + Gratificación legal:        + ${{ r.gratificacion_legal|floatformat:0|intcomma }}
+{% endif %}  TOTAL HABERES TRIBUTABLES:    ${{ r.bruto|floatformat:0|intcomma }}
+
+{% if r.colacion > 0 or r.movilizacion > 0 %}ASIGNACIONES NO IMPONIBLES
+{% if r.colacion > 0 %}  Colación:                     + ${{ r.colacion|floatformat:0|intcomma }}
+{% endif %}{% if r.movilizacion > 0 %}  Movilización:                 + ${{ r.movilizacion|floatformat:0|intcomma }}
+{% endif %}  TOTAL HABERES NO IMPONIBLES:  ${{ r.colacion|add:r.movilizacion|floatformat:0|intcomma }}
+
+{% endif %}DESCUENTOS LEGALES
+  AFP (10% + comisión):         – ${{ r.afp_total|floatformat:0|intcomma }}
+  Salud {% if r.salud_tipo == "isapre" %}(Isapre){% else %}(Fonasa 7%){% endif %}:{% if r.salud_tipo == "isapre" %}              {% else %}          {% endif %}– ${{ r.salud|floatformat:0|intcomma }}
+{% if r.cesantia > 0 %}  Seguro Cesantía (0,6%):       – ${{ r.cesantia|floatformat:0|intcomma }}
+{% endif %}{% if r.igc > 0 %}  Impuesto IGC:                 – ${{ r.igc|floatformat:0|intcomma }}
+{% endif %}  TOTAL DESCUENTOS LEGALES:     – ${{ r.total_descuentos|floatformat:0|intcomma }}
+
+==============================================
+SUELDO LÍQUIDO:                 ${{ r.liquido_total|floatformat:0|intcomma }}
+==============================================
+
+APORTES PATRONALES (costo empleador, no descontado al trabajador):
+  AFP empleador (0,1%):          ${{ r.aporte_afp_empleador|floatformat:0|intcomma }}
+  Expectativa de vida (0,9%):    ${{ r.aporte_expectativa_vida|floatformat:0|intcomma }}
+  SIS (1,62%):                   ${{ r.aporte_sis|floatformat:0|intcomma }}
+  Mutual (0,93% básica):         ${{ r.aporte_mutual|floatformat:0|intcomma }}
+  Cesantía empleador:            ${{ r.aporte_cesantia_empleador|floatformat:0|intcomma }}
+  COSTO TOTAL EMPLEADOR:         ${{ r.costo_total_empleador|floatformat:0|intcomma }}
+
+UF usada: ${{ r.uf_usada|floatformat:2|intcomma }} · UTM usada: ${{ r.utm_usada|floatformat:0|intcomma }}
 
 Generado el {{ generado_en|date:"d/m/Y H:i" }}.
 
-Encuentras el detalle en el PDF adjunto.
+Encontrarás el detalle en el PDF adjunto.
 
 ---
 Recibes este correo porque solicitaste tu cálculo en

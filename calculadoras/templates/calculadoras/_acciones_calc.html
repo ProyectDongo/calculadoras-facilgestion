@@ -26,8 +26,7 @@ Variables Django: calc_key
     {# ── Header ────────────────────────────────────────────────────── #}
     <div class="px-6 pt-6 pb-4 border-b border-slate-100 flex items-start gap-3 shrink-0">
       <div class="w-10 h-10 rounded-xl bg-brand/10 text-brand flex items-center justify-center shrink-0">
-        <svg x-show="accion==='enviar'" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        <svg x-show="accion==='descargar'" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
       </div>
       <div class="flex-1 min-w-0">
         <h3 class="text-base sm:text-lg font-bold text-brand-dark leading-tight">
@@ -43,7 +42,7 @@ Variables Django: calc_key
 
     {# ── Form ──────────────────────────────────────────────────────── #}
     <form method="post"
-          :action="accion==='enviar' ? '{% url 'calculadoras:api_enviar' %}' : '{% url 'calculadoras:api_pdf' %}'"
+          action="{% url 'calculadoras:api_enviar' %}"
           @submit="enviar($event)"
           class="overflow-y-auto px-6 py-5 flex-1">
       {% csrf_token %}
@@ -51,7 +50,6 @@ Variables Django: calc_key
 
       <input type="hidden" name="calculadora" value="{{ calc_key }}">
       <input type="hidden" name="resultado_json" :value="JSON.stringify(ultimoResultado || {})">
-      <input type="hidden" name="accion" :value="accion">
 
       <div class="space-y-3.5">
 
@@ -150,8 +148,7 @@ Variables Django: calc_key
         </button>
         <button type="submit"
                 class="flex-1 bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 transition flex items-center justify-center gap-2 text-sm">
-          <svg x-show="accion==='enviar'" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          <svg x-show="accion==='descargar'" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           <span>Enviar a mi correo</span>
         </button>
       </div>

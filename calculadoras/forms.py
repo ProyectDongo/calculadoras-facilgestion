@@ -198,19 +198,16 @@ class PrecioVentaCalcForm(forms.Form):
 
 class EnviarOdescargarForm(AntiBotFormMixin, forms.Form):
     """
-    Form para "Descargar PDF" y "Enviar a mi correo".
+    Form para "Enviar resultado por correo".
 
-    Ahora capturamos lead obligatorio (email + empresa + acepto_politica).
-    Sin estos campos no se entrega el PDF. Cumple Ley 19.628 (consentimiento
-    explícito para tratamiento de datos personales).
-
-    Sigue requiriendo Turnstile (anti-bot).
+    Captura lead obligatorio (email + empresa + acepto_politica). Cumple Ley
+    19.628 (consentimiento explícito para tratamiento de datos personales).
+    Requiere Turnstile (anti-bot).
     """
     # ── Datos del cálculo ────────────────────────────────────────────────
     # Resultado serializado del cálculo (Alpine). NO confiamos: re-calculamos.
     resultado_json = forms.CharField(max_length=4_000)
     calculadora    = forms.CharField(max_length=20)
-    accion         = forms.ChoiceField(choices=[("descargar", "Descargar"), ("enviar", "Enviar")])
 
     # ── Datos del lead (todos obligatorios excepto fantasía/rubro/nombre) ──
     email           = forms.EmailField(required=True)

@@ -5,41 +5,124 @@
 <h2 style="margin:0 0 16px;font-size:18px;color:{{ BRAND.color_dark }};">Tu cálculo de sueldo líquido</h2>
 
 <p style="margin:0 0 18px;color:{{ BRAND.color_light }};font-size:14px;">
-  Adjunto encontrarás el PDF con el detalle. Resumen:
+  Adjunto encontrarás el PDF con el detalle completo. Resumen:
 </p>
 
 <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;margin-bottom:18px;">
+
+  {# ── Haberes Tributables ────────────────────────────────────── #}
   <tr>
-    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;color:{{ BRAND.color_light }};font-size:13px;">Sueldo Bruto</td>
-    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;">${{ r.bruto|floatformat:0|intcomma }}</td>
+    <td colspan="2" style="padding:8px 0 4px;font-size:10px;color:{{ BRAND.color_light }};text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Haberes Tributables e Imponibles</td>
   </tr>
   <tr>
-    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;color:{{ BRAND.color_light }};font-size:13px;">AFP</td>
-    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;color:#dc2626;">– ${{ r.afp_total|floatformat:0|intcomma }}</td>
+    <td style="padding:6px 0;color:{{ BRAND.color_light }};font-size:13px;">Sueldo base</td>
+    <td style="padding:6px 0;text-align:right;font-weight:600;">${{ r.sueldo_base|floatformat:0|intcomma }}</td>
+  </tr>
+  {% if r.gratificacion_legal > 0 %}
+  <tr>
+    <td style="padding:6px 0;color:#047857;font-size:13px;">+ Gratificación legal</td>
+    <td style="padding:6px 0;text-align:right;font-weight:600;color:#047857;">+ ${{ r.gratificacion_legal|floatformat:0|intcomma }}</td>
+  </tr>
+  {% endif %}
+  <tr>
+    <td style="padding:10px;background:#fef3c7;border-radius:6px 0 0 6px;font-weight:700;font-size:13px;color:#78350f;text-transform:uppercase;letter-spacing:.04em;">Total Haberes Tributables</td>
+    <td style="padding:10px;background:#fef3c7;border-radius:0 6px 6px 0;text-align:right;font-weight:700;color:#78350f;">${{ r.bruto|floatformat:0|intcomma }}</td>
+  </tr>
+
+  {# ── Haberes No Imponibles ──────────────────────────────────── #}
+  {% if r.colacion > 0 or r.movilizacion > 0 %}
+  <tr>
+    <td colspan="2" style="padding:14px 0 4px;font-size:10px;color:{{ BRAND.color_light }};text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Asignaciones No Imponibles</td>
+  </tr>
+  {% if r.colacion > 0 %}
+  <tr>
+    <td style="padding:6px 0;color:{{ BRAND.color_light }};font-size:13px;">Colación</td>
+    <td style="padding:6px 0;text-align:right;font-weight:600;color:#047857;">+ ${{ r.colacion|floatformat:0|intcomma }}</td>
+  </tr>
+  {% endif %}
+  {% if r.movilizacion > 0 %}
+  <tr>
+    <td style="padding:6px 0;color:{{ BRAND.color_light }};font-size:13px;">Movilización</td>
+    <td style="padding:6px 0;text-align:right;font-weight:600;color:#047857;">+ ${{ r.movilizacion|floatformat:0|intcomma }}</td>
+  </tr>
+  {% endif %}
+  <tr>
+    <td style="padding:10px;background:#fef3c7;border-radius:6px 0 0 6px;font-weight:700;font-size:13px;color:#78350f;text-transform:uppercase;letter-spacing:.04em;">Total Haberes No Imponibles</td>
+    <td style="padding:10px;background:#fef3c7;border-radius:0 6px 6px 0;text-align:right;font-weight:700;color:#78350f;">${{ r.colacion|add:r.movilizacion|floatformat:0|intcomma }}</td>
+  </tr>
+  {% endif %}
+
+  {# ── Descuentos Legales ────────────────────────────────────── #}
+  <tr>
+    <td colspan="2" style="padding:14px 0 4px;font-size:10px;color:{{ BRAND.color_light }};text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Descuentos Legales</td>
   </tr>
   <tr>
-    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;color:{{ BRAND.color_light }};font-size:13px;">Salud</td>
-    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;color:#dc2626;">– ${{ r.salud|floatformat:0|intcomma }}</td>
+    <td style="padding:6px 0;color:{{ BRAND.color_light }};font-size:13px;">AFP (10% + comisión)</td>
+    <td style="padding:6px 0;text-align:right;font-weight:600;color:#dc2626;">– ${{ r.afp_total|floatformat:0|intcomma }}</td>
+  </tr>
+  <tr>
+    <td style="padding:6px 0;color:{{ BRAND.color_light }};font-size:13px;">Salud {% if r.salud_tipo == "isapre" %}(Isapre){% else %}(Fonasa 7%){% endif %}</td>
+    <td style="padding:6px 0;text-align:right;font-weight:600;color:#dc2626;">– ${{ r.salud|floatformat:0|intcomma }}</td>
   </tr>
   {% if r.cesantia > 0 %}
   <tr>
-    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;color:{{ BRAND.color_light }};font-size:13px;">Seguro Cesantía</td>
-    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;color:#dc2626;">– ${{ r.cesantia|floatformat:0|intcomma }}</td>
+    <td style="padding:6px 0;color:{{ BRAND.color_light }};font-size:13px;">Seguro Cesantía (0,6%)</td>
+    <td style="padding:6px 0;text-align:right;font-weight:600;color:#dc2626;">– ${{ r.cesantia|floatformat:0|intcomma }}</td>
   </tr>
   {% endif %}
   {% if r.igc > 0 %}
   <tr>
-    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;color:{{ BRAND.color_light }};font-size:13px;">Impuesto IGC</td>
-    <td style="padding:9px 0;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;color:#dc2626;">– ${{ r.igc|floatformat:0|intcomma }}</td>
+    <td style="padding:6px 0;color:{{ BRAND.color_light }};font-size:13px;">Impuesto IGC (Segunda Cat.)</td>
+    <td style="padding:6px 0;text-align:right;font-weight:600;color:#dc2626;">– ${{ r.igc|floatformat:0|intcomma }}</td>
   </tr>
   {% endif %}
   <tr>
-    <td style="padding:14px 14px;background:#fef1f5;border-radius:8px 0 0 8px;color:#e11d48;font-weight:600;">Líquido</td>
-    <td style="padding:14px 14px;background:#fef1f5;border-radius:0 8px 8px 0;text-align:right;font-weight:700;font-size:18px;color:#e11d48;">${{ r.liquido|floatformat:0|intcomma }}</td>
+    <td style="padding:10px;background:#fef3c7;border-radius:6px 0 0 6px;font-weight:700;font-size:13px;color:#78350f;text-transform:uppercase;letter-spacing:.04em;">Total Descuentos Legales</td>
+    <td style="padding:10px;background:#fef3c7;border-radius:0 6px 6px 0;text-align:right;font-weight:700;color:#78350f;">– ${{ r.total_descuentos|floatformat:0|intcomma }}</td>
+  </tr>
+
+  {# ── Sueldo Líquido (destacado) ────────────────────────────── #}
+  <tr><td colspan="2" style="padding:8px 0;"></td></tr>
+  <tr>
+    <td style="padding:14px;background:#059669;border-radius:8px 0 0 8px;color:#ffffff;font-weight:700;text-transform:uppercase;letter-spacing:.04em;">Sueldo Líquido</td>
+    <td style="padding:14px;background:#059669;border-radius:0 8px 8px 0;text-align:right;font-weight:700;font-size:20px;color:#ffffff;">${{ r.liquido_total|floatformat:0|intcomma }}</td>
+  </tr>
+
+  {# ── Aportes Patronales ────────────────────────────────────── #}
+  <tr><td colspan="2" style="padding:8px 0;"></td></tr>
+  <tr>
+    <td colspan="2" style="padding:8px 0 4px;font-size:10px;color:{{ BRAND.color_light }};text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Aportes Patronales (costo empleador)</td>
+  </tr>
+  <tr>
+    <td style="padding:5px 0;color:{{ BRAND.color_light }};font-size:12px;">AFP empleador (0,1%)</td>
+    <td style="padding:5px 0;text-align:right;font-size:12px;">${{ r.aporte_afp_empleador|floatformat:0|intcomma }}</td>
+  </tr>
+  <tr>
+    <td style="padding:5px 0;color:{{ BRAND.color_light }};font-size:12px;">Expectativa de vida (0,9%)</td>
+    <td style="padding:5px 0;text-align:right;font-size:12px;">${{ r.aporte_expectativa_vida|floatformat:0|intcomma }}</td>
+  </tr>
+  <tr>
+    <td style="padding:5px 0;color:{{ BRAND.color_light }};font-size:12px;">SIS (1,62%)</td>
+    <td style="padding:5px 0;text-align:right;font-size:12px;">${{ r.aporte_sis|floatformat:0|intcomma }}</td>
+  </tr>
+  <tr>
+    <td style="padding:5px 0;color:{{ BRAND.color_light }};font-size:12px;">Mutual (0,93% básica)</td>
+    <td style="padding:5px 0;text-align:right;font-size:12px;">${{ r.aporte_mutual|floatformat:0|intcomma }}</td>
+  </tr>
+  <tr>
+    <td style="padding:5px 0;color:{{ BRAND.color_light }};font-size:12px;">Cesantía empleador</td>
+    <td style="padding:5px 0;text-align:right;font-size:12px;">${{ r.aporte_cesantia_empleador|floatformat:0|intcomma }}</td>
+  </tr>
+  <tr>
+    <td style="padding:10px;background:#0f172a;border-radius:6px 0 0 6px;color:#ffffff;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.04em;">Costo Total Empleador</td>
+    <td style="padding:10px;background:#0f172a;border-radius:0 6px 6px 0;text-align:right;font-weight:700;color:#ffffff;">${{ r.costo_total_empleador|floatformat:0|intcomma }}</td>
   </tr>
 </table>
 
-<p style="margin:20px 0 0;font-size:13px;color:{{ BRAND.color_light }};">
+<p style="margin:20px 0 0;font-size:12px;color:{{ BRAND.color_light }};">
+  UF usada: ${{ r.uf_usada|floatformat:2|intcomma }} · UTM usada: ${{ r.utm_usada|floatformat:0|intcomma }}
+</p>
+<p style="margin:6px 0 0;font-size:13px;color:{{ BRAND.color_light }};">
   Generado el {{ generado_en|date:"d/m/Y" }} a las {{ generado_en|date:"H:i" }}.
 </p>
 {% endblock %}
