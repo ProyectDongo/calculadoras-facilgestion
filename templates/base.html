@@ -57,10 +57,8 @@
 
 <link rel="stylesheet" href="{% static 'calculadoras/css/app.css' %}">
 
-{# Helpers globales fmtCL/parseCL inline — garantiza que estén disponibles
-   antes que Alpine evalúe la primera expresión (evita race en prod cuando
-   acciones.js tarda en cargar tras Manifest hashing). #}
 <script>
+// fmtCL/parseCL inline — disponibles antes que Alpine evalúe expresiones.
 window.fmtCL = function (n) {
   const v = parseInt(String(n).replace(/\D/g, ''), 10);
   if (!v && v !== 0) return '';

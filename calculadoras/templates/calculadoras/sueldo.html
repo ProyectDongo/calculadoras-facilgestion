@@ -80,10 +80,10 @@
           </div>
           <span class="text-[10px] text-brand-light italic mt-1 block" x-show="ultimoResultado">
             <template x-if="modo === 'liquido_a_bruto'">
-              <span>Varianza: $<span x-text="fmtCL(Math.abs((ultimoResultado.liquido_total || 0) - (monto || 0)))"></span></span>
+              <span>Varianza: $<span x-text="fmtCL(Math.abs((ultimoResultado?.liquido_total || 0) - (monto || 0)))"></span></span>
             </template>
             <template x-if="modo === 'bruto_a_liquido'">
-              <span>Varianza: $<span x-text="fmtCL(Math.abs((ultimoResultado.sueldo_base || 0) - (monto || 0)))"></span></span>
+              <span>Varianza: $<span x-text="fmtCL(Math.abs((ultimoResultado?.sueldo_base || 0) - (monto || 0)))"></span></span>
             </template>
           </span>
         </div>
