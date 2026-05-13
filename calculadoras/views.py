@@ -222,6 +222,7 @@ def _payload_precio_venta(r) -> str:
 
 def _payload_sueldo(r) -> str:
     return json.dumps({
+        "sueldo_base":       int(r.sueldo_base),
         "bruto":             int(r.bruto),
         "renta_imponible":   int(r.renta_imponible),
         "afp_total":         int(r.afp_total),
