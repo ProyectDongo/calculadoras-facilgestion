@@ -165,6 +165,15 @@ class AntiFloodMiddleware:
         if request.method not in _RATE_LIMITED_METHODS:
             return self.get_response(request)
 
+        # Los endpoints /api/calcular/ son cálculos stateless, baratos e
+        # idempotentes; HTMX dispara uno por cada cambio de input, así que
+        # un usuario normal supera 30 POSTs en minutos. NO deben contar para
+        # el flood global — ya están protegidos por su propio @ratelimit
+        # (300/m). El AntiFlood se reserva para los endpoints caros
+        # (/api/enviar/, /api/pdf/, cotización).
+        if "/api/calcular/" in request.path:
+            return self.get_response(request)
+
         ip_hash = request_ip_hash(request)
 
         if _is_blocked(ip_hash):
