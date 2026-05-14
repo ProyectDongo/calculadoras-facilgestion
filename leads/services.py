@@ -7,7 +7,7 @@ import logging
 
 from core.services.ip_hash import request_ip_hash
 
-from .models import Lead
+from .models import Accion, Lead
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ def crear_lead_desde_form(form, request) -> Lead:
         nombre_fantasia=cd.get("nombre_fantasia", ""),
         rubro=cd.get("rubro", ""),
         calculadora=cd["calculadora"],
-        accion=cd["accion"],
+        accion=Accion.ENVIAR,  # único flujo: PDF de descarga directa fue removido
         acepto_politica=cd["acepto_politica"],
         acepto_marketing=cd.get("acepto_marketing", False),
         ip_hash=request_ip_hash(request),
