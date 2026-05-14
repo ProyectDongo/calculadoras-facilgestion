@@ -259,5 +259,14 @@ LOGGING = {
         "django.request": {
             "level": "WARNING", "handlers": ["console"], "propagate": False,
         },
+        # fontTools/weasyprint loguean en DEBUG/INFO con args estilo %-tuple
+        # que pythonjsonlogger no sabe formatear → "TypeError: not all
+        # arguments converted". Subimos a WARNING para no emitir ese ruido.
+        "fontTools": {
+            "level": "WARNING", "handlers": ["console"], "propagate": False,
+        },
+        "weasyprint": {
+            "level": "WARNING", "handlers": ["console"], "propagate": False,
+        },
     },
 }

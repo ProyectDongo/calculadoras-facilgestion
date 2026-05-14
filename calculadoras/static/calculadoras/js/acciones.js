@@ -31,6 +31,7 @@ window.accionesMixin = function () {
     ultimoResultado: null,
     modalAbierto: false,
     accion: 'enviar',     // Solo se soporta 'enviar' por correo; PDF eliminado.
+    enviando: false,      // true mientras el POST a /api/enviar/ está en vuelo
 
     abrirModal(accion) {
       this.accion = accion;
@@ -65,34 +66,25 @@ window.accionesMixin = function () {
 
     async enviar(ev) {
       ev.preventDefault();
+      if (this.enviando) return;          // evita doble submit
       const form = ev.target;
       const formData = new FormData(form);
+      this.enviando = true;
       try {
         const resp = await fetch(form.action, { method: 'POST', body: formData });
-        const ct = resp.headers.get('content-type') || '';
-        if (ct.includes('application/pdf')) {
-          const blob = await resp.blob();
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          const disp = resp.headers.get('content-disposition') || '';
-          const m = disp.match(/filename="([^"]+)"/);
-          a.href = url; a.download = m ? m[1] : 'calculo.pdf';
-          a.click();
-          URL.revokeObjectURL(url);
+        const data = await resp.json().catch(() => ({}));
+        if (data.ok) {
+          alert('✓ Enviado a tu correo.');
           this.modalAbierto = false;
+        } else if (resp.status === 429) {
+          alert('Has hecho demasiadas solicitudes. Intenta en unos minutos.');
         } else {
-          const data = await resp.json().catch(() => ({}));
-          if (data.ok) {
-            alert('✓ Enviado a tu correo.');
-            this.modalAbierto = false;
-          } else if (resp.status === 429) {
-            alert('Has hecho demasiadas solicitudes. Intenta en unos minutos.');
-          } else {
-            alert('No se pudo procesar tu solicitud. Recarga e intenta de nuevo.');
-          }
+          alert('No se pudo procesar tu solicitud. Recarga e intenta de nuevo.');
         }
       } catch {
         alert('Error de red. Intenta nuevamente.');
+      } finally {
+        this.enviando = false;
       }
     },
   };
