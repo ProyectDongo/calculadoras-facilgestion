@@ -13,33 +13,63 @@
 </p>
 
 <div class="highlight">
-  <span class="label">Líquido a recibir</span>
-  <span class="value">${{ r.liquido|floatformat:0|intcomma }} CLP</span>
+  <span class="label">Sueldo Líquido</span>
+  <span class="value">${{ r.liquido_total|floatformat:0|intcomma }} CLP</span>
 </div>
 
-<h3>Detalle de descuentos</h3>
+<h3>Haberes tributables e imponibles</h3>
 <table class="kv">
-  <tr><th>Sueldo Bruto</th><td>${{ r.bruto|floatformat:0|intcomma }}</td></tr>
-  {% if r.bruto != r.renta_imponible %}
-  <tr><th>Renta imponible (con tope)</th><td>${{ r.renta_imponible|floatformat:0|intcomma }}</td></tr>
+  <tr><th>Sueldo base</th><td>${{ r.sueldo_base|floatformat:0|intcomma }}</td></tr>
+  {% if r.gratificacion_legal > 0 %}
+  <tr><th>+ Gratificación legal</th><td>${{ r.gratificacion_legal|floatformat:0|intcomma }}</td></tr>
   {% endif %}
+  <tr><th>Total Haberes Tributables</th><td>${{ r.bruto|floatformat:0|intcomma }}</td></tr>
+  {% if r.bruto != r.renta_imponible %}
+  <tr><th>Renta imponible (con tope UF)</th><td>${{ r.renta_imponible|floatformat:0|intcomma }}</td></tr>
+  {% endif %}
+</table>
+
+{% if r.colacion > 0 or r.movilizacion > 0 %}
+<h3 style="margin-top:14pt;">Asignaciones no imponibles</h3>
+<table class="kv">
+  {% if r.colacion > 0 %}<tr><th>Colación</th><td>${{ r.colacion|floatformat:0|intcomma }}</td></tr>{% endif %}
+  {% if r.movilizacion > 0 %}<tr><th>Movilización</th><td>${{ r.movilizacion|floatformat:0|intcomma }}</td></tr>{% endif %}
+  <tr><th>Total Haberes No Imponibles</th><td>${{ r.colacion|add:r.movilizacion|floatformat:0|intcomma }}</td></tr>
+</table>
+{% endif %}
+
+<h3 style="margin-top:14pt;">Descuentos legales</h3>
+<table class="kv">
   <tr><th>AFP — 10 % obligatorio</th><td>– ${{ r.afp_obligatoria|floatformat:0|intcomma }}</td></tr>
   <tr><th>AFP — comisión ({{ r.afp_comision_pct|floatformat:"-2" }} %)</th><td>– ${{ r.afp_comision|floatformat:0|intcomma }}</td></tr>
   <tr><th>Salud {% if r.salud_tipo == "isapre" %}(Isapre){% else %}(Fonasa 7 %){% endif %}</th><td>– ${{ r.salud|floatformat:0|intcomma }}</td></tr>
   {% if r.cesantia > 0 %}<tr><th>Seguro Cesantía ({{ r.cesantia_pct|floatformat:"-1" }} %)</th><td>– ${{ r.cesantia|floatformat:0|intcomma }}</td></tr>{% endif %}
-  <tr><th>Base imponible IGC</th><td>${{ r.base_igc|floatformat:0|intcomma }}</td></tr>
-  {% if r.igc > 0 %}<tr><th>Impuesto Único IGC <span style="font-weight:normal;">(UTM ${{ r.utm_usada|floatformat:0|intcomma }})</span></th><td>– ${{ r.igc|floatformat:0|intcomma }}</td></tr>{% endif %}
-  <tr><th>Total descuentos</th><td>– ${{ r.total_descuentos|floatformat:0|intcomma }}</td></tr>
-  <tr><th>Líquido</th><td>${{ r.liquido|floatformat:0|intcomma }}</td></tr>
+  {% if r.igc > 0 %}<tr><th>Impuesto Único IGC <span style="font-weight:normal;">(base ${{ r.base_igc|floatformat:0|intcomma }})</span></th><td>– ${{ r.igc|floatformat:0|intcomma }}</td></tr>{% endif %}
+  <tr><th>Total Descuentos Legales</th><td>– ${{ r.total_descuentos|floatformat:0|intcomma }}</td></tr>
+</table>
+
+<table class="kv" style="margin-top:6pt;">
+  <tr><th>Sueldo Líquido</th><td>${{ r.liquido_total|floatformat:0|intcomma }}</td></tr>
+</table>
+
+<h3 style="margin-top:14pt;">Aportes patronales (costo empleador)</h3>
+<table class="kv">
+  <tr><th>AFP empleador (0,1 %)</th><td>${{ r.aporte_afp_empleador|floatformat:0|intcomma }}</td></tr>
+  <tr><th>Expectativa de vida (0,9 %)</th><td>${{ r.aporte_expectativa_vida|floatformat:0|intcomma }}</td></tr>
+  <tr><th>SIS (1,62 %)</th><td>${{ r.aporte_sis|floatformat:0|intcomma }}</td></tr>
+  <tr><th>Mutual (0,93 % básica)</th><td>${{ r.aporte_mutual|floatformat:0|intcomma }}</td></tr>
+  <tr><th>Cesantía empleador</th><td>${{ r.aporte_cesantia_empleador|floatformat:0|intcomma }}</td></tr>
+  <tr><th>Costo Total Empleador</th><td>${{ r.costo_total_empleador|floatformat:0|intcomma }}</td></tr>
 </table>
 
 <h3 style="margin-top:18pt;">Notas tributarias</h3>
 <p class="muted">
   Cálculo referencial basado en las tasas y tramos del SII Chile vigentes a la fecha
   de emisión (UF ${{ r.uf_usada|floatformat:0|intcomma }} · UTM ${{ r.utm_usada|floatformat:0|intcomma }}).
-  <strong>No incluye</strong> asignaciones (colación, movilización),
-  bonos, gratificación legal ni aportes voluntarios (APV). El monto Isapre, cuando aplica,
-  se calcula con la UF de hoy; el cálculo real lo realiza la Isapre con la UF del mes de pago.
-  Esta calculadora es informativa y no reemplaza la liquidación oficial.
+  Incluye gratificación legal y asignaciones no imponibles cuando se indican.
+  No incluye bonos ni aportes voluntarios (APV). El monto Isapre se calcula con la
+  UF del último día del mes anterior (regla de liquidación); el cálculo real lo realiza
+  la Isapre con la UF del mes de pago. Esta calculadora es informativa y no reemplaza
+  la liquidación oficial.
 </p>
 {% endblock %}
